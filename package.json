@@ -24,9 +24,6 @@
     "lerna": "^5.4.3"
   },
   "dependencies": {
-    "localforage": "^1.10.0",
-    "match": "^1.2.10",
-    "react-router-dom": "^6.13.0",
-    "sort-by": "^1.2.0"
+    "match": "^1.2.10"
   }
 }

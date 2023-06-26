@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700;900&family=Titillium+Web:ital,wght@0,300;0,400;0,600;1,400&display=swap');
+
+* {
+  --bg-color: #e5e6e0;
+  --text-color: #bfb2b5;
+  --accent_1: #e61c5d;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+}

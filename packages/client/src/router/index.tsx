@@ -6,9 +6,9 @@ import Game from '../views/Game'
 import Home from '../views/Home'
 import Profile from '../views/Profile'
 import Rating from '../views/Rating'
-import Signin from '../views/Signin'
 import Signup from '../views/Signup'
 import Topic from '../views/Topic'
+import Signin from '../views/Signin/Signin'
 
 export default createBrowserRouter([
   {

@@ -10,5 +10,24 @@
 }
 
 body {
+  background-color: var(--bg-color);
   font-family: 'Montserrat', sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.spinner {
+  animation: spin 5s linear 0s infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

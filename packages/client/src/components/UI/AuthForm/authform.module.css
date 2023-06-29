@@ -1,0 +1,22 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  align-items: center;
+
+  width: 435px;
+  padding: 30px 30px 50px;
+
+  background: #fff;
+  border-radius: 21px;
+  box-shadow: 3px 3px 0 0 rgb(218 198 198 / 25%);
+}
+
+.title {
+  margin-bottom: 45px;
+
+  font-size: 32px;
+  font-weight: 900;
+  color: #bfb2b5;
+  text-align: center;
+}

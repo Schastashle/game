@@ -12,7 +12,7 @@ const Input: FC<IInputProps & InputElemProps> = ({ error, ...rest }) => {
   return (
     <label className={style.label}>
       <input className={style.input} {...rest} />
-      <p className={error ? style.error : ''}>{error}</p>
+      {error ? <p className={style.error}>{error}</p> : ''}
     </label>
   )
 }

@@ -1,14 +1,34 @@
 import { FC } from 'react'
 import style from './signin.module.css'
-import { AuthForm, Input } from '../../components/UI'
+import { AuthForm } from '../../components/UI'
+
+export interface IFormData {
+  login: string
+  password: string
+}
 
 const Signin: FC = () => {
+  const inputs = [
+    {
+      name: 'login',
+      type: 'text',
+      placeholder: 'Логин',
+    },
+    {
+      name: 'password',
+      type: 'password',
+      placeholder: 'Пароль',
+    },
+  ]
+
   return (
     <section className={style.signin}>
-      <AuthForm title="Регистрация" linkTo="/signup" linkText="Регистрация">
-        <Input placeholder="Логин" type="text" name="login" />
-        <Input placeholder="Пароль" type="password" name="password" />
-      </AuthForm>
+      <AuthForm
+        title="Войти"
+        linkTo="/signup"
+        linkText="Регистрация"
+        inputs={inputs}
+      />
     </section>
   )
 }

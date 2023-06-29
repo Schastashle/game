@@ -1,14 +1,16 @@
 import { createBrowserRouter, redirect } from 'react-router-dom'
 
-import Error from '../views/Error'
-import Forum from '../views/Forum'
-import Game from '../views/Game'
-import Home from '../views/Home/Home'
-import Profile from '../views/Profile'
-import Rating from '../views/Rating'
-import Signup from '../views/Signup'
-import Topic from '../views/Topic'
-import Signin from '../views/Signin/Signin'
+import {
+  Home,
+  Signin,
+  Signup,
+  Error,
+  Forum,
+  Game,
+  Profile,
+  Rating,
+  Topic,
+} from '../views'
 
 export default createBrowserRouter([
   {

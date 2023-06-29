@@ -1,7 +1,6 @@
 import { FC } from 'react'
 import style from './signin.module.css'
-import Input from '../../components/UI/Input/Input'
-import Button from '../../components/UI/Button/Button'
+import { Input, Button } from '../../components/UI'
 
 const Signin: FC = () => {
   return (

@@ -2,28 +2,33 @@
   display: block;
   width: 100%;
 }
+
 .input {
   display: block;
+
   width: 100%;
   height: 45px;
-  border-radius: 25px;
   padding: 12px 24px;
-  border: 3px solid var(--text-color);
+
   font-size: 16px;
-  color: #bfb2b5;
   font-weight: 700;
+  color: #bfb2b5;
+
+  border: 3px solid var(--text-color);
+  border-radius: 25px;
 
   &::placeholder {
-    color: #bfb2b5;
     font-size: 16px;
     font-weight: 700;
+    color: #bfb2b5;
   }
 }
 
 .error {
+  margin-top: 5px;
+  padding-left: 10px;
+
   font-size: 14px;
   font-weight: 400;
-  padding-left: 10px;
-  margin-top: 5px;
-  color: var(--accent_1);
+  color: var(--accent-1);
 }

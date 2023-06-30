@@ -1,11 +1,7 @@
 import { FC } from 'react'
 import style from './signin.module.css'
 import { INPUTS } from './constants'
-import { AuthForm } from '../../components/UI'
-export interface IFormData {
-  login: string
-  password: string
-}
+import { AuthForm } from '../../components'
 
 const Signin: FC = () => {
   return (

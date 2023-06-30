@@ -1,0 +1,86 @@
+.block {
+  margin: 80px auto 20px auto;
+  width: 800px;
+}
+
+.ratingImg {
+  display: flex;
+  justify-content: center;
+}
+
+.ratingImg img {
+  height: 60px;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header {
+  background-color: #bfb2b5;
+  display: flex;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px 8px 0 0;
+  color: white;
+}
+
+.headerNum {
+  margin-right: 12px;
+}
+
+.headerName {
+  flex: 1;
+}
+
+.headerResult {
+}
+
+.list {
+  padding: 0;
+}
+
+.listItem {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #bfb2b5;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listItemNum {
+  font-size: 18px;
+  font-weight: 600;
+  margin-right: 12px;
+  min-width: 48px;
+}
+
+.listItemAvatar {
+  margin-right: 12px;
+}
+
+.listItemName {
+  flex: 1;
+  margin-right: 12px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.listItemScores {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.listItemScores[data-active],
+.listItemName[data-active] {
+  color: #7ec36e;
+}
+
+.medals {
+  width: 36px;
+}

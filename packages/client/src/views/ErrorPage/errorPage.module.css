@@ -1,0 +1,34 @@
+.block {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrapper {
+  text-align: center;
+}
+
+.statusText {
+  font-size: 128px;
+  color: #bfb2b5;
+  font-weight: 900;
+  text-align: center;
+}
+
+.message {
+  color: #bfb2b5;
+  margin-bottom: 20px;
+}
+
+.buttonBlock {
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  color: #7ec36e;
+  font-size: 18px;
+  font-weight: 600;
+}

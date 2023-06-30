@@ -1,0 +1,12 @@
+.block {
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+}
+
+.img {
+  height: 100%;
+}

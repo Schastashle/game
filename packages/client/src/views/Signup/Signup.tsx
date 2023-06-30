@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import style from './signup.module.css'
 import { INPUTS } from './constants'
-import { AuthForm } from '../../components/UI'
+import { AuthForm } from '../../components'
 const Signup: FC = () => {
   return (
     <main className={style.signup}>

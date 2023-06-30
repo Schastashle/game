@@ -1,8 +1,6 @@
 import { FC, FormHTMLAttributes } from 'react'
 import style from './authform.module.css'
-import Button from '../Button'
-import LinkItem from '../LinkItem/LinkItem'
-import Input from '../Input/Input'
+import { Button, LinkItem, Input } from '../UI'
 import { FieldValues, useForm } from 'react-hook-form'
 
 export interface IAuthFormProps extends FormHTMLAttributes<HTMLFormElement> {

@@ -16,10 +16,10 @@ const Input: FC<IInputProps & InputElemProps> = ({
   ...rest
 }) => {
   return (
-    <>
+    <label className={style.label}>
       <input className={style.input} {...register(name)} {...rest} />
       {error ? <p className={style.error}>{error}</p> : ''}
-    </>
+    </label>
   )
 }
 

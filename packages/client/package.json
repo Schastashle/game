@@ -6,10 +6,11 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "eslint": "eslint .",
     "format": "prettier --write .",
     "test": "jest ./",
-    "stylelint": "npx stylelint \"**/*.css\""
+    "stylelint": "npx stylelint \"**/*.css\"",
+    "lint": "yarn eslint & yarn stylelint"
   },
   "dependencies": {
     "dotenv": "^16.0.2",

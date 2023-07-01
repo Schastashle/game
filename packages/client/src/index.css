@@ -3,20 +3,21 @@
 * {
   --bg-color: #e5e6e0;
   --text-color: #bfb2b5;
-  --accent_1: #e61c5d;
-  padding: 0;
-  margin: 0;
+  --accent-1: #e61c5d;
+
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
+  font-family: Montserrat, sans-serif;
   background-color: var(--bg-color);
-  font-family: 'Montserrat', sans-serif;
 }
 
 a {
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
 }
 
 .spinner {
@@ -27,6 +28,7 @@ a {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

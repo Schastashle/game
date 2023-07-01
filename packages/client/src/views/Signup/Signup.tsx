@@ -1,8 +1,21 @@
-import { FC } from 'react'
-import style from './signup.module.css'
+import { FC, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { INPUTS } from './constants'
 import { AuthForm } from '../../components'
-const Signup: FC = () => {
+
+import style from './signup.module.css'
+
+interface ISignup {
+  isAuth: boolean
+}
+
+const Signup: FC<ISignup> = ({ isAuth }) => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    isAuth ? navigate('/') : ''
+  }, [isAuth])
+
   return (
     <main className={style.signup}>
       <AuthForm

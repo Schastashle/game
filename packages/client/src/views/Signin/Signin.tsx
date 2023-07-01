@@ -1,9 +1,20 @@
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
 import style from './signin.module.css'
 import { INPUTS } from './constants'
+import { useNavigate } from 'react-router-dom'
 import { AuthForm } from '../../components'
 
-const Signin: FC = () => {
+interface ISignin {
+  isAuth: boolean
+}
+
+const Signin: FC<ISignin> = ({ isAuth }) => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    isAuth ? navigate('/') : ''
+  }, [isAuth])
+
   return (
     <section className={style.signin}>
       <AuthForm

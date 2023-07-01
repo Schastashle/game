@@ -1,0 +1,23 @@
+.block {
+  display: none;
+}
+
+.block[data-active] {
+  display: flex;
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.75);
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  cursor: default;
+}

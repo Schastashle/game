@@ -12,3 +12,7 @@
   font-weight: 900;
   border: none;
 }
+
+.button[disabled] {
+  background-color: gray;
+}

@@ -10,8 +10,7 @@
     "test": "lerna run test",
     "lint": "lerna run lint",
     "format": "lerna run format",
-    "preview": "lerna run preview",
-    "stylelint": "lerna run stylelint"
+    "preview": "lerna run preview"
   },
   "license": "MIT",
   "workspaces": [

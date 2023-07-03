@@ -1,4 +1,4 @@
-import { FC, memo, useEffect } from 'react'
+import { FC, memo, useCallback, useEffect } from 'react'
 import style from './dialog.module.css'
 import { DialogType, EDialogSize } from './types'
 
@@ -15,19 +15,25 @@ const Dialog: FC<DialogType> = props => {
     }
   }, [open])
 
+  // остановка всплытия события при клике на модалку, чтоб не вызвать onClose
+  const stopPropagation = useCallback((e: any) => {
+    e.stopPropagation()
+  }, [])
+
+  // обработчик закрытия модалки
+  const handleCloseDialog = useCallback(() => {
+    if (onClose) {
+      onClose()
+    }
+  }, [onClose])
+
   return (
     <div
       className={style.block}
       data-active={open ? true : undefined}
-      onClick={e => {
-        if (onClose) {
-          onClose()
-        }
-      }}>
+      onClick={handleCloseDialog}>
       <div
-        onClick={e => {
-          e.stopPropagation()
-        }}
+        onClick={stopPropagation}
         className={style.modal}
         style={{
           width: EDialogSize[size],

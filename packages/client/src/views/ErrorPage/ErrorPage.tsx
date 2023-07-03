@@ -2,12 +2,12 @@ import { FC, useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import style from './errorPage.module.css'
 
-export interface ErrorPageType {
+export interface IErrorPageProps {
   status?: number
 }
 
 /** Страница с статусом ошибки 404/500 */
-const ErrorPage: FC<ErrorPageType> = props => {
+const ErrorPage: FC<IErrorPageProps> = props => {
   const { status = 500 } = props
 
   const message = useMemo(() => {

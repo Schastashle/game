@@ -12,13 +12,13 @@
 
 .statusText {
   font-size: 128px;
-  color: #bfb2b5;
+  color: var(--text-color);
   font-weight: 900;
   text-align: center;
 }
 
 .message {
-  color: #bfb2b5;
+  color: var(--text-color);
   margin-bottom: 20px;
 }
 

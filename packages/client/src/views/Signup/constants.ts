@@ -2,7 +2,7 @@ export const INPUTS = [
   {
     name: 'email',
     type: 'email',
-    placeholder: 'email',
+    placeholder: 'Email',
   },
   {
     name: 'first_name',
@@ -10,7 +10,7 @@ export const INPUTS = [
     placeholder: 'Имя',
   },
   {
-    name: 'last_name',
+    name: 'second_name',
     type: 'text',
     placeholder: 'Фамилия',
   },

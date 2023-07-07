@@ -1,14 +1,15 @@
 import { FC, useEffect } from 'react'
-import style from './signin.module.css'
-import { INPUTS } from './constants'
 import { useNavigate } from 'react-router-dom'
+import { INPUTS } from './constants'
 import { AuthForm } from '../../components'
 
-interface ISignin {
+import style from './signup.module.css'
+
+interface ISignup {
   isAuth: boolean
 }
 
-const Signin: FC<ISignin> = ({ isAuth }) => {
+const Signup: FC<ISignup> = ({ isAuth }) => {
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -16,15 +17,15 @@ const Signin: FC<ISignin> = ({ isAuth }) => {
   }, [isAuth])
 
   return (
-    <section className={style.signin}>
+    <main className={style.signup}>
       <AuthForm
-        title="Войти"
-        linkTo="/signup"
-        linkText="Регистрация"
+        title="Регистрация"
+        linkTo="/signin"
+        linkText="Войти"
         inputs={INPUTS}
       />
-    </section>
+    </main>
   )
 }
 
-export default Signin
+export default Signup

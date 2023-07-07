@@ -4,18 +4,18 @@ import {
   Home,
   Signin,
   Signup,
-  Error,
   Forum,
   Game,
   Profile,
   Rating,
-  Topic,
+  ErrorPage,
+  ForumTopic,
 } from '../views'
 
 export default createBrowserRouter([
   {
     path: '*',
-    element: <div>404</div>,
+    element: <ErrorPage status={404} />,
   },
   {
     path: '/',
@@ -26,41 +26,41 @@ export default createBrowserRouter([
   {
     path: 'signin',
     element: <Signin />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
   },
   {
     path: 'signup',
     element: <Signup />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
   },
   {
     path: 'profile',
     element: <Profile />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
   },
   {
     path: 'home',
     element: <Home />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
   },
   {
     path: 'game',
     element: <Game />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
   },
   {
     path: 'rating',
     element: <Rating />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
   },
   {
     path: 'forum',
     element: <Forum />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
     children: [
       {
-        path: 'forum/:id',
-        element: <Topic />,
+        path: ':id',
+        element: <ForumTopic />,
       },
     ],
   },

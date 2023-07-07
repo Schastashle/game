@@ -8,8 +8,8 @@ import {
   Game,
   Profile,
   Rating,
-  Topic,
   ErrorPage,
+  ForumTopic,
 } from '../views'
 
 export default createBrowserRouter([
@@ -59,9 +59,8 @@ export default createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path: 'forum/:id',
-        element: <Topic />,
-        errorElement: <ErrorPage />,
+        path: ':id',
+        element: <ForumTopic />,
       },
     ],
   },

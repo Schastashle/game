@@ -1,7 +1,7 @@
 import { Circle, Square } from './types'
 
 export default class ShapeBase {
-  protected readonly id: number
+  public readonly id: number
   public readonly type: string
   protected readonly fill_style: string
   protected readonly stroke_style: string

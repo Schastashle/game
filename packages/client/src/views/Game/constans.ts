@@ -7,11 +7,13 @@ const gridParams: GridParams = {
   width: 625,
   height: 500,
 }
+
 const cellParams: CellParams = {
   width: 100,
   height: 100,
   gap: 25,
 }
+
 const gems: (Circle | Square)[] = [
   {
     id: 0,

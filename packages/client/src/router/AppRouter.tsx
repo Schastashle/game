@@ -4,10 +4,11 @@ import {
   Home,
   Signin,
   Signup,
-  Error,
+  ErrorPage,
   Forum,
   Game,
   Profile,
+  FinishPage,
   Rating,
   Topic,
 } from '../views'
@@ -24,10 +25,11 @@ const AppRouter: FC<IAppRouter> = ({ isAuth }) => (
     <Route path="/signup" element={<Signup isAuth={isAuth} />} />
     <Route path="/profile" element={<Profile />} />
     <Route path="/game" element={<Game />} />
+    <Route path="/finish" element={<FinishPage />} />
     <Route path="/rating" element={<Rating />} />
     <Route path="/forum" element={<Forum />} />
     <Route path="/forum/:id" element={<Topic />} />
-    <Route path="*" element={<Error />} />
+    <Route path="*" element={<ErrorPage />} />
   </Routes>
 )
 

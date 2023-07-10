@@ -1,0 +1,16 @@
+.game {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.test {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  top: 156.5px;
+  left: 156.5px;
+  background: yellow;
+}

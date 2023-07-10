@@ -1,9 +1,8 @@
-import axios from 'axios'
-import { FC, FormHTMLAttributes, useContext } from 'react'
+import { FC, FormHTMLAttributes } from 'react'
 import { Button, LinkItem, Input } from '../UI'
 import { FieldValues, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
-import { MyContext } from '../../App'
+import { useAppDispatch } from '../../hooks/reduxHooks'
+import { signinUser, signupUser } from '../../store/slices/userSlice'
 
 import style from './authform.module.css'
 
@@ -14,43 +13,15 @@ export interface IAuthFormProps extends FormHTMLAttributes<HTMLFormElement> {
   inputs: Record<string, string>[]
 }
 const AuthForm: FC<IAuthFormProps> = ({ title, linkTo, linkText, inputs }) => {
-  const navigate = useNavigate()
-
-  const { setAuth } = useContext(MyContext)
+  const dispatch = useAppDispatch()
 
   const { register, handleSubmit } = useForm<FieldValues>()
 
-  const onsubmit = handleSubmit(async data => {
+  const onsubmit = handleSubmit((data: any) => {
     if (linkTo.includes('signup')) {
-      axios
-        .post('https://ya-praktikum.tech/api/v2/auth/signin', data, {
-          withCredentials: true,
-        })
-        .then(response => {
-          console.log(response)
-          setAuth(true)
-          return navigate('/')
-        })
-        .catch(err => {
-          console.error('err', err)
-          setAuth(false)
-          return navigate('/signin')
-        })
+      dispatch(signinUser(data))
     } else {
-      axios
-        .post('https://ya-praktikum.tech/api/v2/auth/signup', data, {
-          withCredentials: true,
-        })
-        .then(response => {
-          console.log(response)
-          setAuth(true)
-          return navigate('/')
-        })
-        .catch(err => {
-          console.error('err', err)
-          setAuth(false)
-          return navigate('/signup')
-        })
+      dispatch(signupUser(data))
     }
   })
 

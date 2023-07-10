@@ -1,46 +1,23 @@
-import axios from 'axios'
-import { FC, useContext, useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { MyContext } from '../../App'
+import { FC, useEffect, useState } from 'react'
+import { NavLink } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
+import { logoutUser } from '../../store/slices/userSlice'
 
 import styles from './home.module.css'
 
 const Home: FC = () => {
-  const navigate = useNavigate()
+  const { user } = useAppSelector(state => state.user)
+  const dispatch = useAppDispatch()
   const [userName, setUserName] = useState('Player')
 
-  const { user, setUser, setAuth } = useContext(MyContext)
-
   useEffect(() => {
-    setUserName(user.login)
+    if (user) {
+      setUserName(user.login)
+    }
   }, [user])
 
   const logoutHandler = () => {
-    axios
-      .post(
-        'https://ya-praktikum.tech/api/v2/auth/logout',
-        {},
-        { withCredentials: true }
-      )
-      .then(response => {
-        setUser({
-          avatar: '',
-          display_name: '',
-          email: '',
-          first_name: '',
-          id: 0,
-          login: '',
-          phone: '',
-          second_name: '',
-        })
-        setAuth(false)
-        return navigate('/signin')
-      })
-      .catch(err => {
-        console.error('err', err)
-        setAuth(false)
-        return navigate('/signin')
-      })
+    dispatch(logoutUser())
   }
 
   return (

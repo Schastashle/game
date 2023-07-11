@@ -2,6 +2,7 @@ import { FC, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INPUTS } from './constants'
 import { AuthForm } from '../../components'
+import { SignUpSchema } from '../../schemas'
 
 import style from './signup.module.css'
 
@@ -23,6 +24,7 @@ const Signup: FC<ISignup> = ({ isAuth }) => {
         linkTo="/signin"
         linkText="Войти"
         inputs={INPUTS}
+        schema={SignUpSchema}
       />
     </main>
   )

@@ -4,12 +4,12 @@ import {
   Home,
   Signin,
   Signup,
-  Error,
+  ErrorPage,
   Forum,
   Game,
   Profile,
   Rating,
-  Topic,
+  ForumTopic,
 } from '../views'
 import { FC } from 'react'
 
@@ -26,8 +26,8 @@ const AppRouter: FC<IAppRouter> = ({ isAuth }) => (
     <Route path="/game" element={<Game />} />
     <Route path="/rating" element={<Rating />} />
     <Route path="/forum" element={<Forum />} />
-    <Route path="/forum/:id" element={<Topic />} />
-    <Route path="*" element={<Error />} />
+    <Route path="/forum/:id" element={<ForumTopic />} />
+    <Route path="*" element={<ErrorPage />} />
   </Routes>
 )
 

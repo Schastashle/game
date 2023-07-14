@@ -32,7 +32,7 @@ const AuthForm: FC<IAuthFormProps> = ({
     formState: { errors },
   } = useForm<FieldValues>({ resolver: zodResolver(schema) })
 
-  const onSubmit = useCallback(async (data: FieldValues) => {
+  const onSubmit = useCallback((data: FieldValues) => {
     if (linkTo.includes('signup')) {
       axios
         .post('https://ya-praktikum.tech/api/v2/auth/signin', data, {

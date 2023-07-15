@@ -4,20 +4,20 @@
 
 ##### Из чего состоит три в ряд:
 1. само поле для игры
-![сетка](https://github.com/Schastashle/game/docs/imgs/game-grid.jpg)
-![поле с элементами](https://github.com/Schastashle/game/docs/imgs/game-grid-with-elems.jpg)
+![сетка](https://github.com/Schastashle/game/raw/dev/docs/imgs/game-grid.jpg)
+![поле с элементами](https://github.com/Schastashle/game/raw/dev/docs/imgs/game-grid-with-elems.jpg)
 1. элементы игры (фишки) в количестве 5 штук
-![фишки](https://github.com/Schastashle/game/docs/imgs/chips.jpg)
+![фишки](https://github.com/Schastashle/game/raw/dev/docs/imgs/chips.jpg)
 1. таймер обратного отсчета
-![таймер](https://github.com/Schastashle/game/docs/imgs/timer.jpg)
+![таймер](https://github.com/Schastashle/game/raw/dev/docs/imgs/timer.jpg)
 1. кнопка паузы (необязательный)
-![кнопка паузы](https://github.com/Schastashle/game/docs/imgs/pause.jpg)
+![кнопка паузы](https://github.com/Schastashle/game/raw/dev/docs/imgs/pause.jpg)
 1. очки или элементы (фишки) рандомного цвета из доступных, которые нужно собрать в N количестве для завершения игры
-![очки](https://github.com/Schastashle/game/docs/imgs/coins.jpg)
+![очки](https://github.com/Schastashle/game/raw/dev/docs/imgs/coins.jpg)
 или
-![фишки](https://github.com/Schastashle/game/docs/imgs/quantity.jpg)
+![фишки](https://github.com/Schastashle/game/raw/dev/docs/imgs/quantity.jpg)
 1. кнопка выхода из игры
-![выход](https://github.com/Schastashle/game/docs/imgs/exit.jpg)
+![выход](https://github.com/Schastashle/game/raw/dev/docs/imgs/exit.jpg)
 
 ##### Базовые классы 
 1. основной класс игры со всеми элементами - в него входят все элементы игры (поле, таймер, выход, пауза(необязательно), очки/условия для прохождения уровня)

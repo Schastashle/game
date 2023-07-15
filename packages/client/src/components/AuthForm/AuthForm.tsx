@@ -1,13 +1,11 @@
-import axios from 'axios'
-import { FC, FormHTMLAttributes, useCallback, useContext } from 'react'
-import { useAppDispatch } from '../../hooks/reduxHooks'
-import { signinUser, signupUser } from '../../store/slices/userSlice'
+import { FC, FormHTMLAttributes, useCallback } from 'react'
 import { Button, LinkItem, Input } from '../UI'
 import { FieldValues, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
-import { MyContext } from '../../App'
+import { useAppDispatch } from '../../hooks/reduxHooks'
+import { signinUser, signupUser } from '../../store/slices/userSlice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoginSchemas } from '../../schemas/formValidation'
+import { IUserLogin, IUserSignup } from '../../types/IUser'
 
 import style from './authform.module.css'
 export interface IAuthFormProps extends FormHTMLAttributes<HTMLFormElement> {
@@ -17,7 +15,6 @@ export interface IAuthFormProps extends FormHTMLAttributes<HTMLFormElement> {
   inputs: { name: string; type: string; placeholder: string }[]
   schema: LoginSchemas
 }
-
 const AuthForm: FC<IAuthFormProps> = ({
   title,
   linkTo,
@@ -35,9 +32,9 @@ const AuthForm: FC<IAuthFormProps> = ({
 
   const onSubmit = useCallback((data: FieldValues) => {
     if (linkTo.includes('signup')) {
-      dispatch(signinUser(data))
+      dispatch(signinUser(data as IUserLogin))
     } else {
-      dispatch(signupUser(data))
+      dispatch(signupUser(data as IUserSignup))
     }
   }, [])
 

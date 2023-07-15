@@ -10,7 +10,7 @@ import {
   Profile,
   FinishPage,
   Rating,
-  Topic,
+  ForumTopic,
 } from '../views'
 import { FC } from 'react'
 
@@ -28,7 +28,7 @@ const AppRouter: FC<IAppRouter> = ({ isAuth }) => (
     <Route path="/finish" element={<FinishPage />} />
     <Route path="/rating" element={<Rating />} />
     <Route path="/forum" element={<Forum />} />
-    <Route path="/forum/:id" element={<Topic />} />
+    <Route path="/forum/:id" element={<ForumTopic />} />
     <Route path="*" element={<ErrorPage />} />
   </Routes>
 )

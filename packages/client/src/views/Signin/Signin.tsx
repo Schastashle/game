@@ -3,6 +3,7 @@ import style from './signin.module.css'
 import { INPUTS } from './constants'
 import { useNavigate } from 'react-router-dom'
 import { AuthForm } from '../../components'
+import { SignInSchema } from '../../schemas'
 
 interface ISignin {
   isAuth: boolean
@@ -22,6 +23,7 @@ const Signin: FC<ISignin> = ({ isAuth }) => {
         linkTo="/signup"
         linkText="Регистрация"
         inputs={INPUTS}
+        schema={SignInSchema}
       />
     </section>
   )

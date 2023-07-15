@@ -10,6 +10,7 @@ import {
   Forum,
   Game,
   Profile,
+  FinishPage,
   Rating,
   ForumTopic,
 } from '../views'

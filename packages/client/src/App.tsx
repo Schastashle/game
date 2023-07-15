@@ -7,16 +7,17 @@ function App() {
   const dispatch = useAppDispatch()
   const { isAuth } = useAppSelector(state => state.user)
 
-  useEffect(() => {
-    const fetchServerData = async () => {
-      const url = `http://localhost:${__SERVER_PORT__}`
-      const response = await fetch(url)
-      const data = await response.json()
-      console.log(data)
-    }
+  // временно скрыл чтобы не было ошибок в консоли
+  // useEffect(() => {
+  //   const fetchServerData = async () => {
+  //     const url = `http://localhost:${__SERVER_PORT__}`
+  //     const response = await fetch(url)
+  //     const data = await response.json()
+  //     console.log(data)
+  //   }
 
-    fetchServerData()
-  }, [])
+  //   fetchServerData()
+  // }, [])
 
   useEffect(() => {
     dispatch(getUser())

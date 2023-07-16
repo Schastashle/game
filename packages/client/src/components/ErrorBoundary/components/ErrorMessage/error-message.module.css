@@ -1,0 +1,22 @@
+.errorMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 44px;
+
+  background-color: #fff;
+  border-radius: 21px;
+  box-shadow: 3px 3px 0 0 rgb(218 198 198 / 25%);
+}

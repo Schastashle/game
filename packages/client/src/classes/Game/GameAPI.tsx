@@ -469,7 +469,6 @@ export default class GameAPI extends CanvasAPI {
       this.swapGems()
 
       const threeInRow: (Circle | Square)[] | [] = this.checkThreeInRow()
-      console.debug(threeInRow.length)
 
       if (!threeInRow.length) {
         this.swapGems()

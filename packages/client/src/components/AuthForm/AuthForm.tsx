@@ -1,11 +1,11 @@
-import axios from 'axios'
-import { FC, FormHTMLAttributes, useCallback, useContext } from 'react'
+import { FC, FormHTMLAttributes, useCallback } from 'react'
 import { Button, LinkItem, Input } from '../UI'
 import { FieldValues, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
-import { MyContext } from '../../App'
+import { useAppDispatch } from '../../hooks/reduxHooks'
+import { signinUser, signupUser } from '../../store/slices/userSlice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoginSchemas } from '../../schemas/formValidation'
+import { IUserLogin, IUserSignup } from '../../types/IUser'
 
 import style from './authform.module.css'
 export interface IAuthFormProps extends FormHTMLAttributes<HTMLFormElement> {
@@ -22,9 +22,7 @@ const AuthForm: FC<IAuthFormProps> = ({
   inputs,
   schema,
 }) => {
-  const navigate = useNavigate()
-
-  const { setAuth } = useContext(MyContext)
+  const dispatch = useAppDispatch()
 
   const {
     register,
@@ -34,35 +32,9 @@ const AuthForm: FC<IAuthFormProps> = ({
 
   const onSubmit = useCallback((data: FieldValues) => {
     if (linkTo.includes('signup')) {
-      axios
-        .post('https://ya-praktikum.tech/api/v2/auth/signin', data, {
-          withCredentials: true,
-        })
-        .then(response => {
-          console.log(response)
-          setAuth(true)
-          return navigate('/')
-        })
-        .catch(err => {
-          console.error('err', err)
-          setAuth(false)
-          return navigate('/signin')
-        })
+      dispatch(signinUser(data as IUserLogin))
     } else {
-      axios
-        .post('https://ya-praktikum.tech/api/v2/auth/signup', data, {
-          withCredentials: true,
-        })
-        .then(response => {
-          console.log(response)
-          setAuth(true)
-          return navigate('/')
-        })
-        .catch(err => {
-          console.error('err', err)
-          setAuth(false)
-          return navigate('/signup')
-        })
+      dispatch(signupUser(data as IUserSignup))
     }
   }, [])
 

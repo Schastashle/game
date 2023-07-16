@@ -89,7 +89,6 @@ export const logoutUser = createAsyncThunk<
       {},
       { withCredentials: true }
     )
-    console.log(response)
     if (!response.request.status) {
       return rejectWithValue('Произошла ошибка выхода из системы')
     }

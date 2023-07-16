@@ -1,17 +1,19 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { Component } from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
 import { gridParams, cellParams, gems } from './constans'
 
 import styles from './game.module.css'
 
-function Game() {
-  const [gameApi, setGameApi] = useState(null)
-  const [canvas, setCanvas] = useState(null)
-  const canvasRef: React.LegacyRef<HTMLDivElement> | undefined = useRef(null)
+export default class Game extends Component {
+  private readonly canvas: HTMLCanvasElement
+  private readonly canvasRef: React.RefObject<HTMLDivElement>
+  private gameAPI: GameAPI
 
-  useEffect(() => {
-    const gameApi = new GameAPI(
+  constructor(props: object) {
+    super(props)
+
+    this.gameAPI = new GameAPI(
       gridParams.width,
       gridParams.height,
       gridParams.columns,
@@ -19,28 +21,31 @@ function Game() {
       cellParams,
       gems
     )
-    const canvas = gameApi.getCanvas()
+    this.canvas = this.gameAPI.getCanvas()
+    this.canvasRef = React.createRef()
 
-    setGameApi(gameApi)
-    setCanvas(canvas)(
-      canvasRef.current as unknown as HTMLDivElement
-    ).appendChild(canvas)
+    this.gameAPI.drawGameGrid()
+    this.gameAPI.distributeGems()
+  }
 
-    gameApi.drawGameGrid()
-    gameApi.distributeGems()
-  }, [])
+  componentDidMount(): void {
+    ;(this.canvasRef.current as HTMLDivElement).appendChild(this.canvas)
+  }
 
-  const onSelectGem = (event: React.MouseEvent<HTMLDivElement>): void => {
-    const { left, top } = canvas.getBoundingClientRect()
+  onSelectGem = (event: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top } = this.canvas.getBoundingClientRect()
     const x = event.clientX - left
     const y = event.clientY - top
 
-    gameApi.setSelectedGem(x, y)
+    this.gameAPI.setSelectedGem(x, y)
   }
 
-  return (
-    <div className={styles.game} ref={canvasRef} onClick={onSelectGem}></div>
-  )
+  render() {
+    return (
+      <div
+        className={styles.game}
+        ref={this.canvasRef}
+        onClick={this.onSelectGem}></div>
+    )
+  }
 }
-
-export default Game

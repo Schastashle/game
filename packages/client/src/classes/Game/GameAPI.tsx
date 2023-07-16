@@ -99,8 +99,6 @@ export default class GameAPI extends CanvasAPI {
     })
 
     if (type === 'circle') {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       return new Circle(
         width,
         height,
@@ -115,8 +113,6 @@ export default class GameAPI extends CanvasAPI {
         (gem as unknown as Circle).radius
       )
     } else {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       return new Square(
         width,
         height,
@@ -431,6 +427,7 @@ export default class GameAPI extends CanvasAPI {
       const generatedGem: Square | Circle = this.getRandomGem()
 
       generatedGem.setPositionData(column, row)
+      generatedGem.setCoords(gem.x, gem.y)
       this.matrix[row][column] = generatedGem
       this.drawGem(column, row, generatedGem)
     })
@@ -472,6 +469,7 @@ export default class GameAPI extends CanvasAPI {
       this.swapGems()
 
       const threeInRow: (Circle | Square)[] | [] = this.checkThreeInRow()
+      console.debug(threeInRow.length)
 
       if (!threeInRow.length) {
         this.swapGems()

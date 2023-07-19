@@ -1,8 +1,8 @@
 import { FC, ReactNode, useCallback, useState } from 'react'
 import style from './forumLayout.module.css'
-import { Form, Link, NavLink, Outlet, useParams } from 'react-router-dom'
+import { Form, NavLink, Outlet, useParams } from 'react-router-dom'
 import { useDate } from '../../../../hooks/useDate'
-import { Button, Input } from '../../../../components/UI'
+import { Button, Input } from '../../../../components'
 import Dialog from '../../../../components/UI/Dialog/Dialog'
 import { useDialog } from '../../../../components/UI/Dialog/bll'
 
@@ -135,6 +135,7 @@ const ForumLayout: FC<ForumLayoutType> = props => {
 
           <div className={style.modalInputBlock}>
             <Input
+              name="message"
               placeholder={'новая тема'}
               value={newTopicName}
               onChange={e => {

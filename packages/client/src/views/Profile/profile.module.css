@@ -1,0 +1,22 @@
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100vh;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  align-items: center;
+  justify-content: center;
+
+  width: 600px;
+  padding: 44px 84px;
+
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+  background: #fff;
+}

@@ -1,4 +1,4 @@
-import { FC, memo, useCallback, useEffect } from 'react'
+import { FC, memo, useCallback, useEffect, MouseEvent } from 'react'
 import style from './dialog.module.css'
 import { DialogType, EDialogSize } from './types'
 
@@ -16,7 +16,7 @@ const Dialog: FC<DialogType> = props => {
   }, [open])
 
   // остановка всплытия события при клике на модалку, чтоб не вызвать onClose
-  const stopPropagation = useCallback((e: any) => {
+  const stopPropagation = useCallback((e: MouseEvent) => {
     e.stopPropagation()
   }, [])
 

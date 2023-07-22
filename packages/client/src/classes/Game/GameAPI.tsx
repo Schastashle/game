@@ -240,8 +240,8 @@ export default class GameAPI extends CanvasAPI {
     gem.drawShape(this.ctx)
 
     gem.nested.forEach(item => {
-      const { x, y } = gem
-
+      const { x, y, scale } = gem
+      item.scale = scale
       // вычисляет разницу с шириной родителя чтобы сместить от края
       const normalizedX = x + (gem.width - item.width) / 2
       const normalizedY = y + (gem.height - item.height) / 2
@@ -397,14 +397,18 @@ export default class GameAPI extends CanvasAPI {
     array.forEach((gem: Shapes) => {
       const { column, row, width, height } = gem
 
-      this.clearCanvasByCoords(column, row, width, height)
+      this.animateDestroy(gem)
+        .then(() => {
+          this.clearCanvasByCoords(column, row, width, height)
+        })
+        .then(() => {
+          const generatedGem: Shapes = this.getRandomGem()
 
-      const generatedGem: Shapes = this.getRandomGem()
-
-      generatedGem.setPositionData(column, row)
-      generatedGem.setCoords(gem.x, gem.y)
-      this.matrix[row][column] = generatedGem
-      this.drawGem(column, row, generatedGem)
+          generatedGem.setPositionData(column, row)
+          generatedGem.setCoords(gem.x, gem.y)
+          this.matrix[row][column] = generatedGem
+          this.drawGem(column, row, generatedGem)
+        })
     })
 
     const threeInRow = this.checkThreeInRow()
@@ -497,6 +501,29 @@ export default class GameAPI extends CanvasAPI {
         tick: () => tick2(gem2),
         onComplete: () => {
           this.disabled = false
+          resolve()
+        },
+      })
+    })
+  }
+
+  private animateDestroy(gem: Shapes): Promise<void> {
+    const duration = 300
+    const easing = easings.easeOutCubic
+
+    const { column, row, width, height } = gem
+
+    const animateGem = new Animation(gem as unknown as Indexed<number>)
+
+    return new Promise<void>(resolve => {
+      animateGem.to({ scale: 0 }, duration, {
+        easing,
+        tick: () => {
+          this.clearCanvasByCoords(column, row, width, height)
+          this.drawDetachedGem(gem)
+        },
+        onComplete: () => {
+          this.stackGems.clear()
           resolve()
         },
       })

@@ -4,6 +4,7 @@ import { Shapes } from './types'
 export default class Circle extends ShapeBase {
   public readonly radius: number
   public readonly type = 'circle'
+  public scale = 1
   constructor(
     width: number,
     height: number,
@@ -38,7 +39,7 @@ export default class Circle extends ShapeBase {
     const centerY = this.y + this.height / 2
 
     ctx.beginPath()
-    ctx.arc(centerX, centerY, this.radius, 0, 2 * Math.PI)
+    ctx.arc(centerX, centerY, this.radius * this.scale, 0, 2 * Math.PI)
     ctx.fillStyle = this.fill_style
     ctx.fill()
     ctx.strokeStyle = this.stroke_style

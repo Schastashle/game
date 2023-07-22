@@ -1,16 +1,14 @@
 import CanvasAPI from './CanvasAPI'
-import Circle from './Shapes/Circle'
-import Square from './Shapes/Square'
+import { Circle, Square, Shapes } from './Shapes'
 import Stack from '../Stack'
 
 import { GridParams, CellParams, Indexed } from './types'
-import { Circle as CircleType, Square as SquareType } from './Shapes/types'
 
 export default class GameAPI extends CanvasAPI {
   private readonly gridParams: GridParams
   private readonly cellParams: CellParams
-  private readonly gems: (CircleType | SquareType)[]
-  private matrix: [][] | (Circle | Square)[][]
+  private readonly gems: Shapes[]
+  private matrix: Shapes[][]
   private readonly gridCoords: Indexed<number[]>
   private stackGems: Stack
 
@@ -20,7 +18,7 @@ export default class GameAPI extends CanvasAPI {
     columns: number,
     rows: number,
     cellParams: CellParams,
-    gems: (CircleType | SquareType)[]
+    gems: Shapes[]
   ) {
     super(width, height)
 
@@ -40,9 +38,9 @@ export default class GameAPI extends CanvasAPI {
     this.stackGems = new Stack(2)
   }
 
-  private getRandomGem(): Square | Circle {
+  private getRandomGem(): Shapes {
     const random_number = Math.floor(Math.random() * this.gems.length)
-    const gem: SquareType | CircleType = this.gems[random_number]
+    const gem: Shapes = this.gems[random_number]
     const {
       id,
       type,
@@ -55,7 +53,7 @@ export default class GameAPI extends CanvasAPI {
       line_width,
       nested = [],
     } = gem
-    const nestedGems: (Square | Circle)[] | [] = nested.map(item => {
+    const nestedGems: Shapes[] | [] = nested.map(item => {
       const {
         id,
         type,
@@ -80,7 +78,7 @@ export default class GameAPI extends CanvasAPI {
           stroke_style,
           line_width,
           [],
-          (item as unknown as Circle).radius
+          item.radius
         )
       } else {
         return new Square(
@@ -110,7 +108,7 @@ export default class GameAPI extends CanvasAPI {
         stroke_style,
         line_width,
         nestedGems,
-        (gem as unknown as Circle).radius
+        gem.radius
       )
     } else {
       return new Square(
@@ -128,29 +126,7 @@ export default class GameAPI extends CanvasAPI {
     }
   }
 
-  private getCircleCoords(
-    column: number,
-    row: number,
-    gem: Circle
-  ): Indexed<number> {
-    const { gap, width: cellWidth, height: cellHeight } = this.cellParams
-    const { width: gemWidth, height: gemHeight } = gem
-    const targetColumn: number = column + 1
-    const targetRow: number = row + 1
-
-    const x: number =
-      column * cellWidth + gap * targetColumn + gemWidth / 2 - gap / 2
-    const y: number =
-      row * cellHeight + gap * targetRow + gemHeight / 2 - gap / 2
-
-    return { x, y }
-  }
-
-  private getSquareCoords(
-    column: number,
-    row: number,
-    gem: Square
-  ): Indexed<number> {
+  private getCoords(column: number, row: number, gem: Shapes): Indexed<number> {
     const { width: gemWidth, height: gemHeight } = gem
     const { gap, width: cellWidth, height: cellHeight } = this.cellParams
 
@@ -171,28 +147,17 @@ export default class GameAPI extends CanvasAPI {
       this.matrix.push([])
 
       for (let column = 0; column < columns; column++) {
-        const gem: Circle | Square = this.getRandomGem()
-        const { x, y } =
-          gem.type === 'circle'
-            ? this.getCircleCoords(column, row, gem as unknown as Circle)
-            : this.getSquareCoords(column, row, gem as unknown as Square)
+        const gem: Shapes = this.getRandomGem()
+        const { x, y } = this.getCoords(column, row, gem)
 
         gem.setCoords(x, y)
         gem.setPositionData(column, row)
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         this.matrix[row].push(gem)
 
         if (gem.nested.length) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          gem.nested = gem.nested.map((shape: Circle | Square) => {
-            const { x, y } =
-              gem.type === 'circle'
-                ? this.getCircleCoords(column, row, shape as unknown as Circle)
-                : this.getSquareCoords(column, row, shape as unknown as Square)
-
+          gem.nested = gem.nested.map((shape: Shapes) => {
+            const { x, y } = this.getCoords(column, row, shape)
             shape.setCoords(x, y)
 
             return shape
@@ -237,41 +202,33 @@ export default class GameAPI extends CanvasAPI {
   private drawAllGems(): void {
     this.matrix.forEach(row => {
       row.forEach(gem => {
-        ;(gem as unknown as Square | Circle).drawShape(this.ctx)
+        gem.drawShape(this.ctx)
 
         // Отрисовываем вложенные элементы фигур
-        const nested = (gem as unknown as Circle | Square).nested
+        const nested = gem.nested
 
         if (nested.length) {
-          nested.forEach(gem =>
-            (gem as unknown as Circle | Square).drawShape(this.ctx)
-          )
+          nested.forEach(gem => gem.drawShape(this.ctx))
         }
       })
     })
   }
 
-  private drawGem(column: number, row: number, gem: Circle | Square): void {
+  private drawGem(column: number, row: number, gem: Shapes): void {
     gem.setPositionData(column, row)
 
-    const { x, y } =
-      gem.type === 'circle'
-        ? this.getCircleCoords(column, row, gem as unknown as Circle)
-        : this.getSquareCoords(column, row, gem)
+    const { x, y } = this.getCoords(column, row, gem)
 
     gem.setCoords(x, y)
     gem.drawShape(this.ctx)
 
     gem.nested.forEach(item => {
-      ;(item as unknown as Circle | Square).setPositionData(column, row)
+      item.setPositionData(column, row)
 
-      const { x, y } =
-        item.type === 'circle'
-          ? this.getCircleCoords(column, row, item as unknown as Circle)
-          : this.getSquareCoords(column, row, item as unknown as Square)
+      const { x, y } = this.getCoords(column, row, item)
 
-      ;(item as unknown as Circle | Square).setCoords(x, y)
-      ;(item as unknown as Circle | Square).drawShape(this.ctx)
+      item.setCoords(x, y)
+      item.drawShape(this.ctx)
     })
   }
 
@@ -377,13 +334,13 @@ export default class GameAPI extends CanvasAPI {
     }
   }
 
-  private checkThreeInRow(): (Circle | Square)[] | [] {
+  private checkThreeInRow(): Shapes[] | [] {
     const { columns, rows } = this.gridParams
 
     // Проверка по горизонтали
     for (let row = 0; row < rows; row++) {
       for (let column = 0; column < columns - 2; column++) {
-        const element: Square | Circle = this.matrix[row][column]
+        const element: Shapes = this.matrix[row][column]
 
         if (
           element.id === this.matrix[row][column + 1].id &&
@@ -418,13 +375,13 @@ export default class GameAPI extends CanvasAPI {
     return []
   }
 
-  private replaceCombination(array: (Circle | Square)[] | []): void {
-    array.forEach((gem: Circle | Square) => {
+  private replaceCombination(array: Shapes[] | []): void {
+    array.forEach((gem: Shapes) => {
       const { column, row, width, height } = gem
 
       this.clearCanvasByCoords(column, row, width, height)
 
-      const generatedGem: Square | Circle = this.getRandomGem()
+      const generatedGem: Shapes = this.getRandomGem()
 
       generatedGem.setPositionData(column, row)
       generatedGem.setCoords(gem.x, gem.y)
@@ -450,16 +407,10 @@ export default class GameAPI extends CanvasAPI {
       const movableGem = stack[0]
 
       if (
-        (Math.abs(
-          movableGem.row - (targetGem as unknown as Circle | Square).row
-        ) <= 1 &&
-          Math.abs(
-            movableGem.column - (targetGem as unknown as Circle | Square).column
-          ) === 0) ||
-        (movableGem.row === (targetGem as unknown as Circle | Square).row &&
-          Math.abs(
-            movableGem.column - (targetGem as unknown as Circle | Square).column
-          ) <= 1)
+        (Math.abs(movableGem.row - targetGem.row) <= 1 &&
+          Math.abs(movableGem.column - targetGem.column) === 0) ||
+        (movableGem.row === targetGem.row &&
+          Math.abs(movableGem.column - targetGem.column) <= 1)
       ) {
         this.stackGems.push(targetGem)
       }
@@ -468,7 +419,7 @@ export default class GameAPI extends CanvasAPI {
     if (this.stackGems.getStack().length === this.stackGems.getLength()) {
       this.swapGems()
 
-      const threeInRow: (Circle | Square)[] | [] = this.checkThreeInRow()
+      const threeInRow: Shapes[] | [] = this.checkThreeInRow()
 
       if (!threeInRow.length) {
         this.swapGems()

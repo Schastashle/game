@@ -1,18 +1,18 @@
-import { Circle, Square } from './types'
+import { Shapes } from './types'
 
 export default class ShapeBase {
   public readonly id: number
   public readonly type: string
-  protected readonly fill_style: string
-  protected readonly stroke_style: string
-  protected readonly line_width: number
+  public readonly fill_style: string
+  public readonly stroke_style: string
+  public readonly line_width: number
   public readonly width: number
   public readonly height: number
   public x: number
   public y: number
   public column: number
   public row: number
-  public nested: (Circle | Square)[] | []
+  public nested: Shapes[]
 
   constructor(
     width: number,
@@ -24,7 +24,7 @@ export default class ShapeBase {
     fill_style: string,
     stroke_style: string,
     line_width: number,
-    nested: (Square | Circle)[]
+    nested: Shapes[]
   ) {
     this.id = id
     this.type = type

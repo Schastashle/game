@@ -1,7 +1,8 @@
 import ShapeBase from './ShapeBase'
-import { Circle as CircleType, Square as SquareType } from './types'
+import { Shapes } from './types'
 
 export default class Square extends ShapeBase {
+  public readonly type = 'square'
   constructor(
     width: number,
     height: number,
@@ -12,7 +13,7 @@ export default class Square extends ShapeBase {
     fill_style: string,
     stroke_style: string,
     line_width: number,
-    nested: (CircleType | SquareType)[]
+    nested: Shapes[]
   ) {
     super(
       width,

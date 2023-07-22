@@ -3,6 +3,7 @@ import { Circle, Square, Shapes } from './Shapes'
 import Stack from '../Stack'
 
 import { GridParams, CellParams, Indexed } from './types'
+import { Animation, easings } from '../Animation'
 
 export default class GameAPI extends CanvasAPI {
   private readonly gridParams: GridParams
@@ -10,7 +11,8 @@ export default class GameAPI extends CanvasAPI {
   private readonly gems: Shapes[]
   private matrix: Shapes[][]
   private readonly gridCoords: Indexed<number[]>
-  private stackGems: Stack
+  private stackGems: Stack<Shapes>
+  private disabled: boolean
 
   constructor(
     width: number,
@@ -36,6 +38,7 @@ export default class GameAPI extends CanvasAPI {
       rows: [0],
     }
     this.stackGems = new Stack(2)
+    this.disabled = false
   }
 
   private getRandomGem(): Shapes {
@@ -232,6 +235,22 @@ export default class GameAPI extends CanvasAPI {
     })
   }
 
+  // Отрисовывает фигуры вне сетки
+  private drawDetachedGem(gem: Shapes): void {
+    gem.drawShape(this.ctx)
+
+    gem.nested.forEach(item => {
+      const { x, y } = gem
+
+      // вычисляет разницу с шириной родителя чтобы сместить от края
+      const normalizedX = x + (gem.width - item.width) / 2
+      const normalizedY = y + (gem.height - item.height) / 2
+
+      item.setCoords(normalizedX, normalizedY)
+      item.drawShape(this.ctx)
+    })
+  }
+
   private clearCanvasByCoords(
     column: number,
     row: number,
@@ -249,9 +268,8 @@ export default class GameAPI extends CanvasAPI {
     )
   }
 
-  private swapGems(): void {
+  private swapGems(gem1: Shapes, gem2: Shapes): void {
     // Свап элементов на canvas
-    const [gem1, gem2] = this.stackGems.getStack()
 
     this.clearCanvasByCoords(gem1.column, gem1.row, gem1.width, gem1.height)
     this.clearCanvasByCoords(gem2.column, gem2.row, gem2.width, gem2.height)
@@ -334,7 +352,7 @@ export default class GameAPI extends CanvasAPI {
     }
   }
 
-  private checkThreeInRow(): Shapes[] | [] {
+  private checkThreeInRow(): Shapes[] {
     const { columns, rows } = this.gridParams
 
     // Проверка по горизонтали
@@ -396,7 +414,8 @@ export default class GameAPI extends CanvasAPI {
     }
   }
 
-  public setSelectedGem(x: number, y: number): void {
+  public async setSelectedGem(x: number, y: number): Promise<void> {
+    if (this.disabled) return
     const { column, row } = this.getGemPositionByCoords(x, y)
     const targetGem = this.matrix[row][column]
     const stack = this.stackGems.getStack()
@@ -417,19 +436,70 @@ export default class GameAPI extends CanvasAPI {
     }
 
     if (this.stackGems.getStack().length === this.stackGems.getLength()) {
-      this.swapGems()
-
-      const threeInRow: Shapes[] | [] = this.checkThreeInRow()
-
-      if (!threeInRow.length) {
-        this.swapGems()
-        this.stackGems.clear()
-
-        return
-      }
-
-      this.replaceCombination(threeInRow)
-      this.stackGems.clear()
+      const [gem1, gem2] = this.stackGems.getStack()
+      this.animateSwap(gem1, gem2)
+        .then(() => this.swapGems(gem1, gem2))
+        .then(() => {
+          this.drawGameGrid()
+          const threeInRow: Shapes[] = this.checkThreeInRow()
+          if (!threeInRow.length) {
+            this.animateSwap(gem1, gem2)
+              .then(() => {
+                this.swapGems(gem1, gem2)
+              })
+              .then(() => {
+                this.stackGems.clear()
+                this.drawGameGrid()
+                return
+              })
+          }
+          return threeInRow
+        })
+        .then(threeInRow => {
+          this.replaceCombination(threeInRow)
+          this.stackGems.clear()
+        })
     }
+  }
+
+  private animateSwap(gem1: Shapes, gem2: Shapes): Promise<void> {
+    // Блокирует взаимодействие с гемами на время анимации
+    this.disabled = true
+
+    const duration = 300
+    const easing = easings.easeOutCubic
+
+    const gem1Coords = { x: gem1.x, y: gem1.y }
+    const gem2Coords = { x: gem2.x, y: gem2.y }
+
+    const animateGem1 = new Animation(gem1 as unknown as Indexed<number>)
+    const animateGem2 = new Animation(gem2 as unknown as Indexed<number>)
+
+    const clearSlots = () => {
+      this.clearCanvasByCoords(gem1.column, gem1.row, gem1.width, gem1.height)
+      this.clearCanvasByCoords(gem2.column, gem2.row, gem2.width, gem2.height)
+    }
+    const tick1 = (gem: Shapes) => {
+      clearSlots()
+      this.drawDetachedGem(gem)
+    }
+    const tick2 = (gem: Shapes) => {
+      this.drawDetachedGem(gem)
+    }
+
+    return new Promise<void>(resolve => {
+      animateGem1.to(gem2Coords, duration, {
+        easing,
+        tick: () => tick1(gem1),
+      })
+      animateGem2.to(gem1Coords, duration, {
+        easing,
+        tick: () => tick2(gem2),
+        onComplete: () => {
+          this.disabled = false
+          resolve()
+        },
+      })
+    })
   }
 }

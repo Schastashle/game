@@ -1,23 +1,32 @@
+import { Indexed } from '../Game/types'
 import { easings, EasingFunction } from './easings'
 
-type Obj = Record<string, number>
+type Obj = Indexed<number>
+
+type Options = {
+  tick: () => void
+  easing?: EasingFunction
+  onComplete?: () => void
+}
 
 export default class Animation {
   private target: HTMLElement | Obj
   private startTime: number | null
   private duration: number
-  private easingFunction: EasingFunction
+  private easing: EasingFunction
+  private tick: (() => void) | null
   private onComplete: (() => void) | null
   private startValues: Obj
   private changeValues: Obj
   private units: Record<string, string>
 
-  constructor(target: HTMLElement | Obj, duration: number) {
+  constructor(target: HTMLElement | Obj) {
     this.target = target
     this.startTime = null
-    this.duration = duration
-    this.easingFunction = easings.linear
+    this.duration = 0
+    this.easing = easings.linear
     this.onComplete = null
+    this.tick = null
     this.startValues = {}
     this.changeValues = {}
     this.units = {}
@@ -49,7 +58,7 @@ export default class Animation {
 
     const elapsed = timestamp - this.startTime
     const progress = Math.min(elapsed / this.duration, 1)
-    const easedProgress = this.easingFunction(progress)
+    const easedProgress = this.easing(progress)
 
     for (const prop in this.changeValues) {
       const value =
@@ -57,8 +66,10 @@ export default class Animation {
 
       if (this.target instanceof HTMLElement) {
         this.target.style.setProperty(`${prop}`, `${value}${this.units[prop]}`)
+        this.tick && this.tick()
       } else {
         this.target[prop] = value
+        this.tick && this.tick()
       }
     }
 
@@ -71,18 +82,14 @@ export default class Animation {
     }
   }
 
-  public to(
-    properties: Obj,
-    duration?: number,
-    onComplete?: () => void,
-    easingFunction?: EasingFunction
-  ) {
-    this.duration = duration || this.duration
-    this.easingFunction = easingFunction || this.easingFunction
+  public to(properties: Obj, duration: number, options?: Options) {
+    this.duration = duration
+    this.easing = options?.easing || this.easing
     this.startValues = {}
     this.changeValues = {}
     this.startTime = null
-    this.onComplete = onComplete || null
+    this.tick = options?.tick || null
+    this.onComplete = options?.onComplete || null
 
     for (const prop in properties) {
       if (this.target instanceof HTMLElement) {
@@ -100,12 +107,7 @@ export default class Animation {
     requestAnimationFrame(timestamp => this.animate(timestamp))
   }
 
-  public from(
-    properties: Obj,
-    duration?: number,
-    onComplete?: () => void,
-    easingFunction?: EasingFunction
-  ) {
+  public from(properties: Obj, duration: number, options?: Options) {
     const reversedProperties: Obj = {}
 
     for (const prop in properties) {
@@ -114,17 +116,16 @@ export default class Animation {
       this.changeValues[prop] = reversedProperties[prop] - properties[prop]
     }
 
-    this.to(properties, duration, onComplete, easingFunction)
+    this.to(properties, duration, options)
   }
 
   public fromTo(
     fromProperties: Obj,
     toProperties: Obj,
-    duration?: number,
-    onComplete?: () => void,
-    easingFunction?: EasingFunction
+    duration: number,
+    options?: Options
   ) {
-    this.to(toProperties, duration, onComplete, easingFunction)
+    this.to(toProperties, duration, options)
     this.startValues = fromProperties
     this.changeValues = {}
 
@@ -133,10 +134,11 @@ export default class Animation {
     }
   }
 
-  public pause(duration?: number, onComplete?: () => void) {
+  public pause(duration: number, options?: Options) {
     this.startTime = null
-    this.duration = duration || this.duration
-    this.onComplete = onComplete || null
+    this.duration = duration
+    this.tick = options?.tick || null
+    this.onComplete = options?.onComplete || null
     this.startValues = {}
     this.changeValues = {}
 

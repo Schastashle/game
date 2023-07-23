@@ -10,4 +10,5 @@ export enum EAvatarSize {
   small = '36px',
   medium = '48px',
   large = '62px',
+  xl = '124px',
 }

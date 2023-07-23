@@ -1,1 +1,6 @@
-export { SignInSchema, SignUpSchema, type LoginSchemas } from './formValidation'
+export {
+  SignInSchema,
+  SignUpSchema,
+  PasswordSchema,
+  type LoginSchemas,
+} from './formValidation'

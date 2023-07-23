@@ -25,12 +25,12 @@ export default createBrowserRouter([
   },
   {
     path: 'signin',
-    element: <Signin />,
+    element: <Signin isAuth={false} />,
     errorElement: <ErrorPage />,
   },
   {
     path: 'signup',
-    element: <Signup />,
+    element: <Signup isAuth={false} />,
     errorElement: <ErrorPage />,
   },
   {

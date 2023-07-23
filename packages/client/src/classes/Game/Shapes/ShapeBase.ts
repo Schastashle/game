@@ -1,6 +1,6 @@
 import { Shapes } from './types'
 
-export default class ShapeBase {
+export default abstract class ShapeBase {
   public readonly id: number
   public readonly type: string
   public readonly fill_style: string

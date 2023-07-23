@@ -5,6 +5,8 @@ import Stack from '../Stack'
 import { GridParams, CellParams, Indexed } from './types'
 import { Animation, easings } from '../Animation'
 
+type ShapeAnimationProps = Pick<Shapes, 'x' | 'y' | 'scale'>
+
 export default class GameAPI extends CanvasAPI {
   private readonly gridParams: GridParams
   private readonly cellParams: CellParams
@@ -239,15 +241,18 @@ export default class GameAPI extends CanvasAPI {
   private drawDetachedGem(gem: Shapes): void {
     gem.drawShape(this.ctx)
 
-    gem.nested.forEach(item => {
-      const { x, y, scale } = gem
-      item.scale = scale
-      // вычисляет разницу с шириной родителя чтобы сместить от края
-      const normalizedX = x + (gem.width - item.width) / 2
-      const normalizedY = y + (gem.height - item.height) / 2
+    const { x, y, scale } = gem
+    const parentWidth = gem.width
+    const parentHeight = gem.height
 
-      item.setCoords(normalizedX, normalizedY)
-      item.drawShape(this.ctx)
+    gem.nested.forEach(nestedGem => {
+      nestedGem.scale = scale
+      // вычисляет разницу с шириной родителя чтобы сместить от края
+      const normalizedX = x + (parentWidth - nestedGem.width) / 2
+      const normalizedY = y + (parentHeight - nestedGem.height) / 2
+
+      nestedGem.setCoords(normalizedX, normalizedY)
+      nestedGem.drawShape(this.ctx)
     })
   }
 
@@ -393,29 +398,35 @@ export default class GameAPI extends CanvasAPI {
     return []
   }
 
-  private replaceCombination(array: Shapes[] | []): void {
-    array.forEach((gem: Shapes) => {
-      const { column, row, width, height } = gem
+  private async replaceCombination(array: Shapes[] | []): Promise<void> {
+    return new Promise<void>(res =>
+      array.forEach((gem: Shapes) => {
+        const { column, row, width, height } = gem
 
-      this.animateDestroy(gem)
-        .then(() => {
-          this.clearCanvasByCoords(column, row, width, height)
-        })
-        .then(() => {
-          const generatedGem: Shapes = this.getRandomGem()
+        this.animateDestroy(gem)
+          .then(() => {
+            this.clearCanvasByCoords(column, row, width, height)
+          })
+          .then(() => {
+            const generatedGem: Shapes = this.getRandomGem()
 
-          generatedGem.setPositionData(column, row)
-          generatedGem.setCoords(gem.x, gem.y)
-          this.matrix[row][column] = generatedGem
-          this.drawGem(column, row, generatedGem)
-        })
+            generatedGem.setPositionData(column, row)
+            generatedGem.setCoords(gem.x, gem.y)
+            this.matrix[row][column] = generatedGem
+            this.drawGem(column, row, generatedGem)
+          })
+          .then(() => {
+            this.disabled = false
+            res()
+          })
+      })
+    ).then(() => {
+      const threeInRow = this.checkThreeInRow()
+
+      if (threeInRow.length) {
+        this.replaceCombination(threeInRow)
+      }
     })
-
-    const threeInRow = this.checkThreeInRow()
-
-    if (threeInRow.length) {
-      this.replaceCombination(threeInRow)
-    }
   }
 
   public async setSelectedGem(x: number, y: number): Promise<void> {
@@ -461,12 +472,11 @@ export default class GameAPI extends CanvasAPI {
         })
         .then(threeInRow => {
           this.replaceCombination(threeInRow)
-          this.stackGems.clear()
         })
     }
   }
 
-  private animateSwap(gem1: Shapes, gem2: Shapes): Promise<void> {
+  private async animateSwap(gem1: Shapes, gem2: Shapes): Promise<void> {
     // Блокирует взаимодействие с гемами на время анимации
     this.disabled = true
 
@@ -476,8 +486,8 @@ export default class GameAPI extends CanvasAPI {
     const gem1Coords = { x: gem1.x, y: gem1.y }
     const gem2Coords = { x: gem2.x, y: gem2.y }
 
-    const animateGem1 = new Animation(gem1 as unknown as Indexed<number>)
-    const animateGem2 = new Animation(gem2 as unknown as Indexed<number>)
+    const animateGem1 = new Animation(gem1 as ShapeAnimationProps)
+    const animateGem2 = new Animation(gem2 as ShapeAnimationProps)
 
     const clearSlots = () => {
       this.clearCanvasByCoords(gem1.column, gem1.row, gem1.width, gem1.height)
@@ -491,7 +501,7 @@ export default class GameAPI extends CanvasAPI {
       this.drawDetachedGem(gem)
     }
 
-    return new Promise<void>(resolve => {
+    await new Promise<void>(resolve => {
       animateGem1.to(gem2Coords, duration, {
         easing,
         tick: () => tick1(gem1),
@@ -507,15 +517,18 @@ export default class GameAPI extends CanvasAPI {
     })
   }
 
-  private animateDestroy(gem: Shapes): Promise<void> {
+  private async animateDestroy(gem: Shapes): Promise<void> {
+    // Блокирует взаимодействие с гемами на время анимации
+    this.disabled = true
+
     const duration = 300
     const easing = easings.easeOutCubic
 
     const { column, row, width, height } = gem
 
-    const animateGem = new Animation(gem as unknown as Indexed<number>)
+    const animateGem = new Animation(gem as ShapeAnimationProps)
 
-    return new Promise<void>(resolve => {
+    await new Promise<void>(resolve => {
       animateGem.to({ scale: 0 }, duration, {
         easing,
         tick: () => {

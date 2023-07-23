@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
-import { gridParams, cellParams, gems } from './constans'
+import { gridParams, cellParams, gems } from './constants'
 
 import styles from './game.module.css'
+import { Shapes } from '../../classes/Game/Shapes'
 
 export default class Game extends Component {
   private readonly canvas: HTMLCanvasElement
@@ -19,7 +20,7 @@ export default class Game extends Component {
       gridParams.columns,
       gridParams.rows,
       cellParams,
-      gems
+      gems as Shapes[]
     )
     this.canvas = this.gameAPI.getCanvas()
     this.canvasRef = React.createRef()

@@ -38,15 +38,11 @@ export default class Animation {
     if (this.target instanceof HTMLElement) {
       const computedStyle = getComputedStyle(this.target)
 
-      for (const prop in this.startValues) {
-        const value = computedStyle.getPropertyValue(`${prop}`)
+      for (const property in this.startValues) {
+        const value = computedStyle.getPropertyValue(property)
         const match = value.match(/(\d+)(\D+)$/)
 
-        if (match) {
-          this.units[prop] = match[2]
-        } else {
-          this.units[prop] = ''
-        }
+        this.units[property] = match ? match[2] : ''
       }
     }
   }
@@ -66,19 +62,17 @@ export default class Animation {
 
       if (this.target instanceof HTMLElement) {
         this.target.style.setProperty(`${prop}`, `${value}${this.units[prop]}`)
-        this.tick && this.tick()
       } else {
         this.target[prop] = value
-        this.tick && this.tick()
       }
+
+      this.tick && this.tick()
     }
 
     if (elapsed < this.duration) {
-      requestAnimationFrame(timestamp => this.animate(timestamp))
-    } else {
-      if (this.onComplete) {
-        this.onComplete()
-      }
+      requestAnimationFrame(this.animate.bind(this))
+    } else if (this.onComplete) {
+      this.onComplete()
     }
   }
 

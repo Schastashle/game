@@ -6,6 +6,7 @@
   width: 100vw;
   height: 100vh;
   gap: 40px;
+  background: #fff;
 }
 
 .game-controls {

@@ -45,7 +45,9 @@ export default class Game extends Component {
     this.gameAPI.setSelectedGem(x, y)
   }
 
-  toggleFullscreen = () => {
+  toggleFullscreen = (event: React.MouseEvent) => {
+    event.stopPropagation()
+
     this.isFullscreenMode
       ? document.exitFullscreen()
       : (this.canvasRef.current as HTMLDivElement).requestFullscreen()

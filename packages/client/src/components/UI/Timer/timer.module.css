@@ -1,0 +1,19 @@
+.block {
+  color: #bfb2b5;
+  display: flex;
+}
+
+.block .imgBlock {
+  display: flex;
+  align-items: center;
+}
+
+.block img {
+  width: 62px;
+}
+
+.time {
+  margin-left: 12px;
+  font-size: 64px;
+  font-weight: 900;
+}

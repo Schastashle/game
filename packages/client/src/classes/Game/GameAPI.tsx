@@ -13,6 +13,7 @@ export default class GameAPI extends CanvasAPI {
   private matrix: [][] | (Circle | Square)[][]
   private readonly gridCoords: Indexed<number[]>
   private stackGems: Stack
+  public counts = 0
 
   constructor(
     width: number,
@@ -439,7 +440,11 @@ export default class GameAPI extends CanvasAPI {
     }
   }
 
-  public setSelectedGem(x: number, y: number): void {
+  public setSelectedGem(
+    x: number,
+    y: number,
+    callback?: (n: number) => void
+  ): void {
     const { column, row } = this.getGemPositionByCoords(x, y)
     const targetGem = this.matrix[row][column]
     const stack = this.stackGems.getStack()
@@ -467,6 +472,12 @@ export default class GameAPI extends CanvasAPI {
 
     if (this.stackGems.getStack().length === this.stackGems.getLength()) {
       this.swapGems()
+      // прибавляем 3 очка
+      this.counts = this.counts + 3
+
+      if (callback) {
+        callback(this.counts)
+      }
 
       const threeInRow: (Circle | Square)[] | [] = this.checkThreeInRow()
 
@@ -479,6 +490,20 @@ export default class GameAPI extends CanvasAPI {
 
       this.replaceCombination(threeInRow)
       this.stackGems.clear()
+    }
+  }
+
+  // завершение игры
+  public finished(callback?: () => void): void {
+    if (callback) {
+      callback()
+    }
+  }
+
+  // старт игры
+  public start(callback?: () => void) {
+    if (callback) {
+      callback()
     }
   }
 }

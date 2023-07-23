@@ -3,9 +3,14 @@
 * {
   --bg-color: #e5e6e0;
   --text-color: #bfb2b5;
+  --focus-color: #a5a5c0;
   --accent-1: #e61c5d;
   --accent-2: #cd7c39;
   --accent-3: #7ec36e;
+  --radius-panel: 21px;
+  --shadow-panel: 3px 3px 0 0 rgb(218 198 198 / 25%);
+  --border: var(--text-color) 3px solid;
+  --border-focus: var(--focus-color) 3px solid;
 
   box-sizing: border-box;
   margin: 0;

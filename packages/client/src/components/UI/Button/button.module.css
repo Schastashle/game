@@ -17,6 +17,22 @@
   border-radius: 9px;
 }
 
+.button.transparent {
+  padding: 0;
+  color: var(--text-color);
+  background-color: transparent;
+
+  &:focus-visible {
+    outline: none;
+    color: var(--focus-color);
+  }
+}
+
 .button[disabled] {
   background-color: gray;
+}
+
+.button[disabled].transparent {
+  background-color: transparent;
+  color: lightgray;
 }

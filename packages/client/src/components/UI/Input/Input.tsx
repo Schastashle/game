@@ -1,29 +1,35 @@
-import { FC, InputHTMLAttributes } from 'react'
 import style from './input.module.css'
+import { FC, InputHTMLAttributes } from 'react'
 import { UseFormRegister, FieldValues } from 'react-hook-form'
-interface IInputProps {
+interface IInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string
   register?: UseFormRegister<FieldValues>
   name: string
+  underline?: boolean
+  label?: string
 }
 
-type InputElemProps = InputHTMLAttributes<HTMLInputElement>
-
-const Input: FC<IInputProps & InputElemProps> = ({
+const Input: FC<IInputProps> = ({
   error,
   register,
   name,
+  underline,
+  label,
   ...rest
 }) => {
   return (
-    <label className={style.label}>
+    <div className={style.wrapper}>
+      <label className={style.label} htmlFor={name}>
+        {label}
+      </label>
       <input
-        className={style.input}
-        {...(register && { ...register(name) })}
+        className={`${style.input} ${underline ? style.underline : ''}`}
+        {...(register && register(name))}
         {...rest}
       />
+
       {error && <p className={style.error}>{error}</p>}
-    </label>
+    </div>
   )
 }
 

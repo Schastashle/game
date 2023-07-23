@@ -1,54 +1,56 @@
-const CACHE_NAME = 'my-site-cache-v1'
+// service-worker.js
+const cacheVersion = 'app-cache-v1';
 
 self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        // Находим все файлы с расширением ".js" и кэшируем их
-        return fetch('/dist/')
-          .then(function(response) {
-            return response.text();
-          })
-          .then(text => {
-            const jsFiles = text.match(/<script.*?src="(.*?\/index\..*?\.js.*?)"/gi)
-            const formattedJSFiles = jsFiles.map(url => `/dist/assets/${url.match(/src="(.*?)"/i)[1].split('/').pop()}`)
+  event.waitUntil(self.skipWaiting());
+});
 
-            if (formattedJSFiles) {
-              return cache.addAll([...formattedJSFiles, '/dist/index.html']);
-            }
-          });
-      })
-      .then(function() {
-        return self.skipWaiting();
-      })
-  );
+self.addEventListener('activate', function(event) {
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', function(event) {
   event.respondWith(
-    caches.match(event.request) // Ищем в кэше соответствующий запросу ресурс
-      .then(function(response) {
-        if (response) {
-          return response; // Возвращаем кэшированный ресурс, если он найден
-        }
-
-        // Если ресурса нет в кэше, делаем фактический запрос
-        return fetch(event.request)
+    caches.open(cacheVersion)
+      .then(function(cache) {
+        // Пытаемся найти запрошенный ресурс в кэше
+        return cache.match(event.request)
           .then(function(response) {
-            // Клонируем ответ, так как response может быть использован только один раз
-            const responseClone = response.clone();
+            // Если ресурс найден в кэше, возвращаем его из кэша
+            if (response) {
+              return response;
+            }
 
-            caches.open(CACHE_NAME) // Открываем кэш
-              .then(function(cache) {
-                // Кэшируем новый ресурс для будущих запросов
-                cache.put(event.request, responseClone);
+            // Если ресурса нет в кэше, выполняем сетевой запрос
+            return fetch(event.request)
+              .then(function(response) {
+                // Проверяем код HTTP-ответа
+                if (response.status === 404) {
+                  // Если код ответа 404, возвращаем ошибку или заглушку
+                  // return new Response('Resource not found', { status: 404 });
+                  // или
+                  return response; // Возвращаем оригинальный ответ без кэширования
+                }
+
+                // Клонируем полученный ответ, так как он может быть использован только один раз
+                const clonedResponse = response.clone();
+
+                // Кэшируем полученный ответ для будущих запросов
+                caches.open(cacheVersion)
+                  .then(function(cache) {
+                    cache.put(event.request, clonedResponse);
+                  });
+
+                // Возвращаем оригинальный ответ
+                return response;
+              })
+              .catch(function(error) {
+                console.error('Ошибка при выполнении запроса:', error);
+                // Возвращаем заглушку или специальный ответ в случае ошибки
+                // return new Response('Error occurred. Please try again later.', { status: 500 });
               });
-
-            return response; // Возвращаем ответ
-          })
-          .catch(function(error) {
-            console.error('Ошибка при выполнении запроса:', error);
           });
       })
   );
 });
+

@@ -1,21 +1,27 @@
 const CACHE_NAME = 'my-site-cache-v1'
-const URLS = [
-  '/dist/assets/index.0117cb92.js',
-  '/dist/index.html'
-];
 
-self.addEventListener("install", event => {
+self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache')
-        return cache.addAll(URLS)
+      .then(function(cache) {
+        // Находим все файлы с расширением ".js" и кэшируем их
+        return fetch('/dist/')
+          .then(function(response) {
+            return response.text();
+          })
+          .then(text => {
+            const jsFiles = text.match(/<script.*?src="(.*?\/index\..*?\.js.*?)"/gi)
+            const formattedJSFiles = jsFiles.map(url => `/dist/assets/${url.match(/src="(.*?)"/i)[1].split('/').pop()}`)
+
+            if (formattedJSFiles) {
+              return cache.addAll([...formattedJSFiles, '/dist/index.html']);
+            }
+          });
       })
-      .catch(error => {
-        console.error(error)
-        throw error
+      .then(function() {
+        return self.skipWaiting();
       })
-  )
+  );
 });
 
 self.addEventListener('fetch', function(event) {

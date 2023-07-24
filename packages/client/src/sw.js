@@ -4,7 +4,8 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        return cache.addAll(self.__WB_MANIFEST)
+        const files = self.__WB_MANIFEST.map(item => item.url)
+        return cache.addAll(files)
       })
       .then(() => {
         return self.skipWaiting();
@@ -34,9 +35,6 @@ self.addEventListener('fetch', function(event) {
 
             return response; // Возвращаем ответ
           })
-          .catch(function(error) {
-            console.error('Ошибка при выполнении запроса:', error);
-          });
       })
   );
 });

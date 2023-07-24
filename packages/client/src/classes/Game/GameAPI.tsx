@@ -1,22 +1,20 @@
 import CanvasAPI from './CanvasAPI'
-import Circle from './Shapes/Circle'
-import Square from './Shapes/Square'
+import { Circle, Square, Shapes } from './Shapes'
 import Stack from '../Stack'
 
 import { GridParams, CellParams, Indexed } from './types'
-import {
-  Circle as CircleType,
-  Square as SquareType,
-  Shape,
-} from './Shapes/types'
+import { Animation, easings } from '../Animation'
+
+type ShapeAnimationProps = Pick<Shapes, 'x' | 'y' | 'scale'>
 
 export default class GameAPI extends CanvasAPI {
   private readonly gridParams: GridParams
   private readonly cellParams: CellParams
-  private readonly gems: (CircleType | SquareType)[]
-  private matrix: [][] | (Circle | Square)[][]
+  private readonly gems: Shapes[]
+  private matrix: Shapes[][]
   private readonly gridCoords: Indexed<number[]>
-  private stackGems: Stack
+  private stackGems: Stack<Shapes>
+  private disabled: boolean
 
   constructor(
     width: number,
@@ -24,7 +22,7 @@ export default class GameAPI extends CanvasAPI {
     columns: number,
     rows: number,
     cellParams: CellParams,
-    gems: (CircleType | SquareType)[]
+    gems: Shapes[]
   ) {
     super(width, height)
 
@@ -42,11 +40,12 @@ export default class GameAPI extends CanvasAPI {
       rows: [0],
     }
     this.stackGems = new Stack(2)
+    this.disabled = false
   }
 
-  private getRandomGem(): Square | Circle {
+  private getRandomGem(): Shapes {
     const random_number = Math.floor(Math.random() * this.gems.length)
-    const gem: SquareType | CircleType = this.gems[random_number]
+    const gem: Shapes = this.gems[random_number]
     const {
       id,
       type,
@@ -59,7 +58,7 @@ export default class GameAPI extends CanvasAPI {
       line_width,
       nested = [],
     } = gem
-    const nestedGems: (Square | Circle)[] | [] = nested.map(item => {
+    const nestedGems: Shapes[] | [] = nested.map(item => {
       const {
         id,
         type,
@@ -84,7 +83,7 @@ export default class GameAPI extends CanvasAPI {
           stroke_style,
           line_width,
           [],
-          (item as unknown as Circle).radius
+          item.radius
         )
       } else {
         return new Square(
@@ -113,10 +112,8 @@ export default class GameAPI extends CanvasAPI {
         fill_style,
         stroke_style,
         line_width,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         nestedGems,
-        (gem as unknown as Circle).radius
+        gem.radius
       )
     } else {
       return new Square(
@@ -129,36 +126,12 @@ export default class GameAPI extends CanvasAPI {
         fill_style,
         stroke_style,
         line_width,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         nestedGems
       )
     }
   }
 
-  private getCircleCoords(
-    column: number,
-    row: number,
-    gem: Circle
-  ): Indexed<number> {
-    const { gap, width: cellWidth, height: cellHeight } = this.cellParams
-    const { width: gemWidth, height: gemHeight } = gem
-    const targetColumn: number = column + 1
-    const targetRow: number = row + 1
-
-    const x: number =
-      column * cellWidth + gap * targetColumn + gemWidth / 2 - gap / 2
-    const y: number =
-      row * cellHeight + gap * targetRow + gemHeight / 2 - gap / 2
-
-    return { x, y }
-  }
-
-  private getSquareCoords(
-    column: number,
-    row: number,
-    gem: Square
-  ): Indexed<number> {
+  private getCoords(column: number, row: number, gem: Shapes): Indexed<number> {
     const { width: gemWidth, height: gemHeight } = gem
     const { gap, width: cellWidth, height: cellHeight } = this.cellParams
 
@@ -179,28 +152,17 @@ export default class GameAPI extends CanvasAPI {
       this.matrix.push([])
 
       for (let column = 0; column < columns; column++) {
-        const gem: Circle | Square = this.getRandomGem()
-        const { x, y } =
-          gem.type === 'circle'
-            ? this.getCircleCoords(column, row, gem as unknown as Circle)
-            : this.getSquareCoords(column, row, gem as unknown as Square)
+        const gem: Shapes = this.getRandomGem()
+        const { x, y } = this.getCoords(column, row, gem)
 
         gem.setCoords(x, y)
         gem.setPositionData(column, row)
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         this.matrix[row].push(gem)
 
         if (gem.nested.length) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          gem.nested = gem.nested.map((shape: Circle | Square) => {
-            const { x, y } =
-              gem.type === 'circle'
-                ? this.getCircleCoords(column, row, shape as unknown as Circle)
-                : this.getSquareCoords(column, row, shape as unknown as Square)
-
+          gem.nested = gem.nested.map((shape: Shapes) => {
+            const { x, y } = this.getCoords(column, row, shape)
             shape.setCoords(x, y)
 
             return shape
@@ -245,41 +207,52 @@ export default class GameAPI extends CanvasAPI {
   private drawAllGems(): void {
     this.matrix.forEach(row => {
       row.forEach(gem => {
-        ;(gem as unknown as Square | Circle).drawShape(this.ctx)
+        gem.drawShape(this.ctx)
 
         // Отрисовываем вложенные элементы фигур
-        const nested = (gem as unknown as Circle | Square).nested
+        const nested = gem.nested
 
         if (nested.length) {
-          nested.forEach(gem =>
-            (gem as unknown as Circle | Square).drawShape(this.ctx)
-          )
+          nested.forEach(gem => gem.drawShape(this.ctx))
         }
       })
     })
   }
 
-  private drawGem(column: number, row: number, gem: Circle | Square): void {
+  private drawGem(column: number, row: number, gem: Shapes): void {
     gem.setPositionData(column, row)
 
-    const { x, y } =
-      gem.type === 'circle'
-        ? this.getCircleCoords(column, row, gem as unknown as Circle)
-        : this.getSquareCoords(column, row, gem)
+    const { x, y } = this.getCoords(column, row, gem)
 
     gem.setCoords(x, y)
     gem.drawShape(this.ctx)
 
     gem.nested.forEach(item => {
-      ;(item as unknown as Circle | Square).setPositionData(column, row)
+      item.setPositionData(column, row)
 
-      const { x, y } =
-        item.type === 'circle'
-          ? this.getCircleCoords(column, row, item as unknown as Circle)
-          : this.getSquareCoords(column, row, item as unknown as Square)
+      const { x, y } = this.getCoords(column, row, item)
 
-      ;(item as unknown as Circle | Square).setCoords(x, y)
-      ;(item as unknown as Circle | Square).drawShape(this.ctx)
+      item.setCoords(x, y)
+      item.drawShape(this.ctx)
+    })
+  }
+
+  // Отрисовывает фигуры вне сетки
+  private drawDetachedGem(gem: Shapes): void {
+    gem.drawShape(this.ctx)
+
+    const { x, y, scale } = gem
+    const parentWidth = gem.width
+    const parentHeight = gem.height
+
+    gem.nested.forEach(nestedGem => {
+      nestedGem.scale = scale
+      // вычисляет разницу с шириной родителя чтобы сместить от края
+      const normalizedX = x + (parentWidth - nestedGem.width) / 2
+      const normalizedY = y + (parentHeight - nestedGem.height) / 2
+
+      nestedGem.setCoords(normalizedX, normalizedY)
+      nestedGem.drawShape(this.ctx)
     })
   }
 
@@ -300,9 +273,8 @@ export default class GameAPI extends CanvasAPI {
     )
   }
 
-  private swapGems(): void {
+  private swapGems(gem1: Shapes, gem2: Shapes): void {
     // Свап элементов на canvas
-    const [gem1, gem2] = this.stackGems.getStack()
 
     this.clearCanvasByCoords(gem1.column, gem1.row, gem1.width, gem1.height)
     this.clearCanvasByCoords(gem2.column, gem2.row, gem2.width, gem2.height)
@@ -385,13 +357,13 @@ export default class GameAPI extends CanvasAPI {
     }
   }
 
-  private checkThreeInRow(): (Circle | Square)[] | [] {
+  private checkThreeInRow(): Shapes[] {
     const { columns, rows } = this.gridParams
 
     // Проверка по горизонтали
     for (let row = 0; row < rows; row++) {
       for (let column = 0; column < columns - 2; column++) {
-        const element: Square | Circle = this.matrix[row][column]
+        const element: Shapes = this.matrix[row][column]
 
         if (
           element.id === this.matrix[row][column + 1].id &&
@@ -426,28 +398,39 @@ export default class GameAPI extends CanvasAPI {
     return []
   }
 
-  private replaceCombination(array: (Circle | Square)[] | []): void {
-    array.forEach((gem: Circle | Square) => {
-      const { column, row, width, height } = gem
+  private async replaceCombination(array: Shapes[] | []): Promise<void> {
+    return new Promise<void>(res =>
+      array.forEach((gem: Shapes) => {
+        const { column, row, width, height } = gem
 
-      this.clearCanvasByCoords(column, row, width, height)
+        this.animateDestroy(gem)
+          .then(() => {
+            this.clearCanvasByCoords(column, row, width, height)
+          })
+          .then(() => {
+            const generatedGem: Shapes = this.getRandomGem()
 
-      const generatedGem: Square | Circle = this.getRandomGem()
+            generatedGem.setPositionData(column, row)
+            generatedGem.setCoords(gem.x, gem.y)
+            this.matrix[row][column] = generatedGem
+            this.drawGem(column, row, generatedGem)
+          })
+          .then(() => {
+            this.disabled = false
+            res()
+          })
+      })
+    ).then(() => {
+      const threeInRow = this.checkThreeInRow()
 
-      generatedGem.setPositionData(column, row)
-      generatedGem.setCoords(gem.x, gem.y)
-      this.matrix[row][column] = generatedGem
-      this.drawGem(column, row, generatedGem)
+      if (threeInRow.length) {
+        this.replaceCombination(threeInRow)
+      }
     })
-
-    const threeInRow = this.checkThreeInRow()
-
-    if (threeInRow.length) {
-      this.replaceCombination(threeInRow)
-    }
   }
 
-  public setSelectedGem(x: number, y: number): void {
+  public async setSelectedGem(x: number, y: number): Promise<void> {
+    if (this.disabled) return
     const { column, row } = this.getGemPositionByCoords(x, y)
     const targetGem = this.matrix[row][column]
     const stack = this.stackGems.getStack()
@@ -458,35 +441,105 @@ export default class GameAPI extends CanvasAPI {
       const movableGem = stack[0]
 
       if (
-        (Math.abs(
-          movableGem.row - (targetGem as unknown as Circle | Square).row
-        ) <= 1 &&
-          Math.abs(
-            movableGem.column - (targetGem as unknown as Circle | Square).column
-          ) === 0) ||
-        (movableGem.row === (targetGem as unknown as Circle | Square).row &&
-          Math.abs(
-            movableGem.column - (targetGem as unknown as Circle | Square).column
-          ) <= 1)
+        (Math.abs(movableGem.row - targetGem.row) <= 1 &&
+          Math.abs(movableGem.column - targetGem.column) === 0) ||
+        (movableGem.row === targetGem.row &&
+          Math.abs(movableGem.column - targetGem.column) <= 1)
       ) {
         this.stackGems.push(targetGem)
       }
     }
 
     if (this.stackGems.getStack().length === this.stackGems.getLength()) {
-      this.swapGems()
-
-      const threeInRow: (Circle | Square)[] | [] = this.checkThreeInRow()
-
-      if (!threeInRow.length) {
-        this.swapGems()
-        this.stackGems.clear()
-
-        return
-      }
-
-      this.replaceCombination(threeInRow)
-      this.stackGems.clear()
+      const [gem1, gem2] = this.stackGems.getStack()
+      this.animateSwap(gem1, gem2)
+        .then(() => this.swapGems(gem1, gem2))
+        .then(() => {
+          this.drawGameGrid()
+          const threeInRow: Shapes[] = this.checkThreeInRow()
+          if (!threeInRow.length) {
+            this.animateSwap(gem1, gem2)
+              .then(() => {
+                this.swapGems(gem1, gem2)
+              })
+              .then(() => {
+                this.stackGems.clear()
+                this.drawGameGrid()
+                return
+              })
+          }
+          return threeInRow
+        })
+        .then(threeInRow => {
+          this.replaceCombination(threeInRow)
+        })
     }
+  }
+
+  private async animateSwap(gem1: Shapes, gem2: Shapes): Promise<void> {
+    // Блокирует взаимодействие с гемами на время анимации
+    this.disabled = true
+
+    const duration = 300
+    const easing = easings.easeOutCubic
+
+    const gem1Coords = { x: gem1.x, y: gem1.y }
+    const gem2Coords = { x: gem2.x, y: gem2.y }
+
+    const animateGem1 = new Animation(gem1 as ShapeAnimationProps)
+    const animateGem2 = new Animation(gem2 as ShapeAnimationProps)
+
+    const clearSlots = () => {
+      this.clearCanvasByCoords(gem1.column, gem1.row, gem1.width, gem1.height)
+      this.clearCanvasByCoords(gem2.column, gem2.row, gem2.width, gem2.height)
+    }
+    const tick1 = (gem: Shapes) => {
+      clearSlots()
+      this.drawDetachedGem(gem)
+    }
+    const tick2 = (gem: Shapes) => {
+      this.drawDetachedGem(gem)
+    }
+
+    await new Promise<void>(resolve => {
+      animateGem1.to(gem2Coords, duration, {
+        easing,
+        tick: () => tick1(gem1),
+      })
+      animateGem2.to(gem1Coords, duration, {
+        easing,
+        tick: () => tick2(gem2),
+        onComplete: () => {
+          this.disabled = false
+          resolve()
+        },
+      })
+    })
+  }
+
+  private async animateDestroy(gem: Shapes): Promise<void> {
+    // Блокирует взаимодействие с гемами на время анимации
+    this.disabled = true
+
+    const duration = 300
+    const easing = easings.easeOutCubic
+
+    const { column, row, width, height } = gem
+
+    const animateGem = new Animation(gem as ShapeAnimationProps)
+
+    await new Promise<void>(resolve => {
+      animateGem.to({ scale: 0 }, duration, {
+        easing,
+        tick: () => {
+          this.clearCanvasByCoords(column, row, width, height)
+          this.drawDetachedGem(gem)
+        },
+        onComplete: () => {
+          this.stackGems.clear()
+          resolve()
+        },
+      })
+    })
   }
 }

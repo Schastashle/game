@@ -4,7 +4,11 @@ import Square from './Shapes/Square'
 import Stack from '../Stack'
 
 import { GridParams, CellParams, Indexed } from './types'
-import { Circle as CircleType, Square as SquareType } from './Shapes/types'
+import {
+  Circle as CircleType,
+  Square as SquareType,
+  Shape,
+} from './Shapes/types'
 
 export default class GameAPI extends CanvasAPI {
   private readonly gridParams: GridParams
@@ -110,6 +114,8 @@ export default class GameAPI extends CanvasAPI {
         fill_style,
         stroke_style,
         line_width,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         nestedGems,
         (gem as unknown as Circle).radius
       )
@@ -124,6 +130,8 @@ export default class GameAPI extends CanvasAPI {
         fill_style,
         stroke_style,
         line_width,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         nestedGems
       )
     }

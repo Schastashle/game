@@ -48,6 +48,14 @@ const AppRouter: FC<IAppRouter> = ({ isAuth }) => (
       }
     />
     <Route
+      path="/finish"
+      element={
+        <RequireAuth>
+          <FinishPage />
+        </RequireAuth>
+      }
+    />
+    <Route
       path="/rating"
       element={
         <RequireAuth>

@@ -1,5 +1,5 @@
 import { FC, useCallback, useMemo, useState } from 'react'
-import { Form, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { mockData } from '../index/mockData'
 import { useDate } from '../../../hooks/useDate'
 import style from './forumTopic.module.css'
@@ -93,9 +93,10 @@ const ForumTopic: FC = () => {
       </div>
 
       <div className={style.form}>
-        <Form onSubmit={handleAddComment}>
+        <form onSubmit={handleAddComment}>
           <div className={style.formInputBlock}>
             <Input
+              name="comment"
               placeholder={'ввод'}
               value={text}
               onChange={e => {
@@ -113,7 +114,7 @@ const ForumTopic: FC = () => {
               Отправить
             </Button>
           </div>
-        </Form>
+        </form>
       </div>
     </div>
   )

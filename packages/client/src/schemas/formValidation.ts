@@ -82,4 +82,31 @@ export const SignUpSchema = z
 
 type SignUpSchemaType = z.infer<typeof SignUpSchema>
 
+export const PasswordSchema = z
+  .object({
+    oldPassword: z.string().nonempty('Поле не должно быть пустым'),
+    newPassword: z
+      .string()
+      .nonempty('Поле не должно быть пустым')
+      .min(8, 'Должно быть минимум 8 символов')
+      .max(40, 'Должно быть максимум 40 символа')
+      .regex(
+        /(?=.*\d)(?=.*[A-Z])/,
+        'Пароль должен содержать хотя бы одну заглавную букву и цифру'
+      ),
+    confirmPassword: z
+      .string()
+      .nonempty('Поле не должно быть пустым')
+      .min(8, 'Должно быть минимум 8 символов')
+      .max(40, 'Должно быть максимум 40 символа')
+      .regex(
+        /(?=.*\d)(?=.*[A-Z])/,
+        'Пароль должен содержать хотя бы одну заглавную букву и цифру'
+      ),
+  })
+  .refine(data => data.newPassword === data.confirmPassword, {
+    message: 'Пароли не совпадают',
+    path: ['confirmPassword'],
+  })
+
 export type LoginSchemas = z.ZodType<SignInSchemaType | SignUpSchemaType>

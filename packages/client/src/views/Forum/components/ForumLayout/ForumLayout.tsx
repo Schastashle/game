@@ -1,8 +1,8 @@
 import { FC, ReactNode, useCallback, useState } from 'react'
 import style from './forumLayout.module.css'
-import { Form, Link, NavLink, Outlet, useParams } from 'react-router-dom'
+import { NavLink, Outlet, useParams } from 'react-router-dom'
 import { useDate } from '../../../../hooks/useDate'
-import { Button, Input } from '../../../../components/UI'
+import { Button, Input } from '../../../../components'
 import Dialog from '../../../../components/UI/Dialog/Dialog'
 import { useDialog } from '../../../../components/UI/Dialog/bll'
 
@@ -130,11 +130,12 @@ const ForumLayout: FC<ForumLayoutType> = props => {
       </main>
 
       <Dialog open={isActive} onClose={onClose} size={'middle'}>
-        <Form className={style.modal} onSubmit={handleAddTopic}>
+        <form className={style.modal} onSubmit={handleAddTopic}>
           <h3 className={style.modalTitle}>Создать новую тему</h3>
 
           <div className={style.modalInputBlock}>
             <Input
+              name="title"
               placeholder={'новая тема'}
               value={newTopicName}
               onChange={e => {
@@ -152,7 +153,7 @@ const ForumLayout: FC<ForumLayoutType> = props => {
               Создать
             </Button>
           </div>
-        </Form>
+        </form>
       </Dialog>
     </div>
   )

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect } from 'react'
+import React, { FC, useCallback, useEffect, useState } from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
 import { gridParams, cellParams, gems } from './constans'
@@ -27,12 +27,14 @@ gameAPI.distributeGems()
 
 const Game: FC = () => {
   const canvasRef: React.RefObject<HTMLDivElement> = React.createRef()
+  const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
   const canvas: HTMLCanvasElement = gameAPI.getCanvas()
   const dispatch = useDispatch()
   const timer = useSelector<any>(state => state.game.timer) as number
   const counts = useSelector<any>(state => state.game.counts) as number
   const { isActive, onOpen, onClose } = useDialog()
   const navigate = useNavigate()
+  const [isFullscreenMode, setIsFullScreen] = useState(false)
 
   useEffect(() => {
     ;(canvasRef.current as HTMLDivElement).appendChild(canvas)
@@ -50,6 +52,21 @@ const Game: FC = () => {
     gameAPI.setSelectedGem(x, y, setCount)
   }
 
+  const toggleFullscreen = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation()
+
+      if (isFullscreenMode) {
+        document.exitFullscreen()
+      } else {
+        ;(wrapperRef.current as HTMLDivElement).requestFullscreen()
+      }
+
+      setIsFullScreen(!isFullscreenMode)
+    },
+    [canvasRef, isFullscreenMode]
+  )
+
   const onFinished = useCallback(() => {
     navigate('/game/finish')
   }, [])
@@ -61,10 +78,10 @@ const Game: FC = () => {
   }, [timer])
 
   return (
-    <div>
+    <div ref={wrapperRef}>
       <div className={styles.header}>
         <div>
-          <Timer initialSeconds={5} />
+          <Timer initialSeconds={30} />
         </div>
 
         <div>
@@ -72,7 +89,15 @@ const Game: FC = () => {
         </div>
       </div>
 
-      <div className={styles.game} ref={canvasRef} onClick={onSelectGem} />
+      <div className={styles.game} ref={canvasRef} onClick={onSelectGem}>
+        <div className={styles['game-controls']}>
+          <button
+            className={styles['button-fullscreen']}
+            onClick={toggleFullscreen}>
+            Переключить режим просмотра
+          </button>
+        </div>
+      </div>
 
       <Dialog
         open={isActive}

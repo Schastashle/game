@@ -2,11 +2,15 @@ import { ButtonHTMLAttributes, FC } from 'react'
 
 import style from './button.module.css'
 
-type ButtonElemPropsAttr = ButtonHTMLAttributes<HTMLButtonElement>
+interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  transparent?: boolean
+}
 
-const Button: FC<ButtonElemPropsAttr> = ({ children, ...rest }) => {
+const Button: FC<IButtonProps> = ({ children, transparent, ...rest }) => {
   return (
-    <button className={style.button} {...rest}>
+    <button
+      className={`${style.button} ${transparent ? style.transparent : ''}`}
+      {...rest}>
       {children}
     </button>
   )

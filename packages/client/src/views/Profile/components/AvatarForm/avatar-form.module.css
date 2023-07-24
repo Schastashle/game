@@ -1,0 +1,19 @@
+.avatarDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+
+  padding: 36px 0;
+}
+
+.header {
+  margin-bottom: 36px;
+}
+
+.avatarForm {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  align-items: center;
+}

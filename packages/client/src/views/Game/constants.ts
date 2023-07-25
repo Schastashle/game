@@ -1,5 +1,5 @@
 import { GridParams, CellParams } from '../../classes/Game/types'
-import { Circle, Square } from '../../classes/Game/Shapes/types'
+import { IShapes } from '../../classes/Game/Shapes'
 
 const gridParams: GridParams = {
   columns: 5,
@@ -14,7 +14,7 @@ const cellParams: CellParams = {
   gap: 25,
 }
 
-const gems: (Circle | Square)[] = [
+const gems: IShapes[] = [
   {
     id: 0,
     type: 'circle',

@@ -1,20 +1,18 @@
-type Shape = {
+import Circle from './Circle'
+import Square from './Square'
+
+export type Shapes = Circle | Square
+
+export interface IShapes {
   id: number
   type: string
+  fill_style: string
+  stroke_style: string
+  line_width: number
   width: number
   height: number
   x: number
   y: number
-  fill_style: string
-  stroke_style: string
-  line_width: number
-  nested?: (Circle | Square)[]
+  radius?: number
+  nested?: IShapes[]
 }
-
-type Circle = {
-  radius: number
-} & Shape
-
-type Square = Shape
-
-export type { Circle, Square, Shape }

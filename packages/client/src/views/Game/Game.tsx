@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
-import { gridParams, cellParams, gems } from './constans'
+import { gridParams, cellParams, gems } from './constants'
 
 import styles from './game.module.css'
 import { useDispatch, useSelector } from 'react-redux'
@@ -12,6 +12,8 @@ import Dialog from '../../components/UI/Dialog/Dialog'
 import Button from '../../components/UI/Button'
 import { useDialog } from '../../components/UI/Dialog/bll'
 import { useNavigate } from 'react-router-dom'
+import { Shapes } from '../../classes/Game/Shapes'
+
 
 const gameAPI: GameAPI = new GameAPI(
   gridParams.width,
@@ -19,7 +21,7 @@ const gameAPI: GameAPI = new GameAPI(
   gridParams.columns,
   gridParams.rows,
   cellParams,
-  gems
+  gems as Shapes[]
 )
 
 gameAPI.drawGameGrid()

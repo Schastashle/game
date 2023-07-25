@@ -1,13 +1,13 @@
-export default class Stack {
+export default class Stack<T> {
   private readonly length: number
-  public stack: any[]
+  public stack: T[]
 
   constructor(length: number) {
     this.length = length
     this.stack = []
   }
 
-  public push(item: unknown): void {
+  public push(item: T): void {
     if (this.stack.length === this.length) {
       this.stack.pop()
     }

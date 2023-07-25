@@ -1,9 +1,10 @@
 import ShapeBase from './ShapeBase'
-import { Circle as CircleType, Square as SquareType } from './types'
+import { Shapes } from './types'
 
 export default class Circle extends ShapeBase {
   public readonly radius: number
-
+  public readonly type = 'circle'
+  public scale = 1
   constructor(
     width: number,
     height: number,
@@ -14,7 +15,7 @@ export default class Circle extends ShapeBase {
     fill_style: string,
     stroke_style: string,
     line_width: number,
-    nested: (SquareType | CircleType)[],
+    nested: Shapes[],
     radius: number
   ) {
     super(
@@ -33,8 +34,12 @@ export default class Circle extends ShapeBase {
   }
 
   public drawShape(ctx: CanvasRenderingContext2D): void {
+    // Вычисляет центр фигуры чтобы не делать это снаружи
+    const centerX = this.x + this.width / 2
+    const centerY = this.y + this.height / 2
+
     ctx.beginPath()
-    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI)
+    ctx.arc(centerX, centerY, this.radius * this.scale, 0, 2 * Math.PI)
     ctx.fillStyle = this.fill_style
     ctx.fill()
     ctx.strokeStyle = this.stroke_style

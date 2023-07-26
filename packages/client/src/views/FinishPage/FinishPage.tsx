@@ -1,6 +1,30 @@
 import styles from './finish.module.css'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { useCallback } from 'react'
+import { gameSliceActions } from '../../store/slices/gameSlice'
 
 const FinishPage = () => {
+  const counts = useSelector<any>(state => state.game.counts) as number
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const onComplete = useCallback(() => {
+    navigate('/game')
+
+    dispatch(gameSliceActions.setTimer(60))
+
+    dispatch(gameSliceActions.setCounts(0))
+  }, [])
+
+  const onExit = useCallback(() => {
+    navigate('/')
+
+    dispatch(gameSliceActions.setTimer(60))
+
+    dispatch(gameSliceActions.setCounts(0))
+  }, [])
+
   return (
     <section className={styles.finish}>
       <div className={styles.content}>
@@ -66,8 +90,8 @@ const FinishPage = () => {
         </div>
         <h1 className={styles.title}>Поздравляем!</h1>
         <p className={styles.text}>Ваш счет:</p>
-        <p className={styles.count}>5 000</p>
-        <button className={styles.start}>
+        <p className={styles.count}>{counts}</p>
+        <button className={styles.start} onClick={onComplete}>
           <svg
             width="56"
             height="65"
@@ -80,7 +104,7 @@ const FinishPage = () => {
             />
           </svg>
         </button>
-        <button className={styles.exit}>
+        <button className={styles.exit} onClick={onExit}>
           <svg
             width="45"
             height="45"

@@ -13,6 +13,7 @@ export default class GameAPI extends CanvasAPI {
   private readonly gems: Shapes[]
   private matrix: Shapes[][]
   private readonly gridCoords: Indexed<number[]>
+  public counts = 0
   private stackGems: Stack<Shapes>
   private disabled: boolean
 
@@ -429,7 +430,11 @@ export default class GameAPI extends CanvasAPI {
     })
   }
 
-  public async setSelectedGem(x: number, y: number): Promise<void> {
+  public setSelectedGem(
+    x: number,
+    y: number,
+    callback?: (n: number) => void
+  ): Promise<void>  {
     if (this.disabled) return
     const { column, row } = this.getGemPositionByCoords(x, y)
     const targetGem = this.matrix[row][column]
@@ -451,6 +456,14 @@ export default class GameAPI extends CanvasAPI {
     }
 
     if (this.stackGems.getStack().length === this.stackGems.getLength()) {
+      this.swapGems()
+      // прибавляем 3 очка
+      this.counts = this.counts + 3
+
+      if (callback) {
+        callback(this.counts)
+      }
+      
       const [gem1, gem2] = this.stackGems.getStack()
       this.animateSwap(gem1, gem2)
         .then(() => this.swapGems(gem1, gem2))
@@ -541,5 +554,19 @@ export default class GameAPI extends CanvasAPI {
         },
       })
     })
+  }
+
+  // завершение игры
+  public finished(callback?: () => void): void {
+    if (callback) {
+      callback()
+    }
+  }
+
+  // старт игры
+  public start(callback?: () => void) {
+    if (callback) {
+      callback()
+    }
   }
 }

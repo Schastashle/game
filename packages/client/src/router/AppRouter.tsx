@@ -80,6 +80,14 @@ const AppRouter: FC<IAppRouter> = ({ isAuth }) => (
       }
     />
     <Route
+      path="/game/finish"
+      element={
+        <RequireAuth>
+          <FinishPage />
+        </RequireAuth>
+      }
+    />
+    <Route
       path="*"
       element={
         <RequireAuth>

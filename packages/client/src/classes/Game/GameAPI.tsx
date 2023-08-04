@@ -1,557 +1,399 @@
 import CanvasAPI from './CanvasAPI'
-import { Circle, Square, Shapes } from './Shapes'
-import Stack from '../Stack'
 
-import { GridParams, CellParams, Indexed } from './types'
-import { Animation, easings } from '../Animation'
+import { GridParams, CellParams, Indexed, Rect } from './types'
+import { Animation, EasingFunction, easings } from '../Animation'
+import ShapeBase from './Shapes/ShapeBase'
 
-type ShapeAnimationProps = Pick<Shapes, 'x' | 'y' | 'scale'>
+enum axisType {
+  column = 1,
+  row = 2,
+}
+
+type Position = {
+  column: number
+  row: number
+}
+
+const DEFAULT_DURATION = 300
+
+type ShapeAnimationProps = Pick<ShapeBase, 'x' | 'y' | 'scale'>
 
 export default class GameAPI extends CanvasAPI {
   private readonly gridParams: GridParams
-  private readonly cellParams: CellParams
-  private readonly gems: Shapes[]
-  private matrix: Shapes[][]
-  private readonly gridCoords: Indexed<number[]>
-  public counts = 0
-  private stackGems: Stack<Shapes>
+  private matrix: ShapeBase[][]
+  private selectedPos?: Position = undefined
   private disabled: boolean
 
   constructor(
-    width: number,
-    height: number,
     columns: number,
     rows: number,
-    cellParams: CellParams,
-    gems: Shapes[]
+    private readonly cellParams: CellParams,
+    private readonly templatedGems: ShapeBase[]
   ) {
+    const width = columns * (cellParams.width + cellParams.gap)
+    const height = rows * (cellParams.height + cellParams.gap)
+
     super(width, height)
 
     this.gridParams = {
-      width: width,
-      height: height,
-      rows: rows,
-      columns: columns,
+      width,
+      height,
+      rows,
+      columns,
     }
     this.cellParams = cellParams
-    this.gems = gems
+    this.templatedGems = templatedGems
     this.matrix = []
-    this.gridCoords = {
-      columns: [0],
-      rows: [0],
-    }
-    this.stackGems = new Stack(2)
     this.disabled = false
   }
 
-  private getRandomGem(): Shapes {
-    const random_number = Math.floor(Math.random() * this.gems.length)
-    const gem: Shapes = this.gems[random_number]
-    const {
-      id,
-      type,
-      width,
-      height,
-      x,
-      y,
-      fill_style,
-      stroke_style,
-      line_width,
-      nested = [],
-    } = gem
-    const nestedGems: Shapes[] | [] = nested.map(item => {
-      const {
-        id,
-        type,
-        width,
-        height,
-        x,
-        y,
-        fill_style,
-        stroke_style,
-        line_width,
-      } = item
+  public initialize() {
+    if (0 !== this.matrix.length) return
 
-      if (item.type === 'circle') {
-        return new Circle(
-          width,
-          height,
-          x,
-          y,
-          id,
-          type,
-          fill_style,
-          stroke_style,
-          line_width,
-          [],
-          item.radius
-        )
-      } else {
-        return new Square(
-          width,
-          height,
-          x,
-          y,
-          id,
-          type,
-          fill_style,
-          stroke_style,
-          line_width,
-          []
-        )
-      }
+    this.fillGems()
+    this.redrawAll()
+  }
+
+  // рисует сетку
+  private drawGameGrid(): void {
+    const { columns, rows, width, height } = this.gridParams
+
+    this.drawGridLines(axisType.column, rows, width)
+    this.drawGridLines(axisType.row, columns, height)
+  }
+
+  // первоначальное заполнение сетки с камнями
+  private fillGems(): void {
+    this.forEachGems(axisType.row, ({ row, column }) => {
+      this.matrix[row] = this.matrix[row] || []
+
+      // получить "камень" для ячейки с проверкой, что нет трех одинаковых "камней" рядом по обоим осям
+      // можем не исключать, но тогда игра поиграет в начале сама с собой
+      const badSiblings = this.badSiblings(row, column)
+      const gem = this.getRandomGem(badSiblings)
+
+      this.linkGemToCell(gem, row, column)
+      return false
+    })
+  }
+
+  private redrawAll() {
+    const { width, height } = this.gridParams
+    this.clearRect({ x: 0, y: 0, width, height })
+
+    this.drawGameGrid()
+    const selectedGem = this.getSelectedGem()
+
+    this.forEachGems(axisType.row, pos => {
+      const gem = this.gemByPos(pos)
+      if (selectedGem !== gem) this.drawGem(gem, { noClear: true })
+      return false
     })
 
-    if (type === 'circle') {
-      return new Circle(
-        width,
-        height,
-        x,
-        y,
-        id,
-        type,
-        fill_style,
-        stroke_style,
-        line_width,
-        nestedGems,
-        gem.radius
-      )
-    } else {
-      return new Square(
-        width,
-        height,
-        x,
-        y,
-        id,
-        type,
-        fill_style,
-        stroke_style,
-        line_width,
-        nestedGems
-      )
+    if (selectedGem) this.drawGem(selectedGem, { noClear: true })
+  }
+
+  private getRandomGem(excludedIds?: Set<number>): ShapeBase {
+    const random_number = Math.floor(Math.random() * this.templatedGems.length)
+    const gem = this.templatedGems[random_number]
+
+    if (excludedIds && excludedIds.has(gem.id)) {
+      return this.getRandomGem(excludedIds)
+    }
+    return gem.clone()
+  }
+
+  // возвращает запрещенных соседей слева и сверху
+  private badSiblings(row: number, column: number): Set<number> {
+    const result: Set<number> = new Set()
+
+    if (column >= 2) {
+      const id1 = this.gemByPos({ row, column: column - 1 })?.id
+      const id2 = this.gemByPos({ row, column: column - 2 })?.id
+
+      if (undefined !== id1 && id1 === id2) result.add(id1)
+    }
+
+    if (row >= 2) {
+      const id1 = this.gemByPos({ row: row - 1, column })?.id
+      const id2 = this.gemByPos({ row: row - 2, column })?.id
+
+      if (undefined !== id1 && id1 === id2) result.add(id1)
+    }
+
+    return result
+  }
+
+  private linkGemToCell(gem: ShapeBase, row: number, column: number) {
+    const center = this.getCellCenterXY(row, column)
+    gem.setCenter(center.x, center.y)
+    gem.setPositionData(column, row)
+
+    this.matrix[row][column] = gem
+  }
+
+  private drawGridLines(axis: axisType, count: number, size: number) {
+    for (let index = 1; index < count; index++) {
+      const offset = this.getCellOffset(axis, index)
+      let moveTo, lineTo
+
+      if (axis === axisType.column) {
+        moveTo = { x: 0, y: offset }
+        lineTo = { x: size, y: offset }
+      } else {
+        moveTo = { x: offset, y: 0 }
+        lineTo = { x: offset, y: size }
+      }
+      this.drawLine({ moveTo, lineTo })
     }
   }
 
-  private getCoords(column: number, row: number, gem: Shapes): Indexed<number> {
-    const { width: gemWidth, height: gemHeight } = gem
-    const { gap, width: cellWidth, height: cellHeight } = this.cellParams
-
-    const x: number =
-      cellWidth * column + (cellWidth - gemWidth) / 2 + gap * column + gap / 2
-    const y: number =
-      cellHeight * row + (cellHeight - gemHeight) / 2 + gap * row + gap / 2
-
-    return { x, y }
+  // возвращает позицию (колонка, строка) по координате
+  private getPosByCoords(x: number, y: number): Indexed<number> {
+    const column = Math.trunc(x / this.getCellSize(axisType.column))
+    const row = Math.trunc(y / this.getCellSize(axisType.row))
+    return { column, row }
   }
 
-  private fillMatrix(): void {
+  // проход по "камням" по разным плоскостям
+  forEachGems(
+    axis: axisType,
+    callback: (pos: Position, newLine: boolean) => boolean
+  ) {
     const { columns, rows } = this.gridParams
+    const out = axis === axisType.column ? columns : rows
+    const inner = axis === axisType.column ? rows : columns
 
-    if (this.matrix.length) this.matrix = []
-
-    for (let row = 0; row < rows; row++) {
-      this.matrix.push([])
-
-      for (let column = 0; column < columns; column++) {
-        const gem: Shapes = this.getRandomGem()
-        const { x, y } = this.getCoords(column, row, gem)
-
-        gem.setCoords(x, y)
-        gem.setPositionData(column, row)
-
-        this.matrix[row].push(gem)
-
-        if (gem.nested.length) {
-          gem.nested = gem.nested.map((shape: Shapes) => {
-            const { x, y } = this.getCoords(column, row, shape)
-            shape.setCoords(x, y)
-
-            return shape
-          })
+    for (let iout = 0; iout < out; iout++) {
+      for (let iinner = 0; iinner < inner; iinner++) {
+        let pos
+        if (axis === axisType.column) {
+          pos = { column: iout, row: iinner }
+        } else {
+          pos = { column: iinner, row: iout }
         }
-      }
-    }
-  }
 
-  private checkCombinations(): boolean {
-    const { rows, columns } = this.gridParams
-
-    for (let row = 0; row < rows; row++) {
-      for (let column = 0; column < columns - 2; column++) {
-        const element = this.matrix[row][column]
-
-        if (
-          element.id === this.matrix[row][column + 1].id &&
-          element.id === this.matrix[row][column + 2].id
-        ) {
-          return true
-        }
-      }
-    }
-
-    for (let column = 0; column < columns; column++) {
-      for (let row = 0; row < rows - 2; row++) {
-        const element = this.matrix[row][column]
-
-        if (
-          element.id === this.matrix[row + 1][column].id &&
-          element.id === this.matrix[row + 2][column].id
-        ) {
-          return true
-        }
+        if (callback(pos, iinner === 0)) return
       }
     }
 
     return false
   }
 
-  private drawAllGems(): void {
-    this.matrix.forEach(row => {
-      row.forEach(gem => {
-        gem.drawShape(this.ctx)
+  // ищет комбинации с тремя и более "камнями"
+  private findGemLine(): ShapeBase[] {
+    const result = new Set([
+      ...this.findGemLineByAxis(axisType.column),
+      ...this.findGemLineByAxis(axisType.row),
+    ])
 
-        // Отрисовываем вложенные элементы фигур
-        const nested = gem.nested
+    return [...result]
+  }
 
-        if (nested.length) {
-          nested.forEach(gem => gem.drawShape(this.ctx))
+  // ищет комбинации с тремя и более "камнями" по оси axis
+  private findGemLineByAxis(axis: axisType): ShapeBase[] {
+    let gems: ShapeBase[] = []
+    let prev: ShapeBase
+
+    this.forEachGems(axis, (pos, newLine) => {
+      const gem = this.gemByPos(pos)
+
+      if (gem) {
+        if (newLine || prev.id !== gem.id) {
+          if (gems.length >= 3) return true
+
+          gems = []
+          prev = gem
         }
-      })
+        gems.push(gem)
+      }
+      return false
     })
-  }
 
-  private drawGem(column: number, row: number, gem: Shapes): void {
-    gem.setPositionData(column, row)
-
-    const { x, y } = this.getCoords(column, row, gem)
-
-    gem.setCoords(x, y)
-    gem.drawShape(this.ctx)
-
-    gem.nested.forEach(item => {
-      item.setPositionData(column, row)
-
-      const { x, y } = this.getCoords(column, row, item)
-
-      item.setCoords(x, y)
-      item.drawShape(this.ctx)
-    })
-  }
-
-  // Отрисовывает фигуры вне сетки
-  private drawDetachedGem(gem: Shapes): void {
-    gem.drawShape(this.ctx)
-
-    const { x, y, scale } = gem
-    const parentWidth = gem.width
-    const parentHeight = gem.height
-
-    gem.nested.forEach(nestedGem => {
-      nestedGem.scale = scale
-      // вычисляет разницу с шириной родителя чтобы сместить от края
-      const normalizedX = x + (parentWidth - nestedGem.width) / 2
-      const normalizedY = y + (parentHeight - nestedGem.height) / 2
-
-      nestedGem.setCoords(normalizedX, normalizedY)
-      nestedGem.drawShape(this.ctx)
-    })
-  }
-
-  private clearCanvasByCoords(
-    column: number,
-    row: number,
-    width: number,
-    height: number
-  ): void {
-    const { columns, rows } = this.gridCoords
-    const { gap } = this.cellParams
-
-    this.ctx.clearRect(
-      columns[column],
-      rows[row],
-      width + gap - 2,
-      height + gap - 2
-    )
-  }
-
-  private swapGems(gem1: Shapes, gem2: Shapes): void {
-    // Свап элементов на canvas
-
-    this.clearCanvasByCoords(gem1.column, gem1.row, gem1.width, gem1.height)
-    this.clearCanvasByCoords(gem2.column, gem2.row, gem2.width, gem2.height)
-
-    const tempGem = JSON.parse(JSON.stringify(gem1))
-
-    // Свап элементов в matrix
-    this.matrix[gem1.row][gem1.column] = gem2
-    this.matrix[gem2.row][gem2.column] = gem1
-
-    this.drawGem(gem2.column, gem2.row, gem1)
-    this.drawGem(tempGem.column, tempGem.row, gem2)
-  }
-
-  public distributeGems(): void {
-    this.fillMatrix()
-
-    if (this.checkCombinations()) {
-      this.distributeGems()
-    } else {
-      this.drawAllGems()
-    }
-  }
-
-  public drawGameGrid(): void {
-    const { columns, rows } = this.gridParams
-    const { gap, width: cellWidth, height: cellHeight } = this.cellParams
-
-    // Отрисовка вертикальных линий сетки
-    for (let column = 1; column < columns; column++) {
-      const startX = column * cellWidth + gap * column
-      const moveTo: Indexed<number> = {
-        x: startX,
-        y: 0,
-      }
-      const lineTo: Indexed<number> = {
-        x: column * cellWidth + gap * column,
-        y: this.height,
-      }
-
-      this.gridCoords.columns[column] = startX
-      this.drawLine({ moveTo, lineTo })
-    }
-
-    // Отрисовка горизонтальных линий сетки
-    for (let row = 1; row < rows; row++) {
-      const startY = cellHeight * row + gap * row
-      const moveTo = {
-        x: 0,
-        y: startY,
-      }
-      const lineTo = {
-        x: this.width,
-        y: cellHeight * row + gap * row,
-      }
-
-      this.gridCoords.rows[row] = startY
-      this.drawLine({ moveTo, lineTo })
-    }
-  }
-
-  private getGemPositionByCoords(x: number, y: number): Indexed<number> {
-    const { columns, rows } = this.gridCoords
-
-    return {
-      column: columns.findIndex((item, index, array) => {
-        if (index === columns.length - 1) {
-          return x >= item
-        }
-
-        return array[index] <= x && x <= array[index + 1]
-      }),
-      row: rows.findIndex((item, index, array) => {
-        if (index === rows.length - 1) {
-          return y >= item
-        }
-
-        return array[index] <= y && y <= array[index + 1]
-      }),
-    }
-  }
-
-  private checkThreeInRow(): Shapes[] {
-    const { columns, rows } = this.gridParams
-
-    // Проверка по горизонтали
-    for (let row = 0; row < rows; row++) {
-      for (let column = 0; column < columns - 2; column++) {
-        const element: Shapes = this.matrix[row][column]
-
-        if (
-          element.id === this.matrix[row][column + 1].id &&
-          element.id === this.matrix[row][column + 2].id
-        ) {
-          return [
-            element,
-            this.matrix[row][column + 1],
-            this.matrix[row][column + 2],
-          ]
-        }
-      }
-    }
-
-    // Проверка по вертикали
-    for (let row = 0; row < rows - 2; row++) {
-      for (let column = 0; column < columns; column++) {
-        const element = this.matrix[row][column]
-        if (
-          element.id === this.matrix[row + 1][column].id &&
-          element.id === this.matrix[row + 2][column].id
-        ) {
-          return [
-            element,
-            this.matrix[row + 1][column],
-            this.matrix[row + 2][column],
-          ]
-        }
-      }
-    }
-
+    if (gems.length >= 3) return gems
     return []
   }
 
-  private async replaceCombination(array: Shapes[] | []): Promise<void> {
-    return new Promise<void>(res =>
-      array.forEach((gem: Shapes) => {
-        const { column, row, width, height } = gem
+  // ищет и удаляет комбинации, добавляет новые "камни" в очищенные ячейки (рекурсивно)
+  private async removeGemLines(): Promise<number> {
+    const gems = this.findGemLine()
+    if (gems.length === 0) return 0
 
-        this.animateDestroy(gem)
-          .then(() => {
-            this.clearCanvasByCoords(column, row, width, height)
-          })
-          .then(() => {
-            const generatedGem: Shapes = this.getRandomGem()
+    let countGem = gems.length
+    this.setSelectedPos(undefined)
+    await this.animateDestroy(gems)
 
-            generatedGem.setPositionData(column, row)
-            generatedGem.setCoords(gem.x, gem.y)
-            this.matrix[row][column] = generatedGem
-            this.drawGem(column, row, generatedGem)
-          })
-          .then(() => {
-            this.disabled = false
-            res()
-          })
-      })
-    ).then(() => {
-      const threeInRow = this.checkThreeInRow()
+    gems.map(async deletedGem => {
+      const { column, row } = deletedGem
 
-      if (threeInRow.length) {
-        this.replaceCombination(threeInRow)
-      }
+      const gem = this.getRandomGem() // тут проверка не нужна, если будут линии то игра сама с собой поиграет
+      this.linkGemToCell(gem, row, column)
+      this.drawGem(gem)
     })
+
+    countGem += await this.removeGemLines()
+    return countGem
   }
 
-  public setSelectedGem(
+  public async trySelectedGem(
     x: number,
     y: number,
     callback?: (n: number) => void
-  ): Promise<void>  {
+  ) {
     if (this.disabled) return
-    const { column, row } = this.getGemPositionByCoords(x, y)
-    const targetGem = this.matrix[row][column]
-    const stack = this.stackGems.getStack()
 
-    if (stack.length === 0) {
-      this.stackGems.push(targetGem)
-    } else {
-      const movableGem = stack[0]
+    const { column, row } = this.getPosByCoords(x, y)
+    const targetGem = this.gemByPos({ column, row })
+    const selectedGem = this.getSelectedGem()
 
-      if (
-        (Math.abs(movableGem.row - targetGem.row) <= 1 &&
-          Math.abs(movableGem.column - targetGem.column) === 0) ||
-        (movableGem.row === targetGem.row &&
-          Math.abs(movableGem.column - targetGem.column) <= 1)
-      ) {
-        this.stackGems.push(targetGem)
-      }
+    if (!targetGem) return
+
+    if (!selectedGem) {
+      this.setSelectedPos(targetGem)
+      return
+    }
+    if (targetGem === selectedGem) {
+      this.setSelectedPos(undefined)
+      return
     }
 
-    if (this.stackGems.getStack().length === this.stackGems.getLength()) {
-      this.swapGems()
-      // прибавляем 3 очка
-      this.counts = this.counts + 3
+    // *** disabled
+    this.disabled = true
 
-      if (callback) {
-        callback(this.counts)
+    const sideBySide =
+      1 ===
+      Math.abs(targetGem.row - selectedGem.row) +
+        Math.abs(targetGem.column - selectedGem.column)
+
+    if (sideBySide) {
+      await this.animateSwap(selectedGem, targetGem)
+
+      const countGem = await this.removeGemLines() // если success===true, внутри скинется select
+
+      if (countGem === 0) {
+        // смена не удалась, возвращаем обратно камни
+        await this.animateSwap(targetGem, selectedGem)
+      } else {
+        // прибавляем очки
+        if (callback) callback(countGem)
       }
-      
-      const [gem1, gem2] = this.stackGems.getStack()
-      this.animateSwap(gem1, gem2)
-        .then(() => this.swapGems(gem1, gem2))
-        .then(() => {
-          this.drawGameGrid()
-          const threeInRow: Shapes[] = this.checkThreeInRow()
-          if (!threeInRow.length) {
-            this.animateSwap(gem1, gem2)
-              .then(() => {
-                this.swapGems(gem1, gem2)
-              })
-              .then(() => {
-                this.stackGems.clear()
-                this.drawGameGrid()
-                return
-              })
-          }
-          return threeInRow
-        })
-        .then(threeInRow => {
-          this.replaceCombination(threeInRow)
-        })
+    } else {
+      this.setSelectedPos(targetGem)
+    }
+
+    // *** disabled
+    this.disabled = false
+  }
+
+  private setSelectedPos(pos: Position | undefined) {
+    if (this.selectedPos === pos) return
+
+    this.selectedPos = pos
+    this.redrawAll()
+  }
+
+  private getSelectedGem() {
+    return this.gemByPos(this.selectedPos)
+  }
+
+  private gemByPos(pos?: Position): ShapeBase | undefined {
+    return pos ? this.matrix[pos.row][pos.column] : undefined
+  }
+
+  private getCellSize(axis: axisType): number {
+    const shapeSize =
+      axis === axisType.column ? this.cellParams.width : this.cellParams.height
+    return shapeSize + this.cellParams.gap
+  }
+
+  private getCellOffset(axis: axisType, index: number): number {
+    return this.getCellSize(axis) * index
+  }
+
+  private getCellCenter(axis: axisType, index: number): number {
+    const start = this.getCellOffset(axis, index)
+    const size = this.getCellSize(axis)
+
+    return start + size / 2
+  }
+
+  private getCellCenterXY(row: number, column: number): Indexed<number> {
+    return {
+      x: this.getCellCenter(axisType.column, column),
+      y: this.getCellCenter(axisType.row, row),
     }
   }
 
-  private async animateSwap(gem1: Shapes, gem2: Shapes): Promise<void> {
-    // Блокирует взаимодействие с гемами на время анимации
-    this.disabled = true
+  // *** draw block ***
+  private drawGem(gem?: ShapeBase, opts?: { noClear?: boolean }) {
+    if (!gem) return
+    opts = opts || {}
 
-    const duration = 300
+    const isSelected = gem === this.getSelectedGem()
+    const margin = this.cellParams.gap / 2 - (isSelected ? 0 : 4)
+    const bufferRect = this.bufferRect(gem.getRect(), margin)
+    if (!opts.noClear) this.clearRect(bufferRect)
+
+    gem.drawShape(this.ctx)
+
+    if (isSelected) {
+      //rgba(255, 255, 255, 0.3)
+      const selRect = this.bufferRect(bufferRect, -1)
+      this.strokeRect(selRect, { color: 'yellow', width: 4 })
+    }
+  }
+
+  private bufferRect(rect: Rect, value: number): Rect {
+    return {
+      x: rect.x - value,
+      y: rect.y - value,
+      width: rect.width + 2 * value,
+      height: rect.height + 2 * value,
+    }
+  }
+
+  private async animateSwap(gem1: ShapeBase, gem2: ShapeBase): Promise<void> {
     const easing = easings.easeOutCubic
 
     const gem1Coords = { x: gem1.x, y: gem1.y }
     const gem2Coords = { x: gem2.x, y: gem2.y }
 
-    const animateGem1 = new Animation(gem1 as ShapeAnimationProps)
-    const animateGem2 = new Animation(gem2 as ShapeAnimationProps)
+    // ожидаем окончания анимации смены
+    await Promise.all([
+      this.animate(gem1, gem2Coords, easing, this.redrawAll.bind(this)),
+      this.animate(gem2, gem1Coords, easing, this.redrawAll.bind(this)),
+    ])
 
-    const clearSlots = () => {
-      this.clearCanvasByCoords(gem1.column, gem1.row, gem1.width, gem1.height)
-      this.clearCanvasByCoords(gem2.column, gem2.row, gem2.width, gem2.height)
-    }
-    const tick1 = (gem: Shapes) => {
-      clearSlots()
-      this.drawDetachedGem(gem)
-    }
-    const tick2 = (gem: Shapes) => {
-      this.drawDetachedGem(gem)
-    }
-
-    await new Promise<void>(resolve => {
-      animateGem1.to(gem2Coords, duration, {
-        easing,
-        tick: () => tick1(gem1),
-      })
-      animateGem2.to(gem1Coords, duration, {
-        easing,
-        tick: () => tick2(gem2),
-        onComplete: () => {
-          this.disabled = false
-          resolve()
-        },
-      })
-    })
+    // меняем местами
+    const gem1Pos = { row: gem1.row, column: gem1.column }
+    this.linkGemToCell(gem1, gem2.row, gem2.column)
+    this.linkGemToCell(gem2, gem1Pos.row, gem1Pos.column)
   }
 
-  private async animateDestroy(gem: Shapes): Promise<void> {
-    // Блокирует взаимодействие с гемами на время анимации
-    this.disabled = true
-
-    const duration = 300
+  private async animateDestroy(gems: ShapeBase[]): Promise<void> {
     const easing = easings.easeOutCubic
+    const defs = gems.map(async gem => {
+      return this.animate(gem, { scale: 0 }, easing, () => this.drawGem(gem))
+    })
 
-    const { column, row, width, height } = gem
+    await Promise.all(defs)
+  }
 
+  // оборачиваем анимацию в промис
+  private async animate(
+    gem: ShapeBase,
+    to: Indexed<number>,
+    easing: EasingFunction,
+    callback: () => void
+  ) {
+    const duration = DEFAULT_DURATION
     const animateGem = new Animation(gem as ShapeAnimationProps)
 
     await new Promise<void>(resolve => {
-      animateGem.to({ scale: 0 }, duration, {
+      animateGem.to(to, duration, {
         easing,
-        tick: () => {
-          this.clearCanvasByCoords(column, row, width, height)
-          this.drawDetachedGem(gem)
-        },
-        onComplete: () => {
-          this.stackGems.clear()
-          resolve()
-        },
+        tick: callback,
+        onComplete: resolve,
       })
     })
   }

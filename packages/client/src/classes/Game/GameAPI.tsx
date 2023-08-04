@@ -14,7 +14,7 @@ type Position = {
   row: number
 }
 
-const DEFAULT_DURATION = 1000
+const DEFAULT_DURATION = 300
 
 type ShapeAnimationProps = Pick<ShapeBase, 'x' | 'y' | 'scale'>
 
@@ -278,7 +278,7 @@ export default class GameAPI extends CanvasAPI {
         if (callback) callback(countGem)
       }
     } else {
-      this.setSelectedPos(undefined)
+      this.setSelectedPos(targetGem)
     }
 
     // *** disabled

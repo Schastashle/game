@@ -434,7 +434,7 @@ export default class GameAPI extends CanvasAPI {
     x: number,
     y: number,
     callback?: (n: number) => void
-  ): Promise<void>  {
+  ): void {
     if (this.disabled) return
     const { column, row } = this.getGemPositionByCoords(x, y)
     const targetGem = this.matrix[row][column]
@@ -456,6 +456,7 @@ export default class GameAPI extends CanvasAPI {
     }
 
     if (this.stackGems.getStack().length === this.stackGems.getLength()) {
+      // @ts-ignore
       this.swapGems()
       // прибавляем 3 очка
       this.counts = this.counts + 3
@@ -463,7 +464,7 @@ export default class GameAPI extends CanvasAPI {
       if (callback) {
         callback(this.counts)
       }
-      
+
       const [gem1, gem2] = this.stackGems.getStack()
       this.animateSwap(gem1, gem2)
         .then(() => this.swapGems(gem1, gem2))

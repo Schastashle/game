@@ -26,14 +26,14 @@ export default class CanvasAPI {
 
   protected drawLine({
     moveTo,
-    lineTo,
-  }: {
+  }: //lineTo,
+  {
     moveTo: Indexed<number>
-    lineTo: Indexed<number>
+    //lineTo: Indexed<number>
   }): void {
     this.ctx.beginPath()
     this.ctx.moveTo(moveTo.x, moveTo.y)
-    this.ctx.lineTo(lineTo.x, lineTo.y)
+    //this.ctx.lineTo(lineTo.x, lineTo.y)
     this.ctx.closePath()
     this.ctx.stroke()
   }

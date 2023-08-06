@@ -12,38 +12,43 @@ import Dialog from '../../components/UI/Dialog/Dialog'
 import Button from '../../components/UI/Button'
 import { useDialog } from '../../components/UI/Dialog/bll'
 import { useNavigate } from 'react-router-dom'
-import { Shapes } from '../../classes/Game/Shapes'
-
 
 const gameAPI: GameAPI = new GameAPI(
-  gridParams.width,
-  gridParams.height,
   gridParams.columns,
   gridParams.rows,
   cellParams,
-  gems as Shapes[]
+  gems
 )
 
-gameAPI.drawGameGrid()
-gameAPI.distributeGems()
+gameAPI.initialize()
+
+const INTERVAL = 2 * 60
+const NUM_GEM = 30
 
 const Game: FC = () => {
   const canvasRef: React.RefObject<HTMLDivElement> = React.createRef()
   const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
   const canvas: HTMLCanvasElement = gameAPI.getCanvas()
+
   const dispatch = useDispatch()
   const timer = useSelector<any>(state => state.game.timer) as number
   const counts = useSelector<any>(state => state.game.counts) as number
+
   const { isActive, onOpen, onClose } = useDialog()
   const navigate = useNavigate()
   const [isFullscreenMode, setIsFullScreen] = useState(false)
 
+  // test
   useEffect(() => {
-    ;(canvasRef.current as HTMLDivElement).appendChild(canvas)
+    canvasRef.current?.appendChild(canvas)
+
+    return () => {
+      canvasRef.current?.removeChild(canvas)
+    }
   }, [])
 
-  const setCount = useCallback((n: number) => {
-    dispatch(gameSliceActions.setCounts(n))
+  const incCount = useCallback((n: number) => {
+    dispatch(gameSliceActions.incCount(n))
   }, [])
 
   const onSelectGem = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -51,7 +56,7 @@ const Game: FC = () => {
     const x = event.clientX - left
     const y = event.clientY - top
 
-    gameAPI.setSelectedGem(x, y, setCount)
+    gameAPI.trySelectedGem(x, y, incCount)
   }
 
   const toggleFullscreen = useCallback(
@@ -61,7 +66,7 @@ const Game: FC = () => {
       if (isFullscreenMode) {
         document.exitFullscreen()
       } else {
-        ;(wrapperRef.current as HTMLDivElement).requestFullscreen()
+        wrapperRef.current?.requestFullscreen()
       }
 
       setIsFullScreen(!isFullscreenMode)
@@ -74,24 +79,22 @@ const Game: FC = () => {
   }, [])
 
   useEffect(() => {
-    if (timer === 0) {
+    if (timer === 0 || NUM_GEM <= counts) {
       onOpen()
     }
-  }, [timer])
+  }, [timer, counts])
 
   return (
     <div ref={wrapperRef}>
       <div className={styles.header}>
-        <div>
-          <Timer initialSeconds={30} />
+        <div className={styles.timer}>
+          <Timer initialSeconds={INTERVAL} />
         </div>
 
         <div>
-          <Counter target={60} />
+          <Counter target={NUM_GEM} />
         </div>
-      </div>
 
-      <div className={styles.game} ref={canvasRef} onClick={onSelectGem}>
         <div className={styles['game-controls']}>
           <button
             className={styles['button-fullscreen']}
@@ -101,6 +104,8 @@ const Game: FC = () => {
         </div>
       </div>
 
+      <div className={styles.game} ref={canvasRef} onClick={onSelectGem}></div>
+
       <Dialog
         open={isActive}
         onClose={() => {
@@ -109,7 +114,7 @@ const Game: FC = () => {
           onFinished()
         }}>
         <h2 className={styles.dialogTitle}>
-          {counts >= 60 ? <>Победа</> : <>Поражение</>}
+          {counts >= NUM_GEM ? <>Победа</> : <>Поражение</>}
         </h2>
 
         <p className={styles.dialogCounts}>Cчет: {counts}</p>

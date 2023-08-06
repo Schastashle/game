@@ -15,4 +15,15 @@ type CellParams = {
   gap: number
 }
 
-export type { CellParams, GridParams, Indexed }
+type Rect = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+type StrokeStyle = {
+  color: string
+  width: number
+}
+export type { CellParams, GridParams, Indexed, Rect, StrokeStyle }

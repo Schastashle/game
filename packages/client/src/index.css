@@ -2,7 +2,7 @@
 
 * {
   --bg-color: #e5e6e0;
-  --text-color: #bfb2b5;
+  --text-color: #988686; /* #bfb2b5; сделать поиск по bfb2b5 и заменить на --text-color 988686 93B4B4 87ABAB 91a1a1 a19da1 e5e0e6 */
   --focus-color: #a5a5c0;
   --accent-1: #e61c5d;
   --accent-2: #cd7c39;

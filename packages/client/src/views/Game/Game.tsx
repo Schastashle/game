@@ -4,7 +4,6 @@ import GameAPI from '../../classes/Game/GameAPI'
 import { gridParams, cellParams, gems } from './constants'
 
 import styles from './game.module.css'
-import { useDispatch, useSelector } from 'react-redux'
 import { gameSliceActions } from '../../store/slices/gameSlice/index'
 import Timer from '../../components/UI/Timer/Timer'
 import Counter from '../../components/UI/Counter'
@@ -12,6 +11,8 @@ import Dialog from '../../components/UI/Dialog/Dialog'
 import Button from '../../components/UI/Button'
 import { useDialog } from '../../components/UI/Dialog/bll'
 import { useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
+import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
 
 const gameAPI: GameAPI = new GameAPI(
   gridParams.columns,
@@ -30,9 +31,9 @@ const Game: FC = () => {
   const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
   const canvas: HTMLCanvasElement = gameAPI.getCanvas()
 
-  const dispatch = useDispatch()
-  const timer = useSelector<any>(state => state.game.timer) as number
-  const counts = useSelector<any>(state => state.game.counts) as number
+  const dispatch = useAppDispatch()
+  const { timer, counts } = useAppSelector(state => state.game)
+  const { user } = useAppSelector(state => state.user)
 
   const { isActive, onOpen, onClose } = useDialog()
   const navigate = useNavigate()
@@ -74,9 +75,18 @@ const Game: FC = () => {
     [canvasRef, isFullscreenMode]
   )
 
-  const onFinished = useCallback(() => {
+  const onFinished = () => {
+    if (user?.login) {
+      dispatch(
+        addUserToLeaderboard({
+          userId: user.id,
+          scoresFir: counts,
+          userName: user.login,
+        })
+      )
+    }
     navigate('/game/finish')
-  }, [])
+  }
 
   useEffect(() => {
     if (timer === 0 || NUM_GEM <= counts) {

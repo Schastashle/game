@@ -311,10 +311,6 @@ export default class GameAPI extends CanvasAPI {
         x: startX,
         y: 0,
       }
-      //const lineTo: Indexed<number> = {
-      //  x: column * cellWidth + gap * column,
-      //  y: this.height,
-      //}
 
       this.gridCoords.columns[column] = startX
       this.drawLine({ moveTo })
@@ -327,10 +323,6 @@ export default class GameAPI extends CanvasAPI {
         x: 0,
         y: startY,
       }
-      //const lineTo = {
-      //  x: this.width,
-      //  y: cellHeight * row + gap * row,
-      //}
 
       this.gridCoords.rows[row] = startY
       this.drawLine({ moveTo })

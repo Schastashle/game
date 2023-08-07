@@ -14,6 +14,10 @@ const gameSlice = createSlice({
       state.counts = payload
     },
 
+    incCount: (state, { payload }) => {
+      state.counts = state.counts + payload
+    },
+
     setTimer: (state, { payload }) => {
       state.timer = payload
     },

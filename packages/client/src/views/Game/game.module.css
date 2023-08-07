@@ -11,10 +11,9 @@
 
 .game-controls {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  max-width: 625px;
+  align-items: flex-end;
+  justify-content: center;
+  flex-grow: 1;
 }
 
 .button-fullscreen {
@@ -35,12 +34,19 @@
 .header {
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 760px;
+  left: 0;
+  bottom: 0;
+  /* transform: translateX(-50%); */
+  width: 310px;
+
   display: flex;
   justify-content: space-between;
-  padding: 20px 0;
+  padding: 20px;
+  flex-direction: column;
+}
+
+.timer {
+  min-width: 290px;
 }
 
 .dialogTitle {

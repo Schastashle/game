@@ -1,93 +1,79 @@
-import { GridParams, CellParams } from '../../classes/Game/types'
-import { IShapes } from '../../classes/Game/Shapes'
+import { CellParams } from '../../classes/Game/types'
+import Square from '../../classes/Game/Shapes/Square'
+import Circle from '../../classes/Game/Shapes/Circle'
+import ShapeBase from '../../classes/Game/Shapes/ShapeBase'
 
-const gridParams: GridParams = {
+const size = 100
+const gap = 30
+
+const gridParams = {
   columns: 5,
   rows: 4,
-  width: 625,
-  height: 500,
 }
 
 const cellParams: CellParams = {
-  width: 100,
-  height: 100,
-  gap: 25,
+  width: size,
+  height: size,
+  gap,
 }
 
-const gems: IShapes[] = [
-  {
+const defaultFigure = {
+  radius: 50,
+  x: 0,
+  y: 0,
+  width: 100,
+  height: 100,
+}
+
+const gems: ShapeBase[] = [
+  new Circle({
     id: 0,
+    ...defaultFigure,
     type: 'circle',
     fill_style: '#700961',
-    stroke_style: '',
-    line_width: 0,
-    radius: 50,
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
+
     nested: [
-      {
+      new Circle({
         id: -1,
+        ...defaultFigure,
         type: 'circle',
         fill_style: '#FFF',
-        stroke_style: '',
-        line_width: 0,
         radius: 30,
-        width: 100,
-        height: 100,
-        x: 0,
-        y: 0,
-      },
+        nested: [],
+      }),
     ],
-  },
-  {
+  }),
+  new Circle({
     id: 1,
+    ...defaultFigure,
     type: 'circle',
     fill_style: '#E61C5D',
-    stroke_style: '',
-    line_width: 0,
-    radius: 50,
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-  },
-  {
+    nested: [],
+  }),
+  new Square({
     id: 2,
+    ...defaultFigure,
     type: 'square',
     fill_style: '#7EC36E',
-    stroke_style: '',
-    line_width: 0,
-    width: 100,
-    height: 100,
-    x: 0,
-    y: 0,
-  },
-  {
+    nested: [],
+  }),
+  new Square({
     id: 3,
+    ...defaultFigure,
     type: 'square',
     fill_style: '#FFAA64',
-    stroke_style: '',
-    line_width: 0,
-    width: 100,
-    height: 100,
-    x: 0,
-    y: 0,
     nested: [
-      {
+      new Square({
         id: -1,
+        ...defaultFigure,
         type: 'square',
         fill_style: '#fff',
-        stroke_style: '',
-        line_width: 0,
         width: 50,
         height: 50,
-        x: 0,
-        y: 0,
-      },
+        nested: [],
+      }),
     ],
-  },
+  }),
 ]
 
 export { cellParams, gems, gridParams }

@@ -4,6 +4,8 @@ node_modules/
 .vscode
 dist
 tmp
+packages/client/ssr-dist
+packages/client/dev-dist
 
 yarn.lock
 .DS_Store

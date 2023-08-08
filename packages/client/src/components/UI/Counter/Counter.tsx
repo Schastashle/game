@@ -1,13 +1,11 @@
 import { FC } from 'react'
 import style from './counter.module.css'
-import { useSelector } from 'react-redux'
 import img from '../../../assets/counter.png'
 import { ICounterProps } from './types'
 
 /** Очки */
 export const Counter: FC<ICounterProps> = props => {
-  const { target } = props
-  const counts = useSelector<any>(state => state.game.counts) as number
+  const { target, counts } = props
 
   return (
     <div className={style.block}>

@@ -22,7 +22,8 @@ export default class GameAPI extends CanvasAPI {
   private readonly gridParams: GridParams
   private matrix: ShapeBase[][]
   private selectedPos?: Position = undefined
-  private disabled: boolean
+  private disabled = false
+  private playing = false
 
   constructor(
     columns: number,
@@ -44,12 +45,12 @@ export default class GameAPI extends CanvasAPI {
     this.cellParams = cellParams
     this.templatedGems = templatedGems
     this.matrix = []
-    this.disabled = false
   }
 
   public initialize() {
     if (0 !== this.matrix.length) return
 
+    this.playing = true
     this.fillGems()
     this.redrawAll()
   }
@@ -215,11 +216,18 @@ export default class GameAPI extends CanvasAPI {
   }
 
   // ищет и удаляет комбинации, добавляет новые "камни" в очищенные ячейки (рекурсивно)
-  private async removeGemLines(): Promise<number> {
-    const gems = this.findGemLine()
-    if (gems.length === 0) return 0
+  private async removeGemLines(
+    callback?: (n: number) => void
+  ): Promise<number> {
+    if (!this.playing) return 0 // если игра закончена прерываем
 
-    let countGem = gems.length
+    const gems = this.findGemLine()
+    const countGem = gems.length
+
+    if (countGem === 0) return 0 // нет рядов
+
+    if (callback) callback(countGem) // отобразим пользователю
+
     this.setSelectedPos(undefined)
     await this.animateDestroy(gems)
 
@@ -231,8 +239,7 @@ export default class GameAPI extends CanvasAPI {
       this.drawGem(gem)
     })
 
-    countGem += await this.removeGemLines()
-    return countGem
+    return countGem + (await this.removeGemLines(callback))
   }
 
   public async trySelectedGem(
@@ -240,7 +247,7 @@ export default class GameAPI extends CanvasAPI {
     y: number,
     callback?: (n: number) => void
   ) {
-    if (this.disabled) return
+    if (this.disabled || !this.playing) return
 
     const { column, row } = this.getPosByCoords(x, y)
     const targetGem = this.gemByPos({ column, row })
@@ -268,14 +275,14 @@ export default class GameAPI extends CanvasAPI {
     if (sideBySide) {
       await this.animateSwap(selectedGem, targetGem)
 
-      const countGem = await this.removeGemLines() // если success===true, внутри скинется select
+      const countGem = await this.removeGemLines(callback)
 
+      // если success===true, внутри скинется select
       if (countGem === 0) {
         // смена не удалась, возвращаем обратно камни
         await this.animateSwap(targetGem, selectedGem)
       } else {
         // прибавляем очки
-        if (callback) callback(countGem)
       }
     } else {
       this.setSelectedPos(targetGem)
@@ -400,6 +407,8 @@ export default class GameAPI extends CanvasAPI {
 
   // завершение игры
   public finished(callback?: () => void): void {
+    this.playing = false
+
     if (callback) {
       callback()
     }

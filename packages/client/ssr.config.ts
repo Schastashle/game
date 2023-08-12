@@ -18,5 +18,6 @@ export default defineConfig({
         dir: 'ssr-dist',
       },
     },
+    target: 'esnext',
   },
 })

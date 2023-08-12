@@ -3,26 +3,25 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useCallback } from 'react'
 import { gameSliceActions } from '../../store/slices/gameSlice'
+import { GameResult } from '../../types/GameState'
 
 const FinishPage = () => {
-  const counts = useSelector<any>(state => state.game.counts) as number
+  const gameResult = useSelector<any>(
+    state => state.game.gameResult
+  ) as GameResult
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
   const onComplete = useCallback(() => {
     navigate('/game')
 
-    dispatch(gameSliceActions.setTimer(60))
-
-    dispatch(gameSliceActions.setCounts(0))
+    dispatch(gameSliceActions.reset())
   }, [])
 
   const onExit = useCallback(() => {
     navigate('/')
 
-    dispatch(gameSliceActions.setTimer(60))
-
-    dispatch(gameSliceActions.setCounts(0))
+    dispatch(gameSliceActions.reset())
   }, [])
 
   return (
@@ -88,9 +87,16 @@ const FinishPage = () => {
             />
           </svg>
         </div>
-        <h1 className={styles.title}>Поздравляем!</h1>
-        <p className={styles.text}>Ваш счет:</p>
-        <p className={styles.count}>{counts}</p>
+        <h1 className={styles.title}>
+          {gameResult.winner ? 'Поздравляем!' : 'В этот раз не удалось'}
+        </h1>
+        {gameResult.winner && (
+          <>
+            <p className={styles.text}>Ваш счет:</p>
+            <p className={styles.count}>{gameResult.counts}</p>
+          </>
+        )}
+
         <button className={styles.start} onClick={onComplete}>
           <svg
             width="56"
@@ -114,23 +120,23 @@ const FinishPage = () => {
             <path
               d="M36.16 22.5H21.1362"
               stroke="white"
-              stroke-width="2.33"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2.33"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M30.9565 29.3181L37.4999 22.4998L30.9565 15.6816"
               stroke="white"
-              stroke-width="2.33"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2.33"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M25.2272 13.125V7.5H7.5V37.5H25.2272V31.875"
               stroke="white"
-              stroke-width="3.33"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="3.33"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         </button>

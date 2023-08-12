@@ -12,6 +12,16 @@ const secToStr = function (sec: number) {
   }`
 }
 
+const animate = function (
+  ref: React.MutableRefObject<number>,
+  func: () => void
+) {
+  cancelAnimationFrame(ref.current)
+  func()
+
+  ref.current = requestAnimationFrame(animate.bind(null, ref, func))
+}
+
 /** Таймер */
 export const Timer: FC<ITimerProps> = props => {
   const { getMSec, played } = props
@@ -19,8 +29,9 @@ export const Timer: FC<ITimerProps> = props => {
   const animateRef = useRef<number>(0)
   const secRef = useRef<number>(0)
   const [seconds, setSeconds] = useState(0)
+  const prevPlayed = useRef(false)
 
-  const animate = useCallback((_t: number, stop?: boolean) => {
+  const updateSeconds = useCallback(() => {
     const newSec = Math.round(getMSec(new Date()) / 1000)
 
     if (newSec >= 0 && secRef.current !== newSec) {
@@ -28,16 +39,19 @@ export const Timer: FC<ITimerProps> = props => {
       secRef.current = newSec
       setSeconds(newSec)
     }
-
-    animateRef.current = stop ? 0 : requestAnimationFrame(animate)
   }, [])
 
   useEffect(() => {
-    if (!animateRef.current && !played) return
+    if (prevPlayed.current) updateSeconds() // тикнем последний раз
+    prevPlayed.current = played
 
-    animate(0, !played)
+    if (!played) return
 
-    return () => cancelAnimationFrame(animateRef.current)
+    animate(animateRef, updateSeconds)
+
+    return () => {
+      cancelAnimationFrame(animateRef.current)
+    }
   }, [played])
 
   return (

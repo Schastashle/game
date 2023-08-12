@@ -15,7 +15,7 @@ import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
 import { GameState } from '../../types/GameState'
 
-const INTERVAL_MS = 1 * 60 * 1000
+const INTERVAL_MS = 5 * 1000 //1 * 60 * 1000
 const MIN_GEM = 70
 
 const Game: FC = () => {
@@ -40,6 +40,7 @@ const Game: FC = () => {
   // создаем игру
   useEffect(() => {
     if (!refGame.current) {
+      console.info('new game')
       const gameAPI = new GameAPI(
         gridParams.columns,
         gridParams.rows,
@@ -54,6 +55,11 @@ const Game: FC = () => {
       refGame.current = { gameAPI, timerId }
 
       dispatch(gameSliceActions.play({ startTime }))
+    }
+
+    return () => {
+      clearTimeout(refGame.current?.timerId)
+      refGame.current = undefined
     }
   }, [])
 

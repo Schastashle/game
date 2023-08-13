@@ -4,7 +4,6 @@ import GameAPI from '../../classes/Game/GameAPI'
 import { gridParams, cellParams, gems } from './constants'
 
 import styles from './game.module.css'
-import { useDispatch, useSelector } from 'react-redux'
 import { gameSliceActions } from '../../store/slices/gameSlice/index'
 import Timer from '../../components/UI/Timer/Timer'
 import Counter from '../../components/UI/Counter'
@@ -12,7 +11,9 @@ import Dialog from '../../components/UI/Dialog/Dialog'
 import Button from '../../components/UI/Button'
 import { useDialog } from '../../components/UI/Dialog/bll'
 import { useNavigate } from 'react-router-dom'
-import { GameResult, GameState } from '../../types/GameState'
+import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
+import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
+import { GameState } from '../../types/GameState'
 
 const INTERVAL_MS = 1 * 60 * 1000
 const MIN_GEM = 70
@@ -22,14 +23,13 @@ const Game: FC = () => {
   const canvasWrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
   const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
 
-  const gameState = useSelector<any>(state => state.game.gameState) as GameState
-  const startTime = useSelector<any>(state => state.game.startTime) as number
-  const gameResult = useSelector<any>(
-    state => state.game.gameResult
-  ) as GameResult
+  const dispatch = useAppDispatch()
+  const { gameState, startTime, gameResult } = useAppSelector(
+    state => state.game
+  )
+  const { user } = useAppSelector(state => state.user)
 
   const navigate = useNavigate()
-  const dispatch = useDispatch()
 
   const [counts, setCounts] = useState(0)
   const { isActive, onOpen, onClose } = useDialog()
@@ -120,13 +120,25 @@ const Game: FC = () => {
     [canvasWrapperRef, isFullscreenMode]
   )
 
+  const onFinished = () => {
+    if (user?.login) {
+      dispatch(
+        addUserToLeaderboard({
+          userId: user.id,
+          scoresFir: counts,
+          userName: user.login,
+        })
+      )
+    }
+  }
+
   const gotoResult = useCallback(() => {
     navigate('/game/finish')
   }, [])
 
   const getMSec = useCallback(
     (date: Date) => {
-      return startTime + INTERVAL_MS - date.getTime()
+      return startTime! + INTERVAL_MS - date.getTime()
     },
     [startTime]
   )
@@ -166,10 +178,10 @@ const Game: FC = () => {
             gotoResult()
           }}>
           <h2 className={styles.dialogTitle}>
-            {gameResult.winner ? <>Победа</> : <>Поражение</>}
+            {gameResult!.winner ? <>Победа</> : <>Поражение</>}
           </h2>
 
-          <p className={styles.dialogCounts}>Cчет: {gameResult.counts}</p>
+          <p className={styles.dialogCounts}>Cчет: {gameResult!.counts}</p>
 
           <div className={styles.dialogBtnBlock}>
             <Button className={styles.dialogBtn} onClick={gotoResult}>

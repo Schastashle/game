@@ -13,7 +13,7 @@ import { useDialog } from '../../components/UI/Dialog/bll'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
-import { GameResult, GameState } from '../../types/GameState'
+import { GameState } from '../../types/GameState'
 
 const INTERVAL_MS = 1 * 60 * 1000
 const MIN_GEM = 70
@@ -24,7 +24,9 @@ const Game: FC = () => {
   const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
 
   const dispatch = useAppDispatch()
-  const { timer, counts, gameState, startTime, gameResult } = useAppSelector(state => state.game)
+  const { gameState, startTime, gameResult } = useAppSelector(
+    state => state.game
+  )
   const { user } = useAppSelector(state => state.user)
 
   const navigate = useNavigate()
@@ -128,14 +130,15 @@ const Game: FC = () => {
         })
       )
     }
+  }
 
   const gotoResult = useCallback(() => {
     navigate('/game/finish')
-  }
+  }, [])
 
   const getMSec = useCallback(
     (date: Date) => {
-      return startTime + INTERVAL_MS - date.getTime()
+      return startTime! + INTERVAL_MS - date.getTime()
     },
     [startTime]
   )
@@ -175,10 +178,10 @@ const Game: FC = () => {
             gotoResult()
           }}>
           <h2 className={styles.dialogTitle}>
-            {gameResult.winner ? <>Победа</> : <>Поражение</>}
+            {gameResult!.winner ? <>Победа</> : <>Поражение</>}
           </h2>
 
-          <p className={styles.dialogCounts}>Cчет: {gameResult.counts}</p>
+          <p className={styles.dialogCounts}>Cчет: {gameResult!.counts}</p>
 
           <div className={styles.dialogBtnBlock}>
             <Button className={styles.dialogBtn} onClick={gotoResult}>

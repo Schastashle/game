@@ -23,15 +23,18 @@ export const INPUTS = [
     name: 'login',
     type: 'text',
     placeholder: 'Логин',
+    autoComplete: 'username',
   },
   {
     name: 'password',
     type: 'password',
     placeholder: 'Пароль',
+    autoComplete: 'new-password',
   },
   {
     name: 'confirm_password',
     type: 'password',
     placeholder: 'Подтвердите пароль',
+    autoComplete: 'new-password',
   },
 ]

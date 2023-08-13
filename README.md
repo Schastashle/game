@@ -74,3 +74,12 @@
 
 Если вам понадобится только один сервис, просто уточните какой в команде
 `docker compose up {sevice_name}`, например `docker compose up server`
+
+## ssr
+cd packages/client
+yarn link
+cd ../server
+yarn link client
+
+Если надо найти какой процесс держит порт 3001
+lsof -i :3001 -t

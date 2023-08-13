@@ -12,7 +12,12 @@ export interface IAuthFormProps extends FormHTMLAttributes<HTMLFormElement> {
   title: string
   linkTo: string
   linkText: string
-  inputs: { name: string; type: string; placeholder: string }[]
+  inputs: {
+    name: string
+    type: string
+    placeholder: string
+    autoComplete?: string
+  }[]
   schema: LoginSchemas
 }
 const AuthForm: FC<IAuthFormProps> = ({
@@ -41,12 +46,13 @@ const AuthForm: FC<IAuthFormProps> = ({
   return (
     <form className={style.form} onSubmit={handleSubmit(onSubmit)}>
       <h1 className={style.title}>{title}</h1>
-      {inputs.map(({ name, type, placeholder }) => (
+      {inputs.map(({ name, type, placeholder, autoComplete }) => (
         <Input
           key={name}
           name={name}
           type={type}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           register={register}
           error={errors[name]?.message as string}
         />

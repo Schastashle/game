@@ -1,3 +1,4 @@
 export interface ITimerProps {
-  initialSeconds: number
+  played: boolean
+  getMSec: (data: Date) => number
 }

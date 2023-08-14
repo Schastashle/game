@@ -1,5 +1,6 @@
 import { FC, FormHTMLAttributes, useCallback } from 'react'
 import { Button, LinkItem, Input } from '../UI'
+import { OAuth } from '../index'
 import { FieldValues, useForm } from 'react-hook-form'
 import { useAppDispatch } from '../../hooks/reduxHooks'
 import { signinUser, signupUser } from '../../store/slices/userSlice'
@@ -52,6 +53,7 @@ const AuthForm: FC<IAuthFormProps> = ({
         />
       ))}
       <Button type="submit">Отправить</Button>
+      <OAuth />
       <LinkItem to={linkTo} text={linkText} />
     </form>
   )

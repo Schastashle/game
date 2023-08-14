@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react'
+import { FC, useState, useEffect, useCallback } from 'react'
 import style from './profile.module.css'
 import { useAppSelector } from '../../hooks/reduxHooks'
 import { IUser } from '../../types/IUser'
@@ -16,9 +16,9 @@ const Profile: FC = () => {
     }
   }, [profile])
 
-  const handleTogglePasswordEdit = () => {
-    setIsPasswordBeingEdited(!isPasswordBeingEdited)
-  }
+  const handleTogglePasswordEdit = useCallback(() => {
+    setIsPasswordBeingEdited(oldValue => !oldValue)
+  }, [])
 
   return (
     <div className={style.profile}>

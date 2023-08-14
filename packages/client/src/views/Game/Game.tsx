@@ -83,6 +83,19 @@ const Game: FC = () => {
     }
   }, [gameState])
 
+  // сохраняем результат, если победили
+  useEffect(() => {
+    if (user?.login && gameResult?.winner) {
+      dispatch(
+        addUserToLeaderboard({
+          userId: user.id,
+          scoresFir: gameResult.counts,
+          userName: user.login,
+        })
+      )
+    }
+  }, [gameResult])
+
   // реагируем на окончание таймера
   const endTimer = useCallback(() => {
     const winner = refCounts.current >= MIN_GEM
@@ -125,18 +138,6 @@ const Game: FC = () => {
     },
     [canvasWrapperRef, isFullscreenMode]
   )
-
-  const onFinished = () => {
-    if (user?.login) {
-      dispatch(
-        addUserToLeaderboard({
-          userId: user.id,
-          scoresFir: counts,
-          userName: user.login,
-        })
-      )
-    }
-  }
 
   const gotoResult = useCallback(() => {
     navigate('/game/finish')

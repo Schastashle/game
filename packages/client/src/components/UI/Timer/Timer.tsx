@@ -1,48 +1,44 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react'
+import { FC, useEffect, useCallback, useRef, useState } from 'react'
 import style from './timer.module.css'
 import { ITimerProps } from './types'
-import { useDispatch } from 'react-redux'
-import { gameSliceActions } from '../../../store/slices/gameSlice'
 import img from '../../../assets/timer.png'
+
+const secToStr = function (sec: number) {
+  const newMinutes = Math.floor(Math.floor((sec / 60) % 60))
+  const newSeconds = Math.round(Math.floor(sec % 60))
+
+  return `${newMinutes < 10 ? `0${newMinutes}` : newMinutes}:${
+    newSeconds < 10 ? `0${newSeconds}` : newSeconds
+  }`
+}
 
 /** Таймер */
 export const Timer: FC<ITimerProps> = props => {
-  const { initialSeconds } = props
-  const dispatch = useDispatch()
-  const [seconds, setSeconds] = useState(initialSeconds)
-  // счетчик для сброса таймера
-  const counter = useRef(seconds)
+  const { getMSec, played } = props
 
-  const time = useMemo(() => {
-    const timeFromDate = new Date(seconds * 1000)
+  const animateRef = useRef<number>(0)
+  const secRef = useRef<number>(0)
+  const [seconds, setSeconds] = useState(0)
 
-    const newMinutes = timeFromDate.getMinutes()
-    const newSeconds = timeFromDate.getSeconds()
+  const animate = useCallback((_t: number, stop?: boolean) => {
+    const newSec = Math.round(getMSec(new Date()) / 1000)
 
-    return `${newMinutes < 10 ? `0${newMinutes}` : newMinutes}:${
-      newSeconds < 10 ? `0${newSeconds}` : newSeconds
-    }`
-  }, [seconds])
+    if (newSec >= 0 && secRef.current !== newSec) {
+      // newSec > 0, чтобы не уйти в минус, если вдруг таймаут сильно задержится
+      secRef.current = newSec
+      setSeconds(newSec)
+    }
+
+    animateRef.current = stop ? 0 : requestAnimationFrame(animate)
+  }, [])
 
   useEffect(() => {
-    const idInterval = setInterval(() => {
-      if (counter.current > 0) {
-        setSeconds(prevState => {
-          if (prevState > 0) {
-            dispatch(gameSliceActions.setTimer(prevState - 1))
+    if (!animateRef.current && !played) return
 
-            return prevState - 1
-          }
+    animate(0, !played)
 
-          return prevState
-        })
-      }
-    }, 1000)
-
-    return () => {
-      clearInterval(idInterval)
-    }
-  }, [])
+    return () => cancelAnimationFrame(animateRef.current)
+  }, [played])
 
   return (
     <div className={style.block}>
@@ -50,7 +46,7 @@ export const Timer: FC<ITimerProps> = props => {
         <img src={img} alt={''} />
       </div>
 
-      <div className={style.time}>{time}</div>
+      <div className={style.time}>{secToStr(seconds)}</div>
     </div>
   )
 }

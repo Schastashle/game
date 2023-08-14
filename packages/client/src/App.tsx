@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import AppRouter from './router/AppRouter'
 import { useAppDispatch, useAppSelector } from './hooks/reduxHooks'
 import { getUser } from './store/slices/userSlice'
+import { getLeaderboard } from './store/slices/leaderboardSlice'
 
 function App() {
   const dispatch = useAppDispatch()
@@ -21,6 +22,9 @@ function App() {
 
   useEffect(() => {
     dispatch(getUser())
+    if (isAuth) {
+      dispatch(getLeaderboard())
+    }
   }, [isAuth])
 
   return <AppRouter isAuth={isAuth} />

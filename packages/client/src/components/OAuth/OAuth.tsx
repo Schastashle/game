@@ -1,26 +1,64 @@
 import { FC, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { useAppDispatch } from '../../hooks/reduxHooks'
+import axios from 'axios'
 import style from './oauth.module.css'
+import { getUser } from '../../store/slices/userSlice'
 
 const OAuth: FC = () => {
   const [serviceId, setServiceId] = useState('')
-
-  const queryString = window.location.search
-  const urlParams = new URLSearchParams(queryString)
-  const code = urlParams.get('code')
-
-  console.debug(code)
+  const dispatch = useAppDispatch()
+  const location = useLocation()
 
   useEffect(() => {
+    // Получаем service_id и записываем его в переменную,
+    // которую подставляем в ссылку кнопки
     const getServiceId = async () => {
-      const response = await fetch(
-        'https://ya-praktikum.tech/api/v2/oauth/yandex/service-id?redirect_url=http%3A%2F%2Flocalhost%3A3000'
-      )
-      return await response.json()
+      try {
+        const response = await fetch(
+          'https://ya-praktikum.tech/api/v2/oauth/yandex/service-id?redirect_url=http%3A%2F%2Flocalhost%3A3000'
+        )
+        return await response.json()
+      } catch (error) {
+        console.error(error)
+      }
     }
 
     getServiceId().then(({ service_id = '' }: { service_id: string }) => {
       setServiceId(service_id)
     })
+
+    // Получаем из параметров url код, который получаем после перехода
+    // на страницу авторизации через OAuth Яндекса
+    const queryString = location.state.from.search
+    const urlParams = new URLSearchParams(queryString)
+    const code = urlParams.get('code')
+
+    const onAuth = async () => {
+      try {
+        // Отправляем запрос на авторизацию с кодом и url для редиректа
+        const data = await axios
+          .post('https://ya-praktikum.tech/api/v2/oauth/yandex', {
+            code,
+            redirect_uri: 'http://localhost:3000',
+          })
+          .then(res => res.data || null)
+
+        // Если запрос возвращает ответ и он равен OK,
+        // то отправляем запрос на получение данных о пользователе
+        if (data && data === 'OK') {
+          dispatch(getUser())
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    // Отправляем запрос на авторизацию только если есть код,
+    // получаемый при переходе на сервис Янедкс для авторизации
+    if (code) {
+      onAuth()
+    }
   }, [])
 
   return (

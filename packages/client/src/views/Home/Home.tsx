@@ -5,30 +5,26 @@ import { logoutUser } from '../../store/slices/userSlice'
 
 import styles from './home.module.css'
 import SVGSpinner from '../../components/SVGSpinner/SVGSpinner'
+import { IUser } from '../../types/IUser'
+
+function getUserName(user: IUser | null) {
+  return user ? user.login : 'Player'
+}
 
 const Home: FC = () => {
   const { user } = useAppSelector(state => state.user)
   const dispatch = useAppDispatch()
-  const [userName, setUserName] = useState('Player')
 
-  useEffect(() => {
-    if (user) {
-      setUserName(user.login)
-    }
-  }, [user])
-
-  const logoutHandler = useCallback(() => {
+  const logoutHandler = () => {
     dispatch(logoutUser())
-  }, [])
+  }
 
   return (
     <section className={styles.home}>
       <div className={styles.container}>
-        <div className={styles.logo}>
-          <SVGSpinner />
-        </div>
+        <div className={styles.logo}>{/* <SVGSpinner /> */}</div>
         <h1 className={styles.title}>Three-in-row</h1>
-        <div className={styles.username}>{userName}</div>
+        <div className={styles.username}>{getUserName(user)}</div>
         <NavLink to="/game" className={styles.link}>
           <div className={styles.start}>Старт</div>
         </NavLink>

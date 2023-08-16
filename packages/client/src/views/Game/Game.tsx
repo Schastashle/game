@@ -40,7 +40,6 @@ const Game: FC = () => {
   // создаем игру
   useEffect(() => {
     if (!refGame.current) {
-      console.info('new game')
       const gameAPI = new GameAPI(
         gridParams.columns,
         gridParams.rows,
@@ -55,11 +54,6 @@ const Game: FC = () => {
       refGame.current = { gameAPI, timerId }
 
       dispatch(gameSliceActions.play({ startTime }))
-    }
-
-    return () => {
-      clearTimeout(refGame.current?.timerId)
-      refGame.current = undefined
     }
   }, [])
 

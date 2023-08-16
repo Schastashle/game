@@ -1,7 +1,7 @@
-import { FC, ReactNode, useCallback, useState } from 'react'
+import { FC, ReactNode, useCallback, useState, useEffect, memo } from 'react'
 import style from './forumLayout.module.css'
 import { NavLink, Outlet, useParams } from 'react-router-dom'
-import { useDate } from '../../../../hooks/useDate'
+import { transformDate } from '../../../../utils/dataTools'
 import { Button, Input } from '../../../../components'
 import Dialog from '../../../../components/UI/Dialog/Dialog'
 import { useDialog } from '../../../../components/UI/Dialog/bll'
@@ -28,38 +28,48 @@ interface ForumLayoutType {
   }[]
 }
 
-const ForumLayout: FC<ForumLayoutType> = props => {
+function ForumLayout(props: ForumLayoutType) {
   const { children, topics } = props
   const { id } = useParams()
 
-  const { getDate } = useDate()
   const { isActive, onOpen, onClose } = useDialog()
   const [newTopicName, setNewTopicName] = useState('')
 
   // временное состояние для работы с мок данными добавления топика
   const [list, setList] = useState(topics)
 
-  const handleAddTopic = useCallback(() => {
-    onClose()
+  const handleAddTopic = useCallback(
+    (evt: React.FormEvent<HTMLFormElement>) => {
+      evt.preventDefault()
+      onClose()
 
-    setList(prev => {
-      return [
-        ...prev,
-        {
-          id: new Date().getTime(),
-          name: newTopicName,
-          date: String(new Date()),
-          comments: [],
-          author: {
-            id: 1,
-            userName: 'Курбан',
+      setList(prev => {
+        return [
+          ...prev,
+          {
+            id: new Date().getTime(),
+            name: newTopicName,
+            date: String(new Date()),
+            comments: [],
+            author: {
+              id: 1,
+              userName: 'Курбан',
+            },
           },
-        },
-      ]
-    })
+        ]
+      })
 
-    setNewTopicName('')
-  }, [list, newTopicName])
+      setNewTopicName('')
+    },
+    [newTopicName]
+  )
+
+  const onChangeTopicName = useCallback(
+    (evt: React.ChangeEvent<HTMLInputElement>) => {
+      setNewTopicName(evt.target.value)
+    },
+    []
+  )
 
   return (
     <div className={style.block}>
@@ -113,7 +123,7 @@ const ForumLayout: FC<ForumLayoutType> = props => {
                     <p>
                       <span>{'Дата создания: '}</span>
 
-                      <span>{getDate(item.date)}</span>
+                      <span>{transformDate(item.date)}</span>
                     </p>
 
                     <p>
@@ -129,7 +139,11 @@ const ForumLayout: FC<ForumLayoutType> = props => {
         </aside>
       </main>
 
-      <Dialog open={isActive} onClose={onClose} size={'middle'}>
+      <Dialog
+        open={isActive}
+        onClose={onClose}
+        size={'middle'}
+        key="addTopcDialog">
         <form className={style.modal} onSubmit={handleAddTopic}>
           <h3 className={style.modalTitle}>Создать новую тему</h3>
 
@@ -138,9 +152,7 @@ const ForumLayout: FC<ForumLayoutType> = props => {
               name="title"
               placeholder={'новая тема'}
               value={newTopicName}
-              onChange={e => {
-                setNewTopicName(e.target.value)
-              }}
+              onChange={onChangeTopicName}
             />
           </div>
 
@@ -159,4 +171,4 @@ const ForumLayout: FC<ForumLayoutType> = props => {
   )
 }
 
-export default ForumLayout
+export default memo(ForumLayout)

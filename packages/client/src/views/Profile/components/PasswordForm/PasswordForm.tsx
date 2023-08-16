@@ -47,13 +47,16 @@ const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
     toggle()
   }
 
+  // без autoComplete="username" получаем сообщение от хрома Password forms should have (optionally hidden) username fields for accessibility
   return (
     <>
       <form className={style.list} onSubmit={handleSubmit(onSubmit)}>
+        <input hidden type="text" autoComplete="username" />
         <Input
           name="oldPassword"
           type="password"
           label="Старый пароль"
+          autoComplete="current-password"
           register={register}
           error={errors.oldPassword?.message as string}
           underline
@@ -62,6 +65,7 @@ const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
           name="newPassword"
           type="password"
           label="Пароль"
+          autoComplete="new-password"
           register={register}
           error={errors.newPassword?.message as string}
           underline
@@ -70,6 +74,7 @@ const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
           name="confirmPassword"
           type="password"
           label="Подтвердите пароль"
+          autoComplete="new-password"
           register={register}
           error={errors.confirmPassword?.message as string}
           underline

@@ -18,4 +18,4 @@ const Avatar: FC<AvatarType> = props => {
   )
 }
 
-export default memo(Avatar)
+export default Avatar // memo(Avatar)

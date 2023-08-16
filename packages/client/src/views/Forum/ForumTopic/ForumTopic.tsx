@@ -1,41 +1,74 @@
-import { FC, useCallback, useMemo, useState } from 'react'
+import React, { FC, useEffect, useState, useCallback, memo } from 'react'
 import { useParams } from 'react-router-dom'
 import { mockData } from '../index/mockData'
-import { useDate } from '../../../hooks/useDate'
+import { transformDate, transformTime } from '../../../utils/dataTools'
 import style from './forumTopic.module.css'
 import { Button, Input } from '../../../components/UI'
 
-const ForumTopic: FC = () => {
-  const { id } = useParams()
-
-  const data = useMemo(() => {
-    if (id) {
-      return mockData.find(item => item.id === Number(id))
+type DataType = {
+  id?: number
+  name?: string
+  comments?: {
+    id: number
+    user: {
+      id: number
+      userName: string
     }
-  }, [id])
+    text: string
+    date: string
+  }[]
+  author?: {
+    id: number
+    userName: string
+  }
+  date?: string
+}
 
-  const [comments, setComments] = useState(data ? data.comments : [])
+function findCallnack(id: string | undefined, item: DataType): boolean {
+  return item.id === Number(id)
+}
 
-  const { getDate, getTime } = useDate()
-
+function ForumTopic() {
+  const { id } = useParams()
+  const [data, setData] = useState<DataType>({})
   const [text, setText] = useState('')
 
-  const handleAddComment = useCallback(() => {
-    setComments(prevState => [
-      ...prevState,
-      {
-        id: new Date().getTime(),
-        text: text,
-        date: String(new Date()),
-        user: {
-          id: 1,
-          userName: 'Курбан',
-        },
-      },
-    ])
+  useEffect(() => {
+    const data = mockData.find(findCallnack.bind(null, id))
+    if (data) setData(data)
+  })
 
-    setText('')
-  }, [comments, text])
+  const handleAddComment = useCallback(
+    (evt: React.FormEvent<HTMLFormElement>) => {
+      evt.preventDefault()
+
+      setData(prevState => ({
+        ...prevState,
+        comments: [
+          ...(prevState.comments || []),
+          {
+            id: new Date().getTime(),
+            text,
+            date: String(new Date()),
+            user: {
+              id: 1,
+              userName: 'Курбан',
+            },
+          },
+        ],
+      }))
+
+      setText('')
+    },
+    [text]
+  )
+
+  const onChangeText = useCallback(
+    (evt: React.ChangeEvent<HTMLInputElement>) => {
+      setText(evt.target.value)
+    },
+    []
+  )
 
   if (!data) {
     return (
@@ -57,19 +90,19 @@ const ForumTopic: FC = () => {
         <div className={style.subTitle}>
           <span>{'Автор: '}</span>
 
-          <span>{data.author.userName}</span>
+          <span>{data.author?.userName}</span>
         </div>
 
         <div className={style.subTitle}>
           <span>{'Дата создания: '}</span>
 
-          <span>{getDate(data.date)}</span>
+          <span>{data.date ? transformDate(data.date) : ''}</span>
         </div>
       </div>
 
       <div className={style.comments}>
         <ul>
-          {comments.map((item, key) => (
+          {data.comments?.map((item, key) => (
             <li key={key}>
               <div className={style.commentsLeft}>
                 <div className={style.commentsAvatar}>
@@ -82,7 +115,7 @@ const ForumTopic: FC = () => {
                 <div className={style.commentsName}>{item.user.userName}</div>
 
                 <div className={style.commentsDate}>
-                  {`${getDate(item.date)} ${getTime(item.date)}`}
+                  {`${transformDate(item.date)} ${transformTime(item.date)}`}
                 </div>
               </div>
 
@@ -99,9 +132,7 @@ const ForumTopic: FC = () => {
               name="comment"
               placeholder={'ввод'}
               value={text}
-              onChange={e => {
-                setText(e.target.value)
-              }}
+              onChange={onChangeText}
             />
           </div>
 
@@ -120,4 +151,4 @@ const ForumTopic: FC = () => {
   )
 }
 
-export default ForumTopic
+export default memo(ForumTopic)

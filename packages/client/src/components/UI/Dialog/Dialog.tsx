@@ -4,6 +4,7 @@ import { DialogType, EDialogSize } from './types'
 
 /** Модальное окно */
 const Dialog: FC<DialogType> = props => {
+  console.info('dialog render')
   const { children, open, size = 'middle', onClose } = props
 
   // блокируем фоновый скролл при открытии поп-апа
@@ -26,18 +27,20 @@ const Dialog: FC<DialogType> = props => {
       onClose()
     }
   }, [onClose])
+  /*
+  style={{
+          width: EDialogSize[size],
+        }}
+
+        {children}
+  */
 
   return (
     <div
       className={style.block}
       data-active={open ? true : undefined}
       onClick={handleCloseDialog}>
-      <div
-        onClick={stopPropagation}
-        className={style.modal}
-        style={{
-          width: EDialogSize[size],
-        }}>
+      <div onClick={stopPropagation} className={style.modal}>
         {children}
       </div>
     </div>

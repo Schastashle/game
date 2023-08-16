@@ -1,4 +1,11 @@
-import React, { FC, useCallback, useEffect, useState, useRef } from 'react'
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  memo,
+} from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
 import { gridParams, cellParams, gems } from './constants'
@@ -13,12 +20,14 @@ import { useDialog } from '../../components/UI/Dialog/bll'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
-import { GameState } from '../../types/GameState'
+import { GameResult, GameState } from '../../types/GameState'
 
-const INTERVAL_MS = 5 * 1000 //1 * 60 * 1000
+const INTERVAL_MS = 1 * 60 * 1000 // 5 * 1000 //
 const MIN_GEM = 70
 
 const Game: FC = () => {
+  console.info('render game')
+
   // createRef для хранения ссылок на dom, будут менятся при рендере
   const canvasWrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
   const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
@@ -133,7 +142,12 @@ const Game: FC = () => {
     [canvasWrapperRef, isFullscreenMode]
   )
 
-  const gotoResult = useCallback(() => {
+  const onCloseDialog = useCallback(() => {
+    onClose() // непонятно
+    navigate('/game/finish')
+  }, [])
+
+  const gotoFinish = useCallback(() => {
     navigate('/game/finish')
   }, [])
 
@@ -145,54 +159,73 @@ const Game: FC = () => {
   )
 
   return (
-    <div ref={wrapperRef}>
-      <div className={styles.header}>
-        <div className={styles.timer}>
-          {startTime && (
-            <Timer getMSec={getMSec} played={gameState === GameState.play} />
-          )}
-        </div>
-
-        <div>
-          <Counter target={MIN_GEM} counts={counts} />
-        </div>
-
-        <div className={styles['game-controls']}>
-          <button
-            className={styles['button-fullscreen']}
-            onClick={toggleFullscreen}>
-            Переключить режим просмотра
-          </button>
-        </div>
-      </div>
-
-      <div
-        className={styles.game}
-        ref={canvasWrapperRef}
-        onClick={onSelectGem}></div>
-
-      {gameState === GameState.stop && (
-        <Dialog
-          open={isActive}
-          onClose={() => {
-            onClose()
-            gotoResult()
-          }}>
-          <h2 className={styles.dialogTitle}>
-            {gameResult!.winner ? <>Победа</> : <>Поражение</>}
-          </h2>
-
-          <p className={styles.dialogCounts}>Cчет: {gameResult!.counts}</p>
-
-          <div className={styles.dialogBtnBlock}>
-            <Button className={styles.dialogBtn} onClick={gotoResult}>
-              К результатам
-            </Button>
+    <>
+      <div ref={wrapperRef}>
+        <div className={styles.header}>
+          <div className={styles.timer}>
+            {startTime && (
+              <Timer getMSec={getMSec} played={gameState === GameState.play} />
+            )}
           </div>
-        </Dialog>
-      )}
-    </div>
+
+          <div>
+            <Counter target={MIN_GEM} counts={counts} />
+          </div>
+
+          <div className={styles['game-controls']}>
+            <button
+              className={styles['button-fullscreen']}
+              onClick={toggleFullscreen}>
+              Переключить режим просмотра
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={styles.game}
+          ref={canvasWrapperRef}
+          onClick={onSelectGem}></div>
+      </div>
+      <Dialog open={isActive} onClose={onCloseDialog}>
+        <DivMemo />
+      </Dialog>
+    </>
   )
 }
 
+const Div1: FC = () => {
+  return <div>sdfdsf</div>
+}
+const DivMemo = memo(Div1)
+
+//onClickResult={gotoFinish} gameResult={gameResult}
+//<DialogBodyMemo onClickResult={gotoFinish} gameResult={gameResult} key="DialogBodyMemo" />
+type DialogBodyProps = {
+  onClickResult?: () => void
+  gameResult?: GameResult
+}
+
+const DialogBody: FC<DialogBodyProps> = ({ onClickResult, gameResult }) => {
+  console.info('DialogBody render')
+
+  return (
+    <>
+      <h2 className={styles.dialogTitle}>
+        {gameResult?.winner ? <>Победа</> : <>Поражение</>}
+      </h2>
+
+      <p className={styles.dialogCounts}>Cчет: {/*gameResult?.counts*/}</p>
+
+      <div className={styles.dialogBtnBlock}>
+        <Button className={styles.dialogBtn} onClick={onClickResult}>
+          К результатам
+        </Button>
+      </div>
+    </>
+  )
+}
+
+const DialogBodyMemo = memo(DialogBody)
+// {gameState === GameState.stop && (
+// )}
 export default Game

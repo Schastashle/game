@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react'
+import { FC } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { logoutUser } from '../../store/slices/userSlice'
@@ -12,7 +12,8 @@ function getUserName(user: IUser | null) {
 }
 
 const Home: FC = () => {
-  const { user } = useAppSelector(state => state.user)
+  console.info('Home render')
+  const user = useAppSelector(state => state.user.user)
   const dispatch = useAppDispatch()
 
   const logoutHandler = () => {
@@ -22,7 +23,9 @@ const Home: FC = () => {
   return (
     <section className={styles.home}>
       <div className={styles.container}>
-        <div className={styles.logo}>{/* <SVGSpinner /> */}</div>
+        <div className={styles.logo}>
+          <SVGSpinner />
+        </div>
         <h1 className={styles.title}>Three-in-row</h1>
         <div className={styles.username}>{getUserName(user)}</div>
         <NavLink to="/game" className={styles.link}>
@@ -47,4 +50,5 @@ const Home: FC = () => {
   )
 }
 
+// memo не нужен, на странице нет динамики
 export default Home

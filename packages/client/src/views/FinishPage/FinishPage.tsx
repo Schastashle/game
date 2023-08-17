@@ -1,29 +1,31 @@
 import styles from './finish.module.css'
-import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { useCallback } from 'react'
+
 import { gameSliceActions } from '../../store/slices/gameSlice'
-import { GameResult } from '../../types/GameState'
 import SVGSpinner from '../../components/SVGSpinner/SVGSpinner'
+import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 
 const FinishPage = () => {
-  const gameResult = useSelector<any>(
-    state => state.game.gameResult
-  ) as GameResult
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  console.info('FinishPage render')
 
-  const onComplete = useCallback(() => {
+  const gameResult = useAppSelector(state => state.game.gameResult)
+
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+
+  const onComplete = () => {
     navigate('/game')
 
     dispatch(gameSliceActions.reset())
-  }, [])
+  }
 
-  const onExit = useCallback(() => {
+  const onExit = () => {
     navigate('/')
 
     dispatch(gameSliceActions.reset())
-  }, [])
+  }
+
+  if (!gameResult) return <div>"Ошибка, неверно состояние"</div> // можем хранить предыдущее и показывать его
 
   return (
     <section className={styles.finish}>
@@ -89,4 +91,6 @@ const FinishPage = () => {
   )
 }
 
+// memo не нужен, на странице нет динамики
+// useCallback тоже не нужны
 export default FinishPage

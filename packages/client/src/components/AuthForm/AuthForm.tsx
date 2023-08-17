@@ -1,4 +1,4 @@
-import { FC, FormHTMLAttributes, useCallback } from 'react'
+import { FC, FormHTMLAttributes, useCallback, memo } from 'react'
 import { Button, LinkItem, Input } from '../UI'
 import { FieldValues, useForm } from 'react-hook-form'
 import { useAppDispatch } from '../../hooks/reduxHooks'
@@ -27,6 +27,7 @@ const AuthForm: FC<IAuthFormProps> = ({
   inputs,
   schema,
 }) => {
+  console.log('render AuthForm')
   const dispatch = useAppDispatch()
 
   const {
@@ -35,16 +36,19 @@ const AuthForm: FC<IAuthFormProps> = ({
     formState: { errors },
   } = useForm<FieldValues>({ resolver: zodResolver(schema) })
 
-  const onSubmit = useCallback((data: FieldValues) => {
-    if (linkTo.includes('signup')) {
-      dispatch(signinUser(data as IUserLogin))
-    } else {
-      dispatch(signupUser(data as IUserSignup))
-    }
-  }, [])
+  const onSubmit = useCallback(
+    handleSubmit((data: FieldValues) => {
+      if (linkTo.includes('signup')) {
+        dispatch(signinUser(data as IUserLogin))
+      } else {
+        dispatch(signupUser(data as IUserSignup))
+      }
+    }),
+    []
+  )
 
   return (
-    <form className={style.form} onSubmit={handleSubmit(onSubmit)}>
+    <form className={style.form} onSubmit={onSubmit}>
       <h1 className={style.title}>{title}</h1>
       {inputs.map(({ name, type, placeholder, autoComplete }) => (
         <Input
@@ -63,4 +67,4 @@ const AuthForm: FC<IAuthFormProps> = ({
   )
 }
 
-export default AuthForm
+export default memo(AuthForm)

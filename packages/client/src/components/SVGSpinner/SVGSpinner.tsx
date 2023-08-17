@@ -1,6 +1,7 @@
 import { FC, memo } from 'react'
 
 const SVGSpinner: FC = () => {
+  console.info('SVGSpinner render')
   return (
     <svg
       className="spinner"

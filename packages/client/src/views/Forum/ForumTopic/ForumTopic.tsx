@@ -1,72 +1,50 @@
 import React, { FC, useEffect, useState, useCallback, memo } from 'react'
-import { useParams } from 'react-router-dom'
 import { mockData } from '../index/mockData'
 import { transformDate, transformTime } from '../../../utils/dataTools'
 import style from './forumTopic.module.css'
 import { Button, Input } from '../../../components/UI'
+import { TopicsType } from '../../../types/ForumTypes'
+import { useForm } from 'react-hook-form'
 
-type DataType = {
-  id?: number
-  name?: string
-  comments?: {
-    id: number
-    user: {
-      id: number
-      userName: string
-    }
-    text: string
-    date: string
-  }[]
-  author?: {
-    id: number
-    userName: string
-  }
-  date?: string
+interface ForumTopicsProps {
+  id: number
 }
 
-function findCallnack(id: string | undefined, item: DataType): boolean {
-  return item.id === Number(id)
+function findCallnack(id: number | undefined, item: TopicsType): boolean {
+  return Number.isFinite(id) && item.id === id
 }
 
-function ForumTopic() {
-  const { id } = useParams()
-  const [data, setData] = useState<DataType>({})
-  const [text, setText] = useState('')
+function ForumTopic({ id }: ForumTopicsProps) {
+  console.info('ForumTopic render')
+
+  const [data, setData] = useState<TopicsType | undefined>(undefined)
+  const { register, handleSubmit, reset } = useForm()
 
   useEffect(() => {
-    const data = mockData.find(findCallnack.bind(null, id))
-    if (data) setData(data)
-  })
+    console.info('ForumTopic useEffect')
+
+    const data = mockData.find(findCallnack.bind(null, Number(id)))
+    setData(data)
+  }, [id])
 
   const handleAddComment = useCallback(
-    (evt: React.FormEvent<HTMLFormElement>) => {
-      evt.preventDefault()
+    handleSubmit(data => {
+      if (!data.comment) return
 
-      setData(prevState => ({
-        ...prevState,
-        comments: [
-          ...(prevState.comments || []),
-          {
-            id: new Date().getTime(),
-            text,
-            date: String(new Date()),
-            user: {
-              id: 1,
-              userName: 'Курбан',
-            },
-          },
-        ],
-      }))
+      setData(prevState => {
+        if (!prevState) return undefined
 
-      setText('')
-    },
-    [text]
-  )
+        return {
+          ...prevState,
+          comments: [
+            ...(prevState?.comments || []),
+            createComments(data.comment),
+          ],
+        }
+      })
 
-  const onChangeText = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => {
-      setText(evt.target.value)
-    },
+      reset()
+    }),
     []
   )
 
@@ -102,8 +80,8 @@ function ForumTopic() {
 
       <div className={style.comments}>
         <ul>
-          {data.comments?.map((item, key) => (
-            <li key={key}>
+          {data.comments?.map(item => (
+            <li key={`${id}-${item.id}`}>
               <div className={style.commentsLeft}>
                 <div className={style.commentsAvatar}>
                   <img
@@ -128,17 +106,11 @@ function ForumTopic() {
       <div className={style.form}>
         <form onSubmit={handleAddComment}>
           <div className={style.formInputBlock}>
-            <Input
-              name="comment"
-              placeholder={'ввод'}
-              value={text}
-              onChange={onChangeText}
-            />
+            <Input {...register('comment')} placeholder={'ввод'} />
           </div>
 
           <div className={style.formButtonBlock}>
             <Button
-              disabled={!text}
               style={{
                 height: '45px',
               }}>
@@ -149,6 +121,18 @@ function ForumTopic() {
       </div>
     </div>
   )
+}
+
+function createComments(comment: string) {
+  return {
+    id: new Date().getTime(),
+    text: comment,
+    date: String(new Date()),
+    user: {
+      id: 1,
+      userName: 'Курбан',
+    },
+  }
 }
 
 export default memo(ForumTopic)

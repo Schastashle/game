@@ -7,7 +7,10 @@ interface IRequireAuth {
 }
 
 const RequireAuth = ({ children }: IRequireAuth) => {
-  const { isAuth } = useAppSelector(state => state.user)
+  console.info('RequireAuth render')
+
+  // { isAuth } убираю, так как при этом лишние рендеры
+  const isAuth = useAppSelector(state => state.user.isAuth)
   const location = useLocation()
 
   if (!isAuth) {

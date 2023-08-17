@@ -10,47 +10,23 @@ interface IPasswordForm {
   toggle: () => void
 }
 const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
+  console.info('PasswordForm')
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FieldValues>({ resolver: zodResolver(PasswordSchema) })
 
-  const onSubmit = async (data: FieldValues) => {
-    const { oldPassword, newPassword } = data
-    try {
-      await axios
-        .put(
-          `https://ya-praktikum.tech/api/v2/user/password`,
-          {
-            oldPassword,
-            newPassword,
-          },
-          { withCredentials: true }
-        )
-        .then(() => {
-          toggle()
-        })
-    } catch (error) {
-      if (
-        error instanceof AxiosError &&
-        error.response?.data.reason === 'Password is incorrect'
-      ) {
-        console.log('Неправильный пароль')
-      } else {
-        throw error
-      }
-    }
-  }
-
-  const onCancel = () => {
-    toggle()
-  }
+  const onSubmit = handleSubmit(async (data: FieldValues) => {
+    const isOk = await sendPass(data)
+    if (isOk) toggle()
+  })
 
   // без autoComplete="username" получаем сообщение от хрома Password forms should have (optionally hidden) username fields for accessibility
   return (
     <>
-      <form className={style.list} onSubmit={handleSubmit(onSubmit)}>
+      <form className={style.list} onSubmit={onSubmit}>
         <input hidden type="text" autoComplete="username" />
         <Input
           name="oldPassword"
@@ -81,11 +57,38 @@ const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
         />
         <Button type="submit">Сохранить пароль</Button>
       </form>
-      <Button type="button" transparent onClick={onCancel}>
+      <Button type="button" transparent onClick={toggle}>
         Отмена
       </Button>
     </>
   )
 }
 
+async function sendPass(data: FieldValues) {
+  const { oldPassword, newPassword } = data
+  let isOk = false
+  try {
+    await axios.put(
+      `https://ya-praktikum.tech/api/v2/user/password`,
+      {
+        oldPassword,
+        newPassword,
+      },
+      { withCredentials: true }
+    )
+    isOk = true
+  } catch (error) {
+    if (
+      error instanceof AxiosError &&
+      error.response?.data.reason === 'Password is incorrect'
+    ) {
+      console.log('Неправильный пароль')
+    } else {
+      throw error
+    }
+  }
+  return isOk
+}
+
+// тут с memo не получилось, может быть useForm что-то делает
 export default PasswordForm

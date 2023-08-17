@@ -5,6 +5,7 @@ import React, {
   useState,
   useRef,
   memo,
+  forwardRef,
 } from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
@@ -21,65 +22,59 @@ import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
 import { GameResult, GameState } from '../../types/GameState'
+import SVGSpinner from '../../components/SVGSpinner/SVGSpinner'
 
-const INTERVAL_MS = 1 * 60 * 1000 // 5 * 1000 //
+const INTERVAL_MS = 1 * 20 * 1000 // 5 * 1000 //
 const MIN_GEM = 70
+
+function createGame() {
+  const gameAPI = new GameAPI(
+    gridParams.columns,
+    gridParams.rows,
+    cellParams,
+    gems
+  )
+  gameAPI.initialize()
+  return gameAPI
+}
 
 const Game: FC = () => {
   console.info('render game')
-
-  // createRef для хранения ссылок на dom, будут менятся при рендере
-  const canvasWrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
-  const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
 
   const dispatch = useAppDispatch()
   const { gameState, startTime, gameResult } = useAppSelector(
     state => state.game
   )
-  const { user } = useAppSelector(state => state.user)
-
-  const navigate = useNavigate()
+  const user = useAppSelector(state => state.user.user)
 
   const [counts, setCounts] = useState(0)
   const { isActive, onOpen, onClose } = useDialog()
   const [isFullscreenMode, setIsFullScreen] = useState(false)
-  const refGame = useRef<{ gameAPI: GameAPI; timerId: number }>()
+  const refGame = useRef<{ gameAPI: GameAPI; timerId?: number }>({
+    gameAPI: createGame(),
+  })
   const refCounts = useRef<number>(0)
+  // dom ref
+  const canvasWrapperRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // создаем игру
-  useEffect(() => {
-    if (!refGame.current) {
-      const gameAPI = new GameAPI(
-        gridParams.columns,
-        gridParams.rows,
-        cellParams,
-        gems
-      )
-      gameAPI.initialize()
-
-      const startTime = new Date().getTime()
-      const timerId = setTimeout(endTimer, INTERVAL_MS) as unknown as number
-
-      refGame.current = { gameAPI, timerId }
-
-      dispatch(gameSliceActions.play({ startTime }))
-    }
-  }, [])
-
+  // после каждого рендеринга
   // добавляем канву от игры к компоненту
   useEffect(() => {
     const parent = canvasWrapperRef.current
     const canvas = refGame.current?.gameAPI.getCanvas()
-    if (canvas) parent?.appendChild(canvas)
+    if (parent && canvas && canvas.parentElement !== parent)
+      parent?.appendChild(canvas)
+  })
 
-    return () => {
-      if (canvas) parent?.removeChild(canvas)
-    }
-  }, [canvasWrapperRef])
-
-  // ждем окончания игры, показываем окно
   useEffect(() => {
-    if (gameState === GameState.stop) {
+    if (gameState === GameState.ini) {
+      const startTime = new Date()
+      const timerId = setTimeout(endTimer, INTERVAL_MS) as unknown as number
+      refGame.current.timerId = timerId
+      dispatch(gameSliceActions.play({ startTime: startTime.getTime() }))
+    } else if (gameState === GameState.stop) {
+      // ждем окончания игры, показываем окно
       clearTimeout(refGame.current?.timerId)
       refGame.current?.gameAPI.finished()
       onOpen()
@@ -139,17 +134,8 @@ const Game: FC = () => {
 
       setIsFullScreen(!isFullscreenMode)
     },
-    [canvasWrapperRef, isFullscreenMode]
+    [isFullscreenMode]
   )
-
-  const onCloseDialog = useCallback(() => {
-    onClose() // непонятно
-    navigate('/game/finish')
-  }, [])
-
-  const gotoFinish = useCallback(() => {
-    navigate('/game/finish')
-  }, [])
 
   const getMSec = useCallback(
     (date: Date) => {
@@ -184,48 +170,58 @@ const Game: FC = () => {
         <div
           className={styles.game}
           ref={canvasWrapperRef}
-          onClick={onSelectGem}></div>
+          onClick={onSelectGem}
+        />
       </div>
-      <Dialog open={isActive} onClose={onCloseDialog}>
-        <DivMemo />
-      </Dialog>
+      {gameState === GameState.stop && (
+        <GameDialog
+          isActive={isActive}
+          onClose={onClose}
+          gameResult={gameResult}
+        />
+      )}
     </>
   )
 }
 
-const Div1: FC = () => {
-  return <div>sdfdsf</div>
-}
-const DivMemo = memo(Div1)
-
-//onClickResult={gotoFinish} gameResult={gameResult}
-//<DialogBodyMemo onClickResult={gotoFinish} gameResult={gameResult} key="DialogBodyMemo" />
-type DialogBodyProps = {
-  onClickResult?: () => void
+type DialogProps = {
   gameResult?: GameResult
+  isActive: boolean
+  onClose: () => void
 }
 
-const DialogBody: FC<DialogBodyProps> = ({ onClickResult, gameResult }) => {
-  console.info('DialogBody render')
+const GameDialog: FC<DialogProps> = memo(
+  ({ gameResult, isActive, onClose }) => {
+    console.info('GameDialog render')
+    const navigate = useNavigate()
 
-  return (
-    <>
-      <h2 className={styles.dialogTitle}>
-        {gameResult?.winner ? <>Победа</> : <>Поражение</>}
-      </h2>
+    const onCloseDialog = useCallback(() => {
+      onClose() // непонятно
+      navigate('/game/finish')
+    }, [])
 
-      <p className={styles.dialogCounts}>Cчет: {/*gameResult?.counts*/}</p>
+    const gotoFinish = useCallback(() => {
+      navigate('/game/finish')
+    }, [])
 
-      <div className={styles.dialogBtnBlock}>
-        <Button className={styles.dialogBtn} onClick={onClickResult}>
-          К результатам
-        </Button>
-      </div>
-    </>
-  )
-}
+    return (
+      <Dialog open={isActive} onClose={onCloseDialog}>
+        <h2 className={styles.dialogTitle}>
+          {gameResult?.winner ? <>Победа</> : <>Поражение</>}
+        </h2>
 
-const DialogBodyMemo = memo(DialogBody)
+        <p className={styles.dialogCounts}>Cчет: {gameResult?.counts}</p>
+
+        <div className={styles.dialogBtnBlock}>
+          <Button className={styles.dialogBtn} onClick={gotoFinish}>
+            К результатам
+          </Button>
+        </div>
+      </Dialog>
+    )
+  }
+)
+
 // {gameState === GameState.stop && (
 // )}
 export default Game

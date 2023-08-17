@@ -36,4 +36,6 @@ const ErrorPage: FC<IErrorPageProps> = props => {
   )
 }
 
+// memo не нужен, на странице нет динамики
+// useCallback тоже не нужны
 export default ErrorPage

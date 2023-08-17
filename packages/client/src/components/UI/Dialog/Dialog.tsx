@@ -27,20 +27,18 @@ const Dialog: FC<DialogType> = props => {
       onClose()
     }
   }, [onClose])
-  /*
-  style={{
-          width: EDialogSize[size],
-        }}
-
-        {children}
-  */
 
   return (
     <div
       className={style.block}
       data-active={open ? true : undefined}
       onClick={handleCloseDialog}>
-      <div onClick={stopPropagation} className={style.modal}>
+      <div
+        onClick={stopPropagation}
+        className={style.modal}
+        style={{
+          width: EDialogSize[size],
+        }}>
         {children}
       </div>
     </div>

@@ -1,4 +1,11 @@
-import { FC, useEffect, useCallback, useRef, useState } from 'react'
+import {
+  FC,
+  useEffect,
+  useCallback,
+  useRef,
+  useState,
+  useTransition,
+} from 'react'
 import style from './timer.module.css'
 import { ITimerProps } from './types'
 import img from '../../../assets/timer.png'
@@ -29,6 +36,7 @@ export const Timer: FC<ITimerProps> = props => {
   const animateRef = useRef<number>(0)
   const secRef = useRef<number>(0)
   const [seconds, setSeconds] = useState(0)
+  const [isPending, startTransition] = useTransition()
   const prevPlayed = useRef(false)
 
   const updateSeconds = useCallback(() => {
@@ -37,7 +45,10 @@ export const Timer: FC<ITimerProps> = props => {
     if (newSec >= 0 && secRef.current !== newSec) {
       // newSec > 0, чтобы не уйти в минус, если вдруг таймаут сильно задержится
       secRef.current = newSec
-      setSeconds(newSec)
+
+      startTransition(() => {
+        setSeconds(newSec)
+      })
     }
   }, [])
 

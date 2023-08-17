@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from './hooks/reduxHooks'
 import { getUser } from './store/slices/userSlice'
 
 function App() {
-  console.info('*** app render')
   const dispatch = useAppDispatch()
   // если поменять, то при смене аватара будет два рендера App
   // если оставить, то при смене Аватара не будет рендера App

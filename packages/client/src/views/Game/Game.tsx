@@ -39,8 +39,6 @@ function createGame() {
 }
 
 const Game: FC = () => {
-  console.info('render game')
-
   const dispatch = useAppDispatch()
   const { gameState, startTime, gameResult } = useAppSelector(
     state => state.game
@@ -192,7 +190,6 @@ type DialogProps = {
 
 const GameDialog: FC<DialogProps> = memo(
   ({ gameResult, isActive, onClose }) => {
-    console.info('GameDialog render')
     const navigate = useNavigate()
 
     const onCloseDialog = useCallback(() => {

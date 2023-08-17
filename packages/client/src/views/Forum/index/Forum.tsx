@@ -4,8 +4,6 @@ import { mockData } from './mockData'
 import { useParams } from 'react-router-dom'
 
 export default function Forum() {
-  console.info('*** Forum')
-
   const { id } = useParams()
   const intId = id ? Number.parseInt(id) : NaN
 

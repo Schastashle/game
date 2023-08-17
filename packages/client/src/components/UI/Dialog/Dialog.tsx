@@ -4,7 +4,6 @@ import { DialogType, EDialogSize } from './types'
 
 /** Модальное окно */
 const Dialog: FC<DialogType> = props => {
-  console.info('dialog render')
   const { children, open, size = 'middle', onClose } = props
 
   // блокируем фоновый скролл при открытии поп-апа

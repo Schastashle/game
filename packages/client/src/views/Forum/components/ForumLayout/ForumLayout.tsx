@@ -15,8 +15,6 @@ interface ForumLayoutType {
 }
 
 function ForumLayout(props: ForumLayoutType) {
-  console.info('ForumLayout render')
-
   const { children, topics, id } = props
 
   const { isActive, onOpen, onClose } = useDialog()
@@ -115,8 +113,6 @@ type DialogProps = {
 
 // надо тестировать после добавления интерактивностей на страницу форума
 const ForumDialog: FC<DialogProps> = memo(({ isActive, onClose, addTopic }) => {
-  console.info('ForumDialog render')
-
   const { register, handleSubmit, reset } = useForm()
 
   // добавление темы

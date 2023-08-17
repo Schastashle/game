@@ -9,8 +9,6 @@ interface IProfileList {
   toggle: () => void
 }
 const ProfileList: FC<IProfileList> = ({ profile, toggle }) => {
-  console.info('ProfileList')
-
   const navigate = useNavigate()
   const back = useCallback(() => {
     navigate(-1)

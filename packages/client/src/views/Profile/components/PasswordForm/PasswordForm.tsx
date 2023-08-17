@@ -10,8 +10,6 @@ interface IPasswordForm {
   toggle: () => void
 }
 const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
-  console.info('PasswordForm')
-
   const {
     register,
     handleSubmit,

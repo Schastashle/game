@@ -12,7 +12,6 @@ function getUserName(user: IUser | null) {
 }
 
 const Home: FC = () => {
-  console.info('Home render')
   const user = useAppSelector(state => state.user.user)
   const dispatch = useAppDispatch()
 

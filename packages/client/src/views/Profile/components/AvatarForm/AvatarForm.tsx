@@ -13,8 +13,6 @@ interface IAvatarForm {
   avatar?: string
 }
 const AvatarForm: FC<IAvatarForm> = ({ disabled, avatar }) => {
-  console.info('AvatarForm')
-
   const { isActive, onOpen, onClose } = useDialog()
 
   return (

@@ -15,14 +15,10 @@ function findCallnack(id: number | undefined, item: TopicsType): boolean {
 }
 
 function ForumTopic({ id }: ForumTopicsProps) {
-  console.info('ForumTopic render')
-
   const [data, setData] = useState<TopicsType | undefined>(undefined)
   const { register, handleSubmit, reset } = useForm()
 
   useEffect(() => {
-    console.info('ForumTopic useEffect')
-
     const data = mockData.find(findCallnack.bind(null, Number(id)))
     setData(data)
   }, [id])

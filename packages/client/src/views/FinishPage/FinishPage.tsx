@@ -6,8 +6,6 @@ import SVGSpinner from '../../components/SVGSpinner/SVGSpinner'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 
 const FinishPage = () => {
-  console.info('FinishPage render')
-
   const gameResult = useAppSelector(state => state.game.gameResult)
 
   const navigate = useNavigate()

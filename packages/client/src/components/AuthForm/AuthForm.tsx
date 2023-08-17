@@ -27,7 +27,6 @@ const AuthForm: FC<IAuthFormProps> = ({
   inputs,
   schema,
 }) => {
-  console.log('render AuthForm')
   const dispatch = useAppDispatch()
 
   const {

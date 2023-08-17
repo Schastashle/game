@@ -12,9 +12,6 @@ const Profile: FC = () => {
     setIsPasswordBeingEdited(oldValue => !oldValue)
   }, [])
 
-  console.info('*************')
-  console.info('render Profile', user, showPass)
-
   return (
     <div className={style.profile}>
       <main className={style.content}>

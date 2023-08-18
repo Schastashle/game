@@ -1,4 +1,4 @@
-import { FC, useMemo, useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import style from './rating.module.css'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { getLeaderboard } from '../../store/slices/leaderboardSlice'
@@ -8,6 +8,8 @@ import ImgSilver from '../../assets/img_silver-medal.png'
 import ImgBronze from '../../assets/img_bronze-medal.png'
 import ImgRating from '../../assets/img_rating.png'
 import { NavLink } from 'react-router-dom'
+
+const medals = [ImgGold, ImgSilver, ImgBronze]
 
 const Rating: FC = () => {
   const { user } = useAppSelector(state => state.user)
@@ -19,10 +21,6 @@ const Rating: FC = () => {
     if (user?.login) {
       dispatch(getLeaderboard())
     }
-  }, [])
-
-  const medals = useMemo(() => {
-    return [ImgGold, ImgSilver, ImgBronze]
   }, [])
 
   return (

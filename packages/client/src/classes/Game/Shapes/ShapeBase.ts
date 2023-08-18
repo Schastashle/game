@@ -66,11 +66,15 @@ export default abstract class ShapeBase {
     this.drawMainShape(ctx)
 
     if (this.nested.length) {
-      this.nested.forEach(gem => gem.drawMainShape(ctx, this))
+      this.nested.forEach(this.nestedDraw.bind(this, ctx))
     }
 
     //  ctx.fillStyle = "black";
     //  ctx.fillText(`x${this.x} y${this.y} c${this.column} r${this.row}`, this.x-40, this.y)
+  }
+
+  private nestedDraw(ctx: CanvasRenderingContext2D, gem: ShapeBase) {
+    gem.drawMainShape(ctx, this)
   }
 
   public getRect() {

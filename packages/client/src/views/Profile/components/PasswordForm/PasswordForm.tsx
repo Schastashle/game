@@ -16,44 +16,21 @@ const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
     formState: { errors },
   } = useForm<FieldValues>({ resolver: zodResolver(PasswordSchema) })
 
-  const onSubmit = async (data: FieldValues) => {
-    const { oldPassword, newPassword } = data
-    try {
-      await axios
-        .put(
-          `https://ya-praktikum.tech/api/v2/user/password`,
-          {
-            oldPassword,
-            newPassword,
-          },
-          { withCredentials: true }
-        )
-        .then(() => {
-          toggle()
-        })
-    } catch (error) {
-      if (
-        error instanceof AxiosError &&
-        error.response?.data.reason === 'Password is incorrect'
-      ) {
-        console.log('Неправильный пароль')
-      } else {
-        throw error
-      }
-    }
-  }
+  const onSubmit = handleSubmit(async (data: FieldValues) => {
+    const isOk = await sendPass(data)
+    if (isOk) toggle()
+  })
 
-  const onCancel = () => {
-    toggle()
-  }
-
+  // без autoComplete="username" получаем сообщение от хрома Password forms should have (optionally hidden) username fields for accessibility
   return (
     <>
-      <form className={style.list} onSubmit={handleSubmit(onSubmit)}>
+      <form className={style.list} onSubmit={onSubmit}>
+        <input hidden type="text" autoComplete="username" />
         <Input
           name="oldPassword"
           type="password"
           label="Старый пароль"
+          autoComplete="current-password"
           register={register}
           error={errors.oldPassword?.message as string}
           underline
@@ -62,6 +39,7 @@ const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
           name="newPassword"
           type="password"
           label="Пароль"
+          autoComplete="new-password"
           register={register}
           error={errors.newPassword?.message as string}
           underline
@@ -70,17 +48,45 @@ const PasswordForm: FC<IPasswordForm> = ({ toggle }) => {
           name="confirmPassword"
           type="password"
           label="Подтвердите пароль"
+          autoComplete="new-password"
           register={register}
           error={errors.confirmPassword?.message as string}
           underline
         />
         <Button type="submit">Сохранить пароль</Button>
       </form>
-      <Button type="button" transparent onClick={onCancel}>
+      <Button type="button" transparent onClick={toggle}>
         Отмена
       </Button>
     </>
   )
 }
 
+async function sendPass(data: FieldValues) {
+  const { oldPassword, newPassword } = data
+  let isOk = false
+  try {
+    await axios.put(
+      `https://ya-praktikum.tech/api/v2/user/password`,
+      {
+        oldPassword,
+        newPassword,
+      },
+      { withCredentials: true }
+    )
+    isOk = true
+  } catch (error) {
+    if (
+      error instanceof AxiosError &&
+      error.response?.data.reason === 'Password is incorrect'
+    ) {
+      console.log('Неправильный пароль')
+    } else {
+      throw error
+    }
+  }
+  return isOk
+}
+
+// тут с memo не получилось, может быть useForm что-то делает
 export default PasswordForm

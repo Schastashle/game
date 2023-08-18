@@ -69,7 +69,7 @@ export const mockData = [
         date: 'Fri Jun 30 2023 22:11:51 GMT+0300 (Москва, стандартное время)',
       },
       {
-        id: 1,
+        id: 4,
         user: {
           id: 1,
           userName: 'Курбан',
@@ -78,7 +78,7 @@ export const mockData = [
         date: 'Fri Jun 30 2023 18:11:51 GMT+0300 (Москва, стандартное время)',
       },
       {
-        id: 2,
+        id: 5,
         user: {
           id: 2,
           userName: 'Андрей',
@@ -87,7 +87,7 @@ export const mockData = [
         date: 'Fri Jun 30 2023 20:11:51 GMT+0300 (Москва, стандартное время)',
       },
       {
-        id: 3,
+        id: 6,
         user: {
           id: 1,
           userName: 'Курбан',

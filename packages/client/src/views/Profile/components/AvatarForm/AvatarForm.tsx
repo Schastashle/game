@@ -1,87 +1,92 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, memo } from 'react'
 import style from './avatar-form.module.css'
 import { Avatar, Button, Dialog } from '../../../../components'
-import { IUser } from '../../../../types/IUser'
 import { FieldValues, useForm } from 'react-hook-form'
 import axios from 'axios'
 import { useAppDispatch } from '../../../../hooks/reduxHooks'
 import { getUser } from '../../../../store/slices/userSlice'
 import { BASE_URL } from '../../constants'
+import { useDialog } from '../../../../components/UI/Dialog/bll'
 
 interface IAvatarForm {
   disabled: boolean
-  profile: IUser
+  avatar?: string
 }
-const AvatarForm: FC<IAvatarForm> = ({ disabled, profile }) => {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [avatar, setAvatar] = useState('')
-
-  const { register, handleSubmit, reset } = useForm()
-  const dispatch = useAppDispatch()
-
-  useEffect(() => {
-    setAvatar(profile.avatar)
-  }, [profile])
-  const handleToggleDialog = () => {
-    setDialogOpen(!dialogOpen)
-  }
-
-  const onSubmit = async (data: FieldValues) => {
-    if (!data.avatar[0]) {
-      return
-    }
-    const formData = new FormData()
-    formData.append('avatar', data.avatar[0])
-    try {
-      await axios
-        .put(`${BASE_URL}/user/profile/avatar`, formData, {
-          withCredentials: true,
-        })
-        .then(res => {
-          if (res.status === 200) {
-            setAvatar(res.data.avatar)
-            dispatch(getUser())
-            reset()
-            handleToggleDialog()
-          }
-        })
-    } catch (error) {
-      console.log(error)
-    }
-  }
+const AvatarForm: FC<IAvatarForm> = ({ disabled, avatar }) => {
+  const { isActive, onOpen, onClose } = useDialog()
 
   return (
     <>
-      <Button
-        type="button"
-        onClick={handleToggleDialog}
-        transparent
-        disabled={disabled}>
+      <Button type="button" onClick={onOpen} transparent disabled={disabled}>
         <Avatar
           src={`${avatar ? `${BASE_URL}/resources/${avatar}` : ''}`}
           size="xl"
         />
       </Button>
-      <Dialog open={dialogOpen}>
-        <section className={style.avatarDialog}>
-          <h2 className={style.header}>Изменить пароль</h2>
-          <form className={style.avatarForm} onSubmit={handleSubmit(onSubmit)}>
-            <input
-              className={style.input}
-              type="file"
-              required
-              {...register('avatar')}
-              id="avatar"
-            />
-            <Button type="submit">Сохранить</Button>
-          </form>
-          <Button type="button" onClick={handleToggleDialog} transparent>
-            Закрыть
-          </Button>
-        </section>
-      </Dialog>
+
+      <AvatarDialog isActive={isActive} onClose={onClose} />
     </>
   )
 }
 
-export default AvatarForm
+type DialogProps = {
+  isActive: boolean
+  onClose: () => void
+}
+
+const AvatarDialog: FC<DialogProps> = memo(({ isActive, onClose }) => {
+  const dispatch = useAppDispatch()
+
+  const { register, handleSubmit, reset } = useForm()
+
+  const onSubmit = async (data: FieldValues) => {
+    const isOk = await sendAvatar(data)
+    if (isOk) {
+      dispatch(getUser())
+      reset()
+      onClose()
+    }
+  }
+
+  return (
+    <Dialog open={isActive} onClose={onClose}>
+      <section className={style.avatarDialog}>
+        <h2 className={style.header}>Изменить пароль</h2>
+        <form className={style.avatarForm} onSubmit={handleSubmit(onSubmit)}>
+          <input
+            className={style.input}
+            type="file"
+            required
+            {...register('avatar')}
+            id="avatar"
+          />
+          <Button type="submit">Сохранить</Button>
+        </form>
+        <Button type="button" onClick={onClose} transparent>
+          Закрыть
+        </Button>
+      </section>
+    </Dialog>
+  )
+})
+
+async function sendAvatar(data: FieldValues) {
+  if (!data.avatar[0]) {
+    return false
+  }
+  const formData = new FormData()
+  formData.append('avatar', data.avatar[0])
+  let isOk = false
+  try {
+    await axios.put(`${BASE_URL}/user/profile/avatar`, formData, {
+      withCredentials: true,
+    })
+
+    isOk = true
+  } catch (error) {
+    console.log(error)
+  }
+  return isOk
+}
+
+export default memo(AvatarForm)

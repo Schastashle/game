@@ -2,11 +2,14 @@ import { useEffect } from 'react'
 import AppRouter from './router/AppRouter'
 import { useAppDispatch, useAppSelector } from './hooks/reduxHooks'
 import { getUser } from './store/slices/userSlice'
-import { getLeaderboard } from './store/slices/leaderboardSlice'
 
 function App() {
   const dispatch = useAppDispatch()
-  const { isAuth } = useAppSelector(state => state.user)
+  // если поменять, то при смене аватара будет два рендера App
+  // если оставить, то при смене Аватара не будет рендера App
+  // при смене аватара идет перезапрос информации о пользователе
+  //const isAuth = useAppSelector(state => state.user.isAuth)
+  const isAuth = useAppSelector(state => state.user.isAuth)
 
   // временно скрыл, чтобы не было ошибок в консоли
   // useEffect(() => {
@@ -21,9 +24,8 @@ function App() {
   // }, [])
 
   useEffect(() => {
-    dispatch(getUser())
-    if (isAuth) {
-      dispatch(getLeaderboard())
+    if (!isAuth) {
+      dispatch(getUser())
     }
   }, [isAuth])
 

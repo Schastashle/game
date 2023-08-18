@@ -12,6 +12,12 @@ export default defineConfig({
   define: {
     __SERVER_PORT__: process.env.SERVER_PORT,
   },
+  esbuild: {
+    minify: false,
+    minifyIdentifiers: false,
+    minifySyntax: false,
+    minifyWhitespace: false,
+  },
   plugins: [
     react(),
     VitePWA({
@@ -21,6 +27,7 @@ export default defineConfig({
       devOptions: {
         enabled: false,
       },
+      selfDestroying: true,
     }),
   ],
 })

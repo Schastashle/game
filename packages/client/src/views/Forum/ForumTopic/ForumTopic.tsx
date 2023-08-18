@@ -1,41 +1,48 @@
-import { FC, useCallback, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { FC, useEffect, useState, useCallback, memo } from 'react'
 import { mockData } from '../index/mockData'
-import { useDate } from '../../../hooks/useDate'
+import { transformDate, transformTime } from '../../../utils/dataTools'
 import style from './forumTopic.module.css'
 import { Button, Input } from '../../../components/UI'
+import { TopicsType } from '../../../types/ForumTypes'
+import { useForm } from 'react-hook-form'
 
-const ForumTopic: FC = () => {
-  const { id } = useParams()
+interface ForumTopicsProps {
+  id: number
+}
 
-  const data = useMemo(() => {
-    if (id) {
-      return mockData.find(item => item.id === Number(id))
-    }
+function findCallnack(id: number | undefined, item: TopicsType): boolean {
+  return Number.isFinite(id) && item.id === id
+}
+
+function ForumTopic({ id }: ForumTopicsProps) {
+  const [data, setData] = useState<TopicsType | undefined>(undefined)
+  const { register, handleSubmit, reset } = useForm()
+
+  useEffect(() => {
+    const data = mockData.find(findCallnack.bind(null, Number(id)))
+    setData(data)
   }, [id])
 
-  const [comments, setComments] = useState(data ? data.comments : [])
+  const handleAddComment = useCallback(
+    handleSubmit(data => {
+      if (!data.comment) return
 
-  const { getDate, getTime } = useDate()
+      setData(prevState => {
+        if (!prevState) return undefined
 
-  const [text, setText] = useState('')
+        return {
+          ...prevState,
+          comments: [
+            ...(prevState?.comments || []),
+            createComments(data.comment),
+          ],
+        }
+      })
 
-  const handleAddComment = useCallback(() => {
-    setComments(prevState => [
-      ...prevState,
-      {
-        id: new Date().getTime(),
-        text: text,
-        date: String(new Date()),
-        user: {
-          id: 1,
-          userName: 'Курбан',
-        },
-      },
-    ])
-
-    setText('')
-  }, [comments, text])
+      reset()
+    }),
+    []
+  )
 
   if (!data) {
     return (
@@ -57,20 +64,20 @@ const ForumTopic: FC = () => {
         <div className={style.subTitle}>
           <span>{'Автор: '}</span>
 
-          <span>{data.author.userName}</span>
+          <span>{data.author?.userName}</span>
         </div>
 
         <div className={style.subTitle}>
           <span>{'Дата создания: '}</span>
 
-          <span>{getDate(data.date)}</span>
+          <span>{data.date ? transformDate(data.date) : ''}</span>
         </div>
       </div>
 
       <div className={style.comments}>
         <ul>
-          {comments.map((item, key) => (
-            <li key={key}>
+          {data.comments?.map(item => (
+            <li key={`${id}-${item.id}`}>
               <div className={style.commentsLeft}>
                 <div className={style.commentsAvatar}>
                   <img
@@ -82,7 +89,7 @@ const ForumTopic: FC = () => {
                 <div className={style.commentsName}>{item.user.userName}</div>
 
                 <div className={style.commentsDate}>
-                  {`${getDate(item.date)} ${getTime(item.date)}`}
+                  {`${transformDate(item.date)} ${transformTime(item.date)}`}
                 </div>
               </div>
 
@@ -95,19 +102,11 @@ const ForumTopic: FC = () => {
       <div className={style.form}>
         <form onSubmit={handleAddComment}>
           <div className={style.formInputBlock}>
-            <Input
-              name="comment"
-              placeholder={'ввод'}
-              value={text}
-              onChange={e => {
-                setText(e.target.value)
-              }}
-            />
+            <Input {...register('comment')} placeholder={'ввод'} />
           </div>
 
           <div className={style.formButtonBlock}>
             <Button
-              disabled={!text}
               style={{
                 height: '45px',
               }}>
@@ -120,4 +119,16 @@ const ForumTopic: FC = () => {
   )
 }
 
-export default ForumTopic
+function createComments(comment: string) {
+  return {
+    id: new Date().getTime(),
+    text: comment,
+    date: String(new Date()),
+    user: {
+      id: 1,
+      userName: 'Курбан',
+    },
+  }
+}
+
+export default memo(ForumTopic)

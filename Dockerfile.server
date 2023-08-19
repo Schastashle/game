@@ -13,8 +13,7 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
-RUN yarn lerna bootstrap 
-RUN yarn build
+RUN yarn lerna bootstrap && yarn build
 
 # два образ
 FROM node:$NODE_VERSION-buster-slim as production 
@@ -22,8 +21,7 @@ WORKDIR /app
 
 # копируем собранного клиента и собранный сервер
 # в собранном сервере только наш код
-COPY --from=builder /app_build/packages/server/dist/ /app/
-COPY --from=builder /app_build/packages/server/package.json /app/package.json
+COPY --from=builder /app_build/packages/server/dist/ /app_build/packages/server/package.json /app/
 
 # серверный пакеты запускаются из node_modules, установим их
 RUN yarn install --production=true 

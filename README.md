@@ -61,24 +61,28 @@
 
 ## Production окружение в докере
 Перед первым запуском выполните `node init.js` (чтобы проверить, что сервер работает?)
-
+Для wsl сначала запускаем `sudo service docker start`
+Если надо без sudo, читать тут https://docs.docker.com/engine/install/linux-postinstall/
 
 `docker compose up` - запустит три сервиса
 1. nginx, раздающий клиентскую статику (client)
 2. node, ваш сервер (server)
 3. postgres, вашу базу данных (postgres)
+`docker compose up --build` создаеть образы перед запуском
+`docker compose up --detach` (`-d`) запуск контейнеров в фоновом режиме
+`cntr+c` оставить контейнеры
+
 
 Если вам понадобится только один сервис, просто уточните какой в команде
 `docker compose up {sevice_name}`, например `docker compose up server`
+Для осатльных команд так же можно указывать сервис
 
-Для wsl сначала запускаем `sudo service docker start`
-`docker compose build` - пересобрать
-`docker compose stop` остановить
-`docker compose start` запустить
-`docker compose down` удалить
+`docker compose build [sevice_name]` пересобрать
+`docker compose stop [sevice_name]` остановить
+`docker compose start [sevice_name]` запустить
+`docker compose down [sevice_name]` удалить
 
-cntr+c - stop
-docker exec -it prakticum-server bash
+`docker exec -it prakticum-server bash` - например, чтобы посмотреть файловую систему в запущенном контейнере prakticum-server
 
 
 ## ssr

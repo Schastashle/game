@@ -1,9 +1,9 @@
 version: "3.9"
 
+# Настройки созданной сети между сервисами
 networks:
-  default:
-    name: fiar_game
-    external: false
+    fiar_game:
+        driver: bridge 
 
 services:
     client:
@@ -16,14 +16,15 @@ services:
               CLIENT_PORT: ${CLIENT_PORT}
         restart: always
         ports:
-            - "${CLIENT_PORT}:${CLIENT_PORT}"
+            - "${CLIENT_PORT}:80"
         environment:
           - CLIENT_PORT=${CLIENT_PORT}
           - SERVER_PORT=${SERVER_PORT}
         env_file:
           - .env
         tty: true
-
+        networks:
+          - fiar_game
 
     server:
         container_name: prakticum-server
@@ -38,11 +39,15 @@ services:
             - "${SERVER_PORT}:${SERVER_PORT}"
         environment:
           SERVER_PORT: ${SERVER_PORT}
+          POSTGRES_HOST: postgres # имя сервиса с БД
         env_file:
           - .env
         tty: true
+        networks:
+          - fiar_game
         #depends_on:
         #  - postgres
+        # condition: service_completed_successfully
 
     postgres:
       image: postgres:14     
@@ -54,8 +59,31 @@ services:
         POSTGRES_DB: ${POSTGRES_DB}
       volumes:
         - ./tmp/pgdata:/var/lib/postgresql/data
+      healthcheck:
+        test: pg_isready -U postgres
       env_file:
         - .env
       tty: true
-      
+      networks:
+          - fiar_game
 
+    pgadmin:
+      container_name: pgadmin
+      image: dpage/pgadmin4:4.18
+      restart: always
+      # PGADMIN_DEFAULT_EMAIL и PGADMIN_DEFAULT_PASSWORD вводить для авторизации на http://localhost:8080/browser/
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@admin.com
+        PGADMIN_DEFAULT_PASSWORD: secret
+        PGADMIN_LISTEN_PORT: 80
+      ports:
+        - "8080:80"
+      volumes:
+        - ./tmp/pgadmin-data:/var/lib/pgadmin 
+      depends_on:
+        - postgres
+      networks:
+        - fiar_game
+
+# Для pgadmin пришлось поставить sudo chown -R 5050:5050 ./tmp/pgadmin-data
+# Для postgres postgres sudo chown -R 5050:5050 ./tmp/pgdata

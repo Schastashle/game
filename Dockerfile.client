@@ -1,6 +1,7 @@
 ARG NODE_VERSION=16
 ARG CLIENT_PORT=3001
 
+# раз образ
 FROM node:$NODE_VERSION-buster as base
 
 WORKDIR /app
@@ -15,7 +16,7 @@ COPY . .
 RUN yarn lerna bootstrap
 RUN rm -rf /app/packages/client/dist/ && yarn build --scope=client
 
-
+# два образ
 FROM nginx:latest as production
 WORKDIR /app
 

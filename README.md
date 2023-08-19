@@ -60,7 +60,7 @@
 Все ваши PR будут автоматически деплоиться на vercel. URL вам предоставит деплоящий бот
 
 ## Production окружение в докере
-Перед первым запуском выполните `node init.js`
+Перед первым запуском выполните `node init.js` (чтобы проверить, что сервер работает?)
 
 
 `docker compose up` - запустит три сервиса
@@ -70,6 +70,16 @@
 
 Если вам понадобится только один сервис, просто уточните какой в команде
 `docker compose up {sevice_name}`, например `docker compose up server`
+
+Для wsl сначала запускаем `sudo service docker start`
+`docker compose build` - пересобрать
+`docker compose stop` остановить
+`docker compose start` запустить
+`docker compose down` удалить
+
+cntr+c - stop
+docker exec -it prakticum-server bash
+
 
 ## ssr
 cd packages/client

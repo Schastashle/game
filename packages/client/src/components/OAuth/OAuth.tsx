@@ -4,6 +4,11 @@ import { useAppDispatch } from '../../hooks/reduxHooks'
 import axios from 'axios'
 import style from './oauth.module.css'
 import { getUser } from '../../store/slices/userSlice'
+import {
+  YANDEX_SERVICE_ID,
+  YANDEX_OAUTH,
+  REDIRECT_URI,
+} from '../../../constants/oauth'
 
 const OAuth: FC = () => {
   const [serviceId, setServiceId] = useState('')
@@ -15,9 +20,7 @@ const OAuth: FC = () => {
     // которую подставляем в ссылку кнопки
     const getServiceId = async () => {
       try {
-        const response = await fetch(
-          'https://ya-praktikum.tech/api/v2/oauth/yandex/service-id?redirect_url=http%3A%2F%2Flocalhost%3A3000'
-        )
+        const response = await fetch(YANDEX_SERVICE_ID)
         return await response.json()
       } catch (error) {
         console.error(error)
@@ -38,9 +41,9 @@ const OAuth: FC = () => {
       try {
         // Отправляем запрос на авторизацию с кодом и url для редиректа
         const data = await axios
-          .post('https://ya-praktikum.tech/api/v2/oauth/yandex', {
+          .post(YANDEX_OAUTH, {
             code,
-            redirect_uri: 'http://localhost:3000',
+            redirect_uri: REDIRECT_URI,
           })
           .then(res => res.data || null)
 

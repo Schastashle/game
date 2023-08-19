@@ -4,8 +4,9 @@ import User from '../../controllers/User'
 import removeSpecialCharacters from '../../utils/removeSpecialCharacters'
 
 const router = Router()
+const LOCAL_URL = `${BASE_URL}/user`
 
-router.get(`${BASE_URL}/user`, async (req, res) => {
+router.get(LOCAL_URL, async (req, res) => {
   const { id, name } = req.query
 
   if (!(id && name))

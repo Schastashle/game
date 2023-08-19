@@ -6,8 +6,9 @@ import User from '../../controllers/User'
 import removeSpecialCharacters from '../../utils/removeSpecialCharacters'
 
 const router = Router()
+const LOCAL_URL = `${BASE_URL}/topic`
 
-router.get(`${BASE_URL}/topic`, async (req, res) => {
+router.get(LOCAL_URL, async (req, res) => {
   const id: number | unknown = req.query?.id
 
   if (!id) return res.status(400).send('Param id is required.')
@@ -29,7 +30,7 @@ router.get(`${BASE_URL}/topics`, async (_req, res) => {
   res.json(topics)
 })
 
-router.post(`${BASE_URL}/topic`, async (req, res) => {
+router.post(LOCAL_URL, async (req, res) => {
   const { name, author_id, author_name } = req.body
 
   if (!(name && author_id))
@@ -48,7 +49,7 @@ router.post(`${BASE_URL}/topic`, async (req, res) => {
   return
 })
 
-router.delete(`${BASE_URL}/topic`, async (req, res) => {
+router.delete(LOCAL_URL, async (req, res) => {
   const { id } = req.body
 
   if (!id) return res.status(400).send('Param id is required.')

@@ -19,15 +19,15 @@ const OAuth: FC = () => {
     const getServiceId = async () => {
       try {
         const response = await fetch(VITE_YANDEX_SERVICE_ID as string)
-        return await response.json()
+        const data = await response.json()
+
+        setServiceId(data)
       } catch (error) {
         console.error(error)
       }
     }
 
-    getServiceId().then(({ service_id = '' }: { service_id: string }) => {
-      setServiceId(service_id)
-    })
+    getServiceId()
 
     // Получаем из параметров url код, который получаем после перехода
     // на страницу авторизации через OAuth Яндекса
@@ -38,12 +38,11 @@ const OAuth: FC = () => {
     const onAuth = async () => {
       try {
         // Отправляем запрос на авторизацию с кодом и url для редиректа
-        const data = await axios
-          .post(VITE_YANDEX_OAUTH as string, {
-            code,
-            redirect_uri: VITE_REDIRECT_URI,
-          })
-          .then(res => res.data || null)
+        const response = await axios.post(VITE_YANDEX_OAUTH as string, {
+          code,
+          redirect_uri: VITE_REDIRECT_URI,
+        })
+        const data = response.data || null
 
         // Если запрос возвращает ответ и он равен OK,
         // то отправляем запрос на получение данных о пользователе

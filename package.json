@@ -2,15 +2,15 @@
   "name": "client-server-template-with-vite",
   "private": true,
   "scripts": {
-    "bootstrap": "yarn && node init.js && lerna clean && yarn && lerna bootstrap",
-    "build": "lerna run build",
-    "dev:client": "lerna run dev  --scope=client",
-    "dev:server": "lerna run dev --scope=server",
-    "dev": "lerna run dev",
+    "bootstrap": "yarn && node init.js && lerna clean && yarn && lerna bootstrap && yarn linkup && yarn build",
+    "build:static": "lerna run build:static",
+    "build": "lerna run build && yarn build:static",
+    "dev": "lerna run dev:ssr ",
     "test": "lerna run test",
     "lint": "lerna run lint",
     "format": "lerna run format",
-    "preview": "lerna run preview"
+    "preview": "lerna run preview",
+    "linkup": "cd ./packages/client && yarn unlink -s && yarn link -s && cd ../server && yarn link 'client'"
   },
   "license": "MIT",
   "workspaces": [

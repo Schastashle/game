@@ -24,16 +24,9 @@ export default class CanvasAPI {
     return this.canvas
   }
 
-  protected drawLine({
-    moveTo,
-    lineTo,
-  }: {
-    moveTo: Indexed<number>
-    lineTo: Indexed<number>
-  }): void {
+  protected drawLine({ moveTo }: { moveTo: Indexed<number> }): void {
     this.ctx.beginPath()
     this.ctx.moveTo(moveTo.x, moveTo.y)
-    this.ctx.lineTo(lineTo.x, lineTo.y)
     this.ctx.closePath()
     this.ctx.stroke()
   }

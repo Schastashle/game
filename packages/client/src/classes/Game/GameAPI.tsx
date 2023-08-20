@@ -136,16 +136,14 @@ export default class GameAPI extends CanvasAPI {
   private drawGridLines(axis: axisType, count: number, size: number) {
     for (let index = 1; index < count; index++) {
       const offset = this.getCellOffset(axis, index)
-      let moveTo, lineTo
+      let moveTo
 
       if (axis === axisType.column) {
         moveTo = { x: 0, y: offset }
-        lineTo = { x: size, y: offset }
       } else {
         moveTo = { x: offset, y: 0 }
-        lineTo = { x: offset, y: size }
       }
-      this.drawLine({ moveTo, lineTo })
+      this.drawLine({ moveTo })
     }
   }
 

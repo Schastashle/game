@@ -4,11 +4,9 @@ import { useAppDispatch } from '../../hooks/reduxHooks'
 import axios from 'axios'
 import style from './oauth.module.css'
 import { getUser } from '../../store/slices/userSlice'
-import {
-  YANDEX_SERVICE_ID,
-  YANDEX_OAUTH,
-  REDIRECT_URI,
-} from '../../../constants/oauth'
+
+const { VITE_YANDEX_SERVICE_ID, VITE_YANDEX_OAUTH, VITE_REDIRECT_URI } =
+  import.meta.env
 
 const OAuth: FC = () => {
   const [serviceId, setServiceId] = useState('')
@@ -20,7 +18,7 @@ const OAuth: FC = () => {
     // которую подставляем в ссылку кнопки
     const getServiceId = async () => {
       try {
-        const response = await fetch(YANDEX_SERVICE_ID)
+        const response = await fetch(VITE_YANDEX_SERVICE_ID as string)
         return await response.json()
       } catch (error) {
         console.error(error)
@@ -41,9 +39,9 @@ const OAuth: FC = () => {
       try {
         // Отправляем запрос на авторизацию с кодом и url для редиректа
         const data = await axios
-          .post(YANDEX_OAUTH, {
+          .post(VITE_YANDEX_OAUTH as string, {
             code,
-            redirect_uri: REDIRECT_URI,
+            redirect_uri: VITE_REDIRECT_URI,
           })
           .then(res => res.data || null)
 

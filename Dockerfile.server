@@ -1,9 +1,10 @@
 ARG NODE_VERSION=16
 ARG SERVER_PORT=3001
 
+# раз образ
 FROM node:$NODE_VERSION-buster as base
 
-WORKDIR /app
+WORKDIR /app_build
 
 FROM base as builder
 
@@ -12,16 +13,22 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
-RUN yarn lerna bootstrap
-RUN rm -rf /app/packages/server/dist/ && yarn build --scope=server
+RUN yarn lerna bootstrap && yarn build
 
-
-FROM node:$NODE_VERSION-buster-slim as production
+# два образ
+FROM node:$NODE_VERSION-buster-slim as production 
 WORKDIR /app
 
-COPY --from=builder /app/packages/server/dist/ /app/
-COPY --from=builder /app/packages/server/package.json /app/package.json
-RUN yarn install --production=true
+# копируем собранного клиента и собранный сервер
+# в собранном сервере только наш код
+COPY --from=builder /app_build/packages/server/dist/ /app_build/packages/server/package.json /app/
+
+# серверный пакеты запускаются из node_modules, установим их
+RUN yarn install --production=true 
+
+# client для ssr делали пакетом, скопируем его в node_modules для сервера
+# поробовать разделить prod и dev режимы? для dev нужна вся папка с клиентом, для prod только некоторые файлы
+COPY --from=builder /app_build/packages/client /app/node_modules/client
 
 EXPOSE $SERVER_PORT
 CMD [ "node", "/app/index.js" ]

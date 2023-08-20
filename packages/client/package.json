@@ -4,8 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "NODE_ENV=production && tsc && vite build --config vite.config.ts",
-    "build:ssr": "tsc && vite build --config ssr.config.ts",
+    "build": "yarn build:ssr && yarn build:dev",
+    "build:dev": "rm -rf ./dist && tsc && vite build --config vite.config.ts",
+    "build:ssr": "rm -rf ./ssr-dist && tsc && vite build --config ssr.config.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",

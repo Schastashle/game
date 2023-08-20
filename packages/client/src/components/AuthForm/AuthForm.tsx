@@ -1,5 +1,6 @@
-import { FC, FormHTMLAttributes, useCallback } from 'react'
+import { FC, FormHTMLAttributes, useCallback, memo } from 'react'
 import { Button, LinkItem, Input } from '../UI'
+import { OAuth } from '../index'
 import { FieldValues, useForm } from 'react-hook-form'
 import { useAppDispatch } from '../../hooks/reduxHooks'
 import { signinUser, signupUser } from '../../store/slices/userSlice'
@@ -12,7 +13,12 @@ export interface IAuthFormProps extends FormHTMLAttributes<HTMLFormElement> {
   title: string
   linkTo: string
   linkText: string
-  inputs: { name: string; type: string; placeholder: string }[]
+  inputs: {
+    name: string
+    type: string
+    placeholder: string
+    autoComplete?: string
+  }[]
   schema: LoginSchemas
 }
 const AuthForm: FC<IAuthFormProps> = ({
@@ -30,31 +36,36 @@ const AuthForm: FC<IAuthFormProps> = ({
     formState: { errors },
   } = useForm<FieldValues>({ resolver: zodResolver(schema) })
 
-  const onSubmit = useCallback((data: FieldValues) => {
-    if (linkTo.includes('signup')) {
-      dispatch(signinUser(data as IUserLogin))
-    } else {
-      dispatch(signupUser(data as IUserSignup))
-    }
-  }, [])
+  const onSubmit = useCallback(
+    handleSubmit((data: FieldValues) => {
+      if (linkTo.includes('signup')) {
+        dispatch(signinUser(data as IUserLogin))
+      } else {
+        dispatch(signupUser(data as IUserSignup))
+      }
+    }),
+    []
+  )
 
   return (
-    <form className={style.form} onSubmit={handleSubmit(onSubmit)}>
+    <form className={style.form} onSubmit={onSubmit}>
       <h1 className={style.title}>{title}</h1>
-      {inputs.map(({ name, type, placeholder }) => (
+      {inputs.map(({ name, type, placeholder, autoComplete }) => (
         <Input
           key={name}
           name={name}
           type={type}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           register={register}
           error={errors[name]?.message as string}
         />
       ))}
       <Button type="submit">Отправить</Button>
+      <OAuth />
       <LinkItem to={linkTo} text={linkText} />
     </form>
   )
 }
 
-export default AuthForm
+export default memo(AuthForm)

@@ -1,53 +1,31 @@
-import { FC, ReactNode, useCallback, useState } from 'react'
+import { FC, ReactNode, useCallback, useState, useEffect, memo } from 'react'
 import style from './forumLayout.module.css'
-import { NavLink, Outlet, useParams } from 'react-router-dom'
-import { useDate } from '../../../../hooks/useDate'
+import { NavLink } from 'react-router-dom'
+import { transformDate } from '../../../../utils/dataTools'
 import { Button, Input } from '../../../../components'
 import Dialog from '../../../../components/UI/Dialog/Dialog'
 import { useDialog } from '../../../../components/UI/Dialog/bll'
+import { FieldValues, useForm } from 'react-hook-form'
+import { TopicsType } from '../../../../types/ForumTypes'
 
 interface ForumLayoutType {
   children: ReactNode | string
-  topics: {
-    id: number
-    name: string
-    comments: {
-      id: number
-      user: {
-        id: number
-        userName: string
-      }
-      text: string
-      date: string
-    }[]
-    author: {
-      id: number
-      userName: string
-    }
-    date: string
-  }[]
+  topics: TopicsType[]
+  id: number
 }
 
-const ForumLayout: FC<ForumLayoutType> = props => {
-  const { children, topics } = props
-  const { id } = useParams()
+function ForumLayout(props: ForumLayoutType) {
+  const { children, topics, id } = props
 
-  const { getDate } = useDate()
   const { isActive, onOpen, onClose } = useDialog()
-  const [newTopicName, setNewTopicName] = useState('')
 
-  // временное состояние для работы с мок данными добавления топика
-  const [list, setList] = useState(topics)
-
-  const handleAddTopic = useCallback(() => {
-    onClose()
-
+  const addTopic = useCallback((name: string) => {
     setList(prev => {
       return [
         ...prev,
         {
           id: new Date().getTime(),
-          name: newTopicName,
+          name,
           date: String(new Date()),
           comments: [],
           author: {
@@ -57,24 +35,17 @@ const ForumLayout: FC<ForumLayoutType> = props => {
         },
       ]
     })
+  }, [])
 
-    setNewTopicName('')
-  }, [list, newTopicName])
+  // временное состояние для работы с мок данными добавления топика
+  const [list, setList] = useState(topics)
 
   return (
     <div className={style.block}>
       <h1 className={style.title}>Форум игры</h1>
 
       <main className={style.main}>
-        <article className={style.topic}>
-          {id ? (
-            <>
-              <Outlet />
-            </>
-          ) : (
-            children
-          )}
-        </article>
+        <article className={style.topic}>{children}</article>
 
         <aside className={style.sidebar}>
           <div className={style.sidebarHeader}>
@@ -100,7 +71,7 @@ const ForumLayout: FC<ForumLayoutType> = props => {
                   <div className={style.sidebarListItemTop}>
                     <div
                       className={style.sidebarListItemLink}
-                      data-active={Number(id) === item.id ? 1 : undefined}>
+                      data-active={id === item.id ? 1 : undefined}>
                       <NavLink to={`/forum/${item.id}`}>{item.name}</NavLink>
                     </div>
 
@@ -113,7 +84,7 @@ const ForumLayout: FC<ForumLayoutType> = props => {
                     <p>
                       <span>{'Дата создания: '}</span>
 
-                      <span>{getDate(item.date)}</span>
+                      <span>{transformDate(item.date)}</span>
                     </p>
 
                     <p>
@@ -129,34 +100,60 @@ const ForumLayout: FC<ForumLayoutType> = props => {
         </aside>
       </main>
 
-      <Dialog open={isActive} onClose={onClose} size={'middle'}>
-        <form className={style.modal} onSubmit={handleAddTopic}>
-          <h3 className={style.modalTitle}>Создать новую тему</h3>
-
-          <div className={style.modalInputBlock}>
-            <Input
-              name="title"
-              placeholder={'новая тема'}
-              value={newTopicName}
-              onChange={e => {
-                setNewTopicName(e.target.value)
-              }}
-            />
-          </div>
-
-          <div className={style.modalButtonBlock}>
-            <Button
-              disabled={!newTopicName}
-              style={{
-                width: '100%',
-              }}>
-              Создать
-            </Button>
-          </div>
-        </form>
-      </Dialog>
+      <ForumDialog addTopic={addTopic} isActive={isActive} onClose={onClose} />
     </div>
   )
 }
 
-export default ForumLayout
+type DialogProps = {
+  isActive: boolean
+  onClose: () => void
+  addTopic: (name: string) => void
+}
+
+// надо тестировать после добавления интерактивностей на страницу форума
+const ForumDialog: FC<DialogProps> = memo(({ isActive, onClose, addTopic }) => {
+  const { register, handleSubmit, reset } = useForm()
+
+  // добавление темы
+  const handleAddTopic = useCallback(
+    handleSubmit((data: FieldValues) => {
+      addTopic(data.title)
+
+      onClose()
+    }),
+    []
+  )
+
+  useEffect(() => {
+    if (!isActive) reset()
+  }, [isActive])
+
+  return (
+    <Dialog
+      open={isActive}
+      onClose={onClose}
+      size={'middle'}
+      key="addTopcDialog">
+      <form className={style.modal} onSubmit={handleAddTopic}>
+        <h3 className={style.modalTitle}>Создать новую тему</h3>
+
+        <div className={style.modalInputBlock}>
+          <Input {...register('title')} placeholder={'новая тема'} />
+        </div>
+
+        <div className={style.modalButtonBlock}>
+          <Button
+            type="submit"
+            style={{
+              width: '100%',
+            }}>
+            Создать
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  )
+})
+
+export default memo(ForumLayout)

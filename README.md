@@ -52,10 +52,6 @@
 В проекте используется [lefthook](https://github.com/evilmartians/lefthook)
 Если очень-очень нужно пропустить проверки, используйте `--no-verify` (но не злоупотребляйте :)
 
-## Ой, ничего не работает :(
-
-Откройте issue, я приду :)
-
 ## Автодеплой статики на vercel
 Зарегистрируйте аккаунт на [vercel](https://vercel.com/)
 Следуйте [инструкции](https://vitejs.dev/guide/static-deploy.html#vercel-for-git)
@@ -64,13 +60,41 @@
 Все ваши PR будут автоматически деплоиться на vercel. URL вам предоставит деплоящий бот
 
 ## Production окружение в докере
-Перед первым запуском выполните `node init.js`
-
+Перед первым запуском выполните `node init.js` (чтобы проверить, что сервер работает?)
+Для wsl сначала запускаем `sudo service docker start`
+Если надо без sudo, читать тут https://docs.docker.com/engine/install/linux-postinstall/
 
 `docker compose up` - запустит три сервиса
 1. nginx, раздающий клиентскую статику (client)
 2. node, ваш сервер (server)
 3. postgres, вашу базу данных (postgres)
+`docker compose up --build` создаеть образы перед запуском
+`docker compose up --detach` (`-d`) запуск контейнеров в фоновом режиме
+`cntr+c` оставить контейнеры
+
 
 Если вам понадобится только один сервис, просто уточните какой в команде
 `docker compose up {sevice_name}`, например `docker compose up server`
+Для осатльных команд так же можно указывать сервис
+
+`docker compose build [sevice_name]` пересобрать
+`docker compose stop [sevice_name]` остановить
+`docker compose start [sevice_name]` запустить
+`docker compose down [sevice_name]` удалить
+
+`docker exec -it prakticum-server bash` - например, чтобы посмотреть файловую систему в запущенном контейнере prakticum-server
+
+
+## ssr
+cd packages/client
+yarn link
+cd ../server
+yarn link client
+
+Если надо найти какой процесс держит порт 3001
+lsof -i :3001 -t
+
+## Утечки памяти
+Память течет, но понять это настоящие утечки или псевдо утечки из-за теневого дом или useCallback, useMemo не удалось
+Память чаще течет, но редко бывают ситуации - что память возвращается, чтобы искать настоящие утечки надо убирать
+useCallback, useMemo и проверять без них

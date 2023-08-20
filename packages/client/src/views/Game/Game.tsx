@@ -1,4 +1,12 @@
-import React, { FC, useCallback, useEffect, useState, useRef } from 'react'
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  memo,
+  forwardRef,
+} from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
 import { gridParams, cellParams, gems } from './constants'
@@ -13,69 +21,76 @@ import { useDialog } from '../../components/UI/Dialog/bll'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
-import { GameState } from '../../types/GameState'
+import { GameResult, GameState } from '../../types/GameState'
+import SVGSpinner from '../../components/SVGSpinner/SVGSpinner'
 
-const INTERVAL_MS = 1 * 60 * 1000
+const INTERVAL_MS = 1 * 20 * 1000 // 5 * 1000 //
 const MIN_GEM = 70
 
-const Game: FC = () => {
-  // createRef для хранения ссылок на dom, будут менятся при рендере
-  const canvasWrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
-  const wrapperRef: React.RefObject<HTMLDivElement> = React.createRef()
+function createGame() {
+  const gameAPI = new GameAPI(
+    gridParams.columns,
+    gridParams.rows,
+    cellParams,
+    gems
+  )
+  gameAPI.initialize()
+  return gameAPI
+}
 
+const Game: FC = () => {
   const dispatch = useAppDispatch()
   const { gameState, startTime, gameResult } = useAppSelector(
     state => state.game
   )
-  const { user } = useAppSelector(state => state.user)
-
-  const navigate = useNavigate()
+  const user = useAppSelector(state => state.user.user)
 
   const [counts, setCounts] = useState(0)
   const { isActive, onOpen, onClose } = useDialog()
   const [isFullscreenMode, setIsFullScreen] = useState(false)
-  const refGame = useRef<{ gameAPI: GameAPI; timerId: number }>()
+  const refGame = useRef<{ gameAPI: GameAPI; timerId?: number }>({
+    gameAPI: createGame(),
+  })
   const refCounts = useRef<number>(0)
+  // dom ref
+  const canvasWrapperRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // создаем игру
-  useEffect(() => {
-    if (!refGame.current) {
-      const gameAPI = new GameAPI(
-        gridParams.columns,
-        gridParams.rows,
-        cellParams,
-        gems
-      )
-      gameAPI.initialize()
-
-      const startTime = new Date().getTime()
-      const timerId = setTimeout(endTimer, INTERVAL_MS) as unknown as number
-
-      refGame.current = { gameAPI, timerId }
-
-      dispatch(gameSliceActions.play({ startTime }))
-    }
-  }, [])
-
+  // после каждого рендеринга
   // добавляем канву от игры к компоненту
   useEffect(() => {
     const parent = canvasWrapperRef.current
     const canvas = refGame.current?.gameAPI.getCanvas()
-    if (canvas) parent?.appendChild(canvas)
+    if (parent && canvas && canvas.parentElement !== parent)
+      parent?.appendChild(canvas)
+  })
 
-    return () => {
-      if (canvas) parent?.removeChild(canvas)
-    }
-  }, [canvasWrapperRef])
-
-  // ждем окончания игры, показываем окно
   useEffect(() => {
-    if (gameState === GameState.stop) {
+    if (gameState === GameState.ini) {
+      const startTime = new Date()
+      const timerId = setTimeout(endTimer, INTERVAL_MS) as unknown as number
+      refGame.current.timerId = timerId
+      dispatch(gameSliceActions.play({ startTime: startTime.getTime() }))
+    } else if (gameState === GameState.stop) {
+      // ждем окончания игры, показываем окно
       clearTimeout(refGame.current?.timerId)
       refGame.current?.gameAPI.finished()
       onOpen()
     }
   }, [gameState])
+
+  // сохраняем результат, если победили
+  useEffect(() => {
+    if (user?.login && gameResult?.winner) {
+      dispatch(
+        addUserToLeaderboard({
+          userId: user.id,
+          scoresFir: gameResult.counts,
+          userName: user.login,
+        })
+      )
+    }
+  }, [gameResult])
 
   // реагируем на окончание таймера
   const endTimer = useCallback(() => {
@@ -117,24 +132,8 @@ const Game: FC = () => {
 
       setIsFullScreen(!isFullscreenMode)
     },
-    [canvasWrapperRef, isFullscreenMode]
+    [isFullscreenMode]
   )
-
-  const onFinished = () => {
-    if (user?.login) {
-      dispatch(
-        addUserToLeaderboard({
-          userId: user.id,
-          scoresFir: counts,
-          userName: user.login,
-        })
-      )
-    }
-  }
-
-  const gotoResult = useCallback(() => {
-    navigate('/game/finish')
-  }, [])
 
   const getMSec = useCallback(
     (date: Date) => {
@@ -144,54 +143,82 @@ const Game: FC = () => {
   )
 
   return (
-    <div ref={wrapperRef}>
-      <div className={styles.header}>
-        <div className={styles.timer}>
-          {startTime && (
-            <Timer getMSec={getMSec} played={gameState === GameState.play} />
-          )}
-        </div>
-
-        <div>
-          <Counter target={MIN_GEM} counts={counts} />
-        </div>
-
-        <div className={styles['game-controls']}>
-          <button
-            className={styles['button-fullscreen']}
-            onClick={toggleFullscreen}>
-            Переключить режим просмотра
-          </button>
-        </div>
-      </div>
-
-      <div
-        className={styles.game}
-        ref={canvasWrapperRef}
-        onClick={onSelectGem}></div>
-
-      {gameState === GameState.stop && (
-        <Dialog
-          open={isActive}
-          onClose={() => {
-            onClose()
-            gotoResult()
-          }}>
-          <h2 className={styles.dialogTitle}>
-            {gameResult!.winner ? <>Победа</> : <>Поражение</>}
-          </h2>
-
-          <p className={styles.dialogCounts}>Cчет: {gameResult!.counts}</p>
-
-          <div className={styles.dialogBtnBlock}>
-            <Button className={styles.dialogBtn} onClick={gotoResult}>
-              К результатам
-            </Button>
+    <>
+      <div ref={wrapperRef}>
+        <div className={styles.header}>
+          <div className={styles.timer}>
+            {startTime && (
+              <Timer getMSec={getMSec} played={gameState === GameState.play} />
+            )}
           </div>
-        </Dialog>
+
+          <div>
+            <Counter target={MIN_GEM} counts={counts} />
+          </div>
+
+          <div className={styles['game-controls']}>
+            <button
+              className={styles['button-fullscreen']}
+              onClick={toggleFullscreen}>
+              Переключить режим просмотра
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={styles.game}
+          ref={canvasWrapperRef}
+          onClick={onSelectGem}
+        />
+      </div>
+      {gameState === GameState.stop && (
+        <GameDialog
+          isActive={isActive}
+          onClose={onClose}
+          gameResult={gameResult}
+        />
       )}
-    </div>
+    </>
   )
 }
 
+type DialogProps = {
+  gameResult?: GameResult
+  isActive: boolean
+  onClose: () => void
+}
+
+const GameDialog: FC<DialogProps> = memo(
+  ({ gameResult, isActive, onClose }) => {
+    const navigate = useNavigate()
+
+    const onCloseDialog = useCallback(() => {
+      onClose() // непонятно
+      navigate('/game/finish')
+    }, [])
+
+    const gotoFinish = useCallback(() => {
+      navigate('/game/finish')
+    }, [])
+
+    return (
+      <Dialog open={isActive} onClose={onCloseDialog}>
+        <h2 className={styles.dialogTitle}>
+          {gameResult?.winner ? <>Победа</> : <>Поражение</>}
+        </h2>
+
+        <p className={styles.dialogCounts}>Cчет: {gameResult?.counts}</p>
+
+        <div className={styles.dialogBtnBlock}>
+          <Button className={styles.dialogBtn} onClick={gotoFinish}>
+            К результатам
+          </Button>
+        </div>
+      </Dialog>
+    )
+  }
+)
+
+// {gameState === GameState.stop && (
+// )}
 export default Game

@@ -9,7 +9,6 @@ import {
   Profile,
   Rating,
   ErrorPage,
-  ForumTopic,
 } from '../views'
 
 export default createBrowserRouter([
@@ -57,11 +56,5 @@ export default createBrowserRouter([
     path: 'forum',
     element: <Forum />,
     errorElement: <ErrorPage />,
-    children: [
-      {
-        path: ':id',
-        element: <ForumTopic />,
-      },
-    ],
   },
 ])

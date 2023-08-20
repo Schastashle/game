@@ -19,6 +19,7 @@ export default class Animation {
   private startValues: Obj
   private changeValues: Obj
   private units: Record<string, string>
+  private lastAnimateKey = 0
 
   constructor(target: HTMLElement | Obj) {
     this.target = target
@@ -48,6 +49,8 @@ export default class Animation {
   }
 
   private animate(timestamp: number) {
+    cancelAnimationFrame(this.lastAnimateKey)
+
     if (!this.startTime) {
       this.startTime = timestamp
     }
@@ -70,7 +73,7 @@ export default class Animation {
     }
 
     if (elapsed < this.duration) {
-      requestAnimationFrame(this.animate.bind(this))
+      this.lastAnimateKey = requestAnimationFrame(this.animate.bind(this))
     } else if (this.onComplete) {
       this.onComplete()
     }

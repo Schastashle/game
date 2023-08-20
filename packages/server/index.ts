@@ -2,12 +2,14 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import { createServer as createViteServer } from 'vite'
 import type { ViteDevServer } from 'vite'
-
-dotenv.config()
-
 import express from 'express'
 import * as fs from 'fs'
 import * as path from 'path'
+import { createProxyMiddleware } from 'http-proxy-middleware'
+import jsesc from 'jsesc'
+import { YandexAPIRepository } from './repositories/YandexAPIRepository'
+
+dotenv.config()
 
 const isDev = () => process.env.NODE_ENV === 'development'
 
@@ -16,20 +18,31 @@ async function startServer() {
   app.use(cors())
   const port = Number(process.env.SERVER_PORT) || 3001
 
-  let vite: ViteDevServer | undefined
+  let viteServer: ViteDevServer
   const distPath = path.dirname(require.resolve('client/dist/index.html'))
   const srcPath = path.dirname(require.resolve('client'))
   const ssrClientPath = require.resolve('client/ssr-dist/client.cjs')
 
   if (isDev()) {
-    vite = await createViteServer({
+    viteServer = await createViteServer({
       server: { middlewareMode: true },
       root: srcPath,
       appType: 'custom',
     })
 
-    app.use(vite.middlewares)
+    app.use(viteServer.middlewares)
   }
+
+  app.use(
+    '/api/v2',
+    createProxyMiddleware({
+      changeOrigin: true,
+      cookieDomainRewrite: {
+        '*': '',
+      },
+      target: 'https://ya-praktikum.tech',
+    })
+  )
 
   app.get('/api', (_, res) => {
     res.json('👋 Howdy from the server :)')
@@ -53,26 +66,43 @@ async function startServer() {
       } else {
         template = fs.readFileSync(path.resolve(srcPath, 'index.html'), 'utf-8')
 
-        template = await vite!.transformIndexHtml(url, template)
+        template = await viteServer.transformIndexHtml(url, template)
       }
 
-      let render: (url: string) => Promise<string>
+      interface SSRModule {
+        render: (
+          url: string,
+          repository: unknown
+        ) => Promise<[Record<string, unknown>, string]>
+      }
 
-      if (!isDev()) {
-        render = (await import(ssrClientPath)).render
+      let ssrModule: SSRModule
+
+      if (isDev()) {
+        ssrModule = (await viteServer.ssrLoadModule(
+          path.resolve(srcPath, 'ssr.tsx')
+        )) as SSRModule
       } else {
-        render = (await vite!.ssrLoadModule(path.resolve(srcPath, 'ssr.tsx')))
-          .render
+        ssrModule = await import(ssrClientPath)
       }
 
-      const appHtml = await render(req.url)
-
-      const html = template.replace(`<!--ssr-outlet-->`, appHtml)
+      const { render } = ssrModule
+      const [initialState, appHtml] = await render(
+        url,
+        new YandexAPIRepository(req.headers['cookie'])
+      )
+      const initStateSerialized = jsesc(JSON.stringify(initialState), {
+        json: true,
+        isScriptContext: true,
+      })
+      const html = template
+        .replace(`<!--ssr-outlet-->`, appHtml)
+        .replace('<!--store-data-->', initStateSerialized)
 
       res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
     } catch (e) {
       if (isDev()) {
-        vite!.ssrFixStacktrace(e as Error)
+        viteServer.ssrFixStacktrace(e as Error)
       }
       next(e)
     }

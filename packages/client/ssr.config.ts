@@ -15,7 +15,7 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        dir: 'ssr-dist',
+        dir: 'dist-ssr',
       },
     },
     target: 'esnext',

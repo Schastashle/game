@@ -1,27 +1,21 @@
 import { useEffect } from 'react'
 import AppRouter from './router/AppRouter'
-import { useAppDispatch, useAppSelector } from './hooks/reduxHooks'
-import { getUser } from './store/slices/userSlice'
+import { useAppSelector } from './hooks/reduxHooks'
+import { SERVER_URL } from './constants'
 
 function App() {
-  const dispatch = useAppDispatch()
   const { isAuth } = useAppSelector(state => state.user)
 
-  // временно скрыл, чтобы не было ошибок в консоли
-  // useEffect(() => {
-  //   const fetchServerData = async () => {
-  //     const url = `http://localhost:${__SERVER_PORT__}`
-  //     const response = await fetch(url)
-  //     const data = await response.json()
-  //     console.log(data)
-  //   }
-
-  //   fetchServerData()
-  // }, [])
-
   useEffect(() => {
-    dispatch(getUser())
-  }, [isAuth])
+    const fetchServerData = async () => {
+      const url = `${SERVER_URL}/api`
+      const response = await fetch(url)
+      const data = await response.json()
+      console.log(data)
+    }
+
+    fetchServerData()
+  }, [])
 
   return <AppRouter isAuth={isAuth} />
 }

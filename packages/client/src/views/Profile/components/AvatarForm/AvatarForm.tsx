@@ -6,7 +6,7 @@ import { FieldValues, useForm } from 'react-hook-form'
 import axios from 'axios'
 import { useAppDispatch } from '../../../../hooks/reduxHooks'
 import { getUser } from '../../../../store/slices/userSlice'
-import { BASE_URL } from '../../constants'
+import { API_ROOT } from '../../../../constants'
 
 interface IAvatarForm {
   disabled: boolean
@@ -34,7 +34,7 @@ const AvatarForm: FC<IAvatarForm> = ({ disabled, profile }) => {
     formData.append('avatar', data.avatar[0])
     try {
       await axios
-        .put(`${BASE_URL}/user/profile/avatar`, formData, {
+        .put(`${API_ROOT}/user/profile/avatar`, formData, {
           withCredentials: true,
         })
         .then(res => {
@@ -58,7 +58,7 @@ const AvatarForm: FC<IAvatarForm> = ({ disabled, profile }) => {
         transparent
         disabled={disabled}>
         <Avatar
-          src={`${avatar ? `${BASE_URL}/resources/${avatar}` : ''}`}
+          src={`${avatar ? `${API_ROOT}/resources${avatar}` : ''}`}
           size="xl"
         />
       </Button>

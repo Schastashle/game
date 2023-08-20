@@ -21,7 +21,8 @@
     "http-proxy-middleware": "^2.0.6",
     "jsesc": "^3.0.2",
     "pg": "^8.8.0",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "vite": "^3.0.7"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

@@ -8,10 +8,13 @@ import * as path from 'path'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import jsesc from 'jsesc'
 import { YandexAPIRepository } from './repositories/YandexAPIRepository'
+import { createClientAndConnect } from './db'
 
 dotenv.config()
 
 const isDev = () => process.env.NODE_ENV === 'development'
+
+createClientAndConnect()
 
 async function startServer() {
   const app = express()

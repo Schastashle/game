@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-// import { VitePWA } from 'vite-plugin-pwa'
+import { VitePWA } from 'vite-plugin-pwa'
 import react from '@vitejs/plugin-react'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -15,6 +15,12 @@ export default defineConfig({
   build: {
     target: 'esnext',
   },
+  esbuild: {
+    // minify: false,
+    minifyIdentifiers: false,
+    minifySyntax: false,
+    minifyWhitespace: false,
+  },
   plugins: [
     react(),
     // VitePWA({
@@ -24,6 +30,7 @@ export default defineConfig({
     //   devOptions: {
     //     enabled: false,
     //   },
+    //   selfDestroying: true,
     // }),
   ],
 })

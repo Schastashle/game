@@ -4,7 +4,7 @@ import { useAppSelector } from './hooks/reduxHooks'
 import { SERVER_URL } from './constants'
 
 function App() {
-  const { isAuth } = useAppSelector(state => state.user)
+  const isAuth = useAppSelector(state => state.user.isAuth)
 
   useEffect(() => {
     const fetchServerData = async () => {

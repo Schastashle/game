@@ -75,7 +75,7 @@ const AppRouter: FC<IAppRouter> = ({ isAuth }) => (
       path="/forum/:id"
       element={
         <RequireAuth>
-          <ForumTopic />
+          <Forum />
         </RequireAuth>
       }
     />

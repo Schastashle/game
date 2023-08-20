@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { IUser, IUserLogin, IUserSignup } from '../../types/IUser'
-import { API_ROOT } from '../../constants'
+import { API_ROOT } from '../../shared/constants'
 
 export interface IUserState {
   user: IUser | null

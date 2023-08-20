@@ -1,7 +1,7 @@
 import { UserRepository } from '../userService'
 import axios from 'axios'
 import { IUser } from '../../types/IUser'
-import { API_ROOT } from '../../constants'
+import { API_ROOT } from '../../shared/constants'
 
 export class YandexAPIRepository implements UserRepository {
   async getCurrent(): Promise<IUser> {

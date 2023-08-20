@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import AppRouter from './router/AppRouter'
 import { useAppSelector } from './hooks/reduxHooks'
-import { SERVER_URL } from './constants'
+import { SERVER_URL } from './shared/constants'
 
 function App() {
   const isAuth = useAppSelector(state => state.user.isAuth)

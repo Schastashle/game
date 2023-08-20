@@ -5,7 +5,7 @@ import { FieldValues, useForm } from 'react-hook-form'
 import axios from 'axios'
 import { useAppDispatch } from '../../../../hooks/reduxHooks'
 import { getUser } from '../../../../store/slices/userSlice'
-import { API_ROOT } from '../../../../constants'
+import { API_ROOT } from '../../../../shared/constants'
 import { useDialog } from '../../../../components/UI/Dialog/bll'
 
 interface IAvatarForm {

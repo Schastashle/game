@@ -45,9 +45,9 @@ services:
         tty: true
         networks:
           - fiar_game
-        #depends_on:
-        #  - postgres
-        # condition: service_completed_successfully
+        depends_on:
+          postgres:
+            condition: service_healthy
 
     postgres:
       image: postgres:14     
@@ -58,9 +58,12 @@ services:
         POSTGRES_USER: ${POSTGRES_USER}
         POSTGRES_DB: ${POSTGRES_DB}
       volumes:
-        - ./tmp/pgdata:/var/lib/postgresql/data
+        - ./pgdata:/var/lib/postgresql/data
       healthcheck:
-        test: pg_isready -U postgres
+        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+        interval: 1s
+        timeout: 5s
+        retries: 10
       env_file:
         - .env
       tty: true
@@ -79,11 +82,12 @@ services:
       ports:
         - "8080:80"
       volumes:
-        - ./tmp/pgadmin-data:/var/lib/pgadmin 
+        - ./pgadmin-data:/var/lib/pgadmin 
       depends_on:
         - postgres
       networks:
         - fiar_game
 
-# Для pgadmin пришлось поставить sudo chown -R 5050:5050 ./tmp/pgadmin-data
-# Для postgres postgres sudo chown -R 5050:5050 ./tmp/pgdata
+# Для pgadmin пришлось поставить sudo chmod -R 777 ./pgadmin-data
+# Для postgres postgres sudo chmod -R 777 ./pgdata
+# Если делать .gitkeep + папка, то ошибки от postgres

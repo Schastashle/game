@@ -1,3 +1,4 @@
+import CommentModel from '../models/Comment.model'
 import TopicModel from '../models/Topic.model'
 import type { stateMessage } from './types'
 
@@ -11,8 +12,9 @@ class Topic {
   async getTopic() {
     return await TopicModel.findOne({
       where: {
-        id: this.id as number,
+        topic_id: this.id as number,
       },
+      include: [CommentModel],
     })
   }
 
@@ -23,14 +25,6 @@ class Topic {
     })
 
     return topic.dataValues
-  }
-
-  async getTopicById() {
-    return await TopicModel.findOne({
-      where: {
-        id: this.id as number,
-      },
-    })
   }
 
   async getTopics() {

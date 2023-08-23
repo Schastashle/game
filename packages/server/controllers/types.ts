@@ -15,8 +15,6 @@ type IReply = {
   id?: number | null
   author_id?: number | null
   comment_id?: number | null
-  reply_id?: number | null
-  replies?: number[]
   text?: string | null
 }
 

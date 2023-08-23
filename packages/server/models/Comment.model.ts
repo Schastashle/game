@@ -1,12 +1,17 @@
 import {
   AutoIncrement,
+  BelongsTo,
   Column,
   DataType,
+  ForeignKey,
+  HasMany,
   Length,
   Model,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript'
+import Topic from './Topic.model'
+import Reply from './Reply.model'
 import { COMMENT_LENGTH_MIN, COMMENT_LENGTH_MAX } from './constants'
 
 @Table({
@@ -17,20 +22,28 @@ class CommentModel extends Model {
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.INTEGER)
-  override id: number
-
-  @Column(DataType.INTEGER)
-  topic_id: number
+  comment_id: number
 
   @Column(DataType.INTEGER)
   author_id: number
 
-  @Column(DataType.ARRAY(DataType.INTEGER))
-  replies: number[]
+  @ForeignKey(() => Topic)
+  @Column(DataType.INTEGER)
+  topic_id: number
+
+  @BelongsTo(() => Topic)
+  topic: Topic
 
   @Length({ max: COMMENT_LENGTH_MAX, min: COMMENT_LENGTH_MIN })
   @Column(DataType.STRING)
   text: string
+
+  @HasMany(() => Reply, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    hooks: true,
+  })
+  reply: Reply[]
 }
 
 export default CommentModel

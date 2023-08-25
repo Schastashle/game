@@ -23,14 +23,19 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    // VitePWA({
-    //   strategies: 'injectManifest',
-    //   srcDir: 'src',
-    //   filename: 'sw.js',
-    //   devOptions: {
-    //     enabled: false,
-    //   },
-    //   selfDestroying: true,
-    // }),
+    VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      devOptions: {
+        enabled: process.env.SW_DEV === 'true',
+        type: 'module',
+      },
+      // selfDestroying: true,
+      registerType: 'autoUpdate',
+      workbox: {
+        sourcemap: true,
+      },
+    }),
   ],
 })

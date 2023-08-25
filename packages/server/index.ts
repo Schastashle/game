@@ -58,6 +58,11 @@ async function startServer() {
   app.use('*', async (req, res, next) => {
     const url = req.originalUrl
 
+    if (!req.get('accept')?.includes('html')) {
+      next()
+      return
+    }
+
     try {
       let template: string
 
@@ -110,6 +115,10 @@ async function startServer() {
       next(e)
     }
   })
+
+  if (!isDev()) {
+    app.use('/', express.static(path.resolve(distPath)))
+  }
 
   app.listen(port, () => {
     console.log(`  ➜ 🎸 Server is listening on port: ${port}`)

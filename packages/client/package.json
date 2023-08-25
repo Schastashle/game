@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "vite ",
     "dev:ssr": "vite --config ssr.config.ts",
-    "build:static": "NODE_ENV=production && tsc && vite build --config vite.config.ts",
-    "build": "NODE_ENV=production && tsc && vite build --config ssr.config.ts",
+    "build:static": "rm -rf ./dist && NODE_ENV=production && tsc && vite build --config vite.config.ts",
+    "build": "rm -rf ./dist-ssr && NODE_ENV=production && tsc && vite build --config ssr.config.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",

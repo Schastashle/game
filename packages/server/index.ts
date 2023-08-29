@@ -10,7 +10,7 @@ import jsesc from 'jsesc'
 import { YandexAPIRepository } from './repositories/YandexAPIRepository'
 
 import bodyParser from 'body-parser'
-import cookieParser from 'cookie-parser'
+import cookieParser, { CookieParseOptions } from 'cookie-parser'
 
 import CommentRoute from './routes/v1/comment'
 import ReplyRoute from './routes/v1/reply'
@@ -31,8 +31,8 @@ async function startServer() {
   const app = express()
 
   app.use(cors())
-  app.use(bodyParser.json())
-  app.use(cookieParser())
+  app.use(BASE_URL, bodyParser.json())
+  app.use(cookieParser() as (options: CookieParseOptions) => void)
 
   app.use(BASE_URL, CheckAuth)
 
@@ -41,7 +41,7 @@ async function startServer() {
   app.use(TopicRoute)
   app.use(UserRoute)
 
-  const port = Number(process.env.SERVER_PORT) || 3001
+  const port = Number(process.env.SERVER_PORT)
 
   let viteServer: ViteDevServer
   const distPath = path.dirname(require.resolve('client/dist/index.html'))

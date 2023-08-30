@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '../hooks/reduxHooks'
 import { ReactNode, useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { getUser } from '../store/slices/userSlice'
+import { getUser, loginWithOAuth } from '../store/slices/userSlice'
 
 interface IRequireAuth {
   children: ReactNode
@@ -9,7 +9,6 @@ interface IRequireAuth {
 
 const RequireAuth = ({ children }: IRequireAuth) => {
   const dispatch = useAppDispatch()
-  // { isAuth } убираю, так как при этом лишние рендеры
   const isAuth = useAppSelector(state => state.user.isAuth)
   const [clientSide, setClientSide] = useState(false)
   const location = useLocation()
@@ -19,15 +18,30 @@ const RequireAuth = ({ children }: IRequireAuth) => {
     setClientSide(true)
   }, [])
 
+  const { search } = useLocation()
+
   useEffect(() => {
-    dispatch(getUser())
+    if (!isAuth) {
+      const urlParams = new URLSearchParams(search)
+      const code = urlParams.get('code')
+
+      code && dispatch(loginWithOAuth(code))
+    }
+  }, [search])
+
+  useEffect(() => {
+    isAuth && dispatch(getUser())
   }, [isAuth])
 
-  if (!isAuth && clientSide) {
-    return <Navigate to="/signin" state={{ from: location }} />
-  }
-
-  return <>{children}</>
+  return (
+    <>
+      {!isAuth && clientSide ? (
+        <Navigate to="/signin" state={{ from: location }} />
+      ) : (
+        children
+      )}
+    </>
+  )
 }
 
 export default RequireAuth

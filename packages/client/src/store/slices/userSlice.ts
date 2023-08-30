@@ -2,6 +2,7 @@ import axios from 'axios'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { IUser, IUserLogin, IUserSignup } from '../../types/IUser'
 import { API_ROOT } from '../../shared/constants'
+import { loginWithCode } from '../../api/OAuth'
 
 export interface IUserState {
   user: IUser | null
@@ -55,7 +56,22 @@ export const signinUser = createAsyncThunk<
 
     return true
   } catch (e) {
-    return rejectWithValue('Произошла ошибка авторизации')
+    return rejectWithValue(`Произошла ошибка авторизации ${e}`)
+  }
+})
+
+export const loginWithOAuth = createAsyncThunk<
+  void,
+  string,
+  { rejectValue: string }
+>('user/loginWithOAuth', async (code, { rejectWithValue }) => {
+  try {
+    const response = await loginWithCode(code)
+    if (!response?.request.status) {
+      return rejectWithValue('Произошла ошибка авторизации OAuth')
+    }
+  } catch (e) {
+    return rejectWithValue(`Произошла ошибка авторизации OAuth ${e}`)
   }
 })
 

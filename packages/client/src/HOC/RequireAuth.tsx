@@ -1,21 +1,47 @@
-import { useAppSelector } from '../hooks/reduxHooks'
-import { ReactNode } from 'react'
+import { useAppDispatch, useAppSelector } from '../hooks/reduxHooks'
+import { ReactNode, useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { getUser, loginWithOAuth } from '../store/slices/userSlice'
 
 interface IRequireAuth {
   children: ReactNode
 }
 
 const RequireAuth = ({ children }: IRequireAuth) => {
-  // { isAuth } убираю, так как при этом лишние рендеры
+  const dispatch = useAppDispatch()
   const isAuth = useAppSelector(state => state.user.isAuth)
+  const [clientSide, setClientSide] = useState(false)
   const location = useLocation()
 
-  if (!isAuth) {
-    return <Navigate to="/signin" state={{ from: location }} />
-  }
+  // исправляет "<Navigate> must not be used on the initial render in a <StaticRouter>"
+  useEffect(() => {
+    setClientSide(true)
+  }, [])
 
-  return <>{children}</>
+  const { search } = useLocation()
+
+  useEffect(() => {
+    if (!isAuth) {
+      const urlParams = new URLSearchParams(search)
+      const code = urlParams.get('code')
+
+      code && dispatch(loginWithOAuth(code))
+    }
+  }, [search])
+
+  useEffect(() => {
+    isAuth && dispatch(getUser())
+  }, [isAuth])
+
+  return (
+    <>
+      {!isAuth && clientSide ? (
+        <Navigate to="/signin" state={{ from: location }} />
+      ) : (
+        children
+      )}
+    </>
+  )
 }
 
 export default RequireAuth

@@ -1,73 +1,22 @@
-import { FC, useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { useAppDispatch } from '../../hooks/reduxHooks'
-import axios from 'axios'
+import { FC, useCallback } from 'react'
 import style from './oauth.module.css'
-import { getUser } from '../../store/slices/userSlice'
+import { getServiceId } from '../../api/OAuth'
 
-const { VITE_YANDEX_SERVICE_ID, VITE_YANDEX_OAUTH, VITE_REDIRECT_URI } =
-  import.meta.env
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
 
 const OAuth: FC = () => {
-  const [serviceId, setServiceId] = useState('')
-  const dispatch = useAppDispatch()
-  const location = useLocation()
-
-  useEffect(() => {
-    // Получаем service_id и записываем его в переменную,
-    // которую подставляем в ссылку кнопки
-    const getServiceId = async () => {
-      try {
-        const response = await fetch(VITE_YANDEX_SERVICE_ID as string)
-        const data = await response.json()
-
-        setServiceId(data)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    getServiceId()
-
-    // Получаем из параметров url код, который получаем после перехода
-    // на страницу авторизации через OAuth Яндекса
-    const queryString = location.state.from.search
-    const urlParams = new URLSearchParams(queryString)
-    const code = urlParams.get('code')
-
-    const onAuth = async () => {
-      try {
-        // Отправляем запрос на авторизацию с кодом и url для редиректа
-        const response = await axios.post(VITE_YANDEX_OAUTH as string, {
-          code,
-          redirect_uri: VITE_REDIRECT_URI,
-        })
-        const data = response.data || null
-
-        // Если запрос возвращает ответ и он равен OK,
-        // то отправляем запрос на получение данных о пользователе
-        if (data && data === 'OK') {
-          dispatch(getUser())
-        }
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    // Отправляем запрос на авторизацию только если есть код,
-    // получаемый при переходе на сервис Янедкс для авторизации
-    if (code) {
-      onAuth()
-    }
+  const handleLogin = useCallback(async () => {
+    const serviceId = await getServiceId()
+    window.location.replace(
+      `https://oauth.yandex.ru/authorize?response_type=code&client_id=${serviceId}&redirect_uri=${REDIRECT_URI}`
+    )
   }, [])
 
   return (
     <div className={style.container}>
       <div className={style.divider}>или</div>
 
-      <a
-        href={`https://oauth.yandex.ru/authorize?response_type=code&client_id=${serviceId}&redirect_uri=http://localhost:3000`}
-        className={style['oauth-provider']}>
+      <a href="#" onClick={handleLogin} className={style['oauth-provider']}>
         <svg
           width="32px"
           height="32px"

@@ -1,13 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { GameState, GameResult } from '../../../types/GameState'
 
-type StateType = {
+export interface IGameState {
   gameState: GameState
   gameResult?: GameResult
   startTime?: number
 }
 
-const initialState: StateType = {
+const initialState: IGameState = {
   gameState: GameState.ini,
 }
 

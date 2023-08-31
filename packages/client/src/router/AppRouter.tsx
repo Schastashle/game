@@ -12,7 +12,6 @@ import {
   Profile,
   FinishPage,
   Rating,
-  ForumTopic,
 } from '../views'
 
 interface IAppRouter {

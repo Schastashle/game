@@ -5,7 +5,6 @@ import React, {
   useState,
   useRef,
   memo,
-  forwardRef,
 } from 'react'
 
 import GameAPI from '../../classes/Game/GameAPI'
@@ -22,7 +21,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { addUserToLeaderboard } from '../../store/slices/leaderboardSlice'
 import { GameResult, GameState } from '../../types/GameState'
-import SVGSpinner from '../../components/SVGSpinner/SVGSpinner'
 
 const INTERVAL_MS = 1 * 20 * 1000 // 5 * 1000 //
 const MIN_GEM = 70
@@ -207,7 +205,7 @@ const GameDialog: FC<DialogProps> = memo(
           {gameResult?.winner ? <>Победа</> : <>Поражение</>}
         </h2>
 
-        <p className={styles.dialogCounts}>Cчет: {gameResult?.counts}</p>
+        <p className={styles.dialogCounts}>Счет: {gameResult?.counts}</p>
 
         <div className={styles.dialogBtnBlock}>
           <Button className={styles.dialogBtn} onClick={gotoFinish}>

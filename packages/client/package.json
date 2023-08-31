@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "yarn build:ssr && yarn build:dev",
-    "build:dev": "rm -rf ./dist && tsc && vite build --config vite.config.ts",
-    "build:ssr": "rm -rf ./ssr-dist && tsc && vite build --config ssr.config.ts",
+    "dev": "vite ",
+    "dev:ssr": "vite --config ssr.config.ts",
+    "build:static": "rm -rf ./dist && NODE_ENV=production && tsc && vite build --config vite.config.ts",
+    "build": "rm -rf ./dist-ssr && NODE_ENV=production && tsc && vite build --config ssr.config.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -41,7 +41,7 @@
     "lefthook": "^1.3.9",
     "prettier": "^2.7.1",
     "ts-jest": "^28.0.8",
-    "typescript": "^4.8.2",
+    "typescript": "^4.9.5",
     "vite": "^3.0.7"
   },
   "license": "MIT"

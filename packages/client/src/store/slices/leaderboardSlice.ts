@@ -4,17 +4,17 @@ import {
   ILeaderboardData,
   ILeaderboardResponse,
 } from '../../types/ILeaderboard'
+import { API_ROOT } from '../../shared/constants'
 
 const TEAM_NAME = 'FIAR'
-const BASE_URL = 'https://ya-praktikum.tech/api/v2'
 
-interface LeaderboardInitialState {
+export interface ILeaderboardState {
   status: string
   error: string | undefined
   leaderboard: ILeaderboardResponse[]
 }
 
-const initialState: LeaderboardInitialState = {
+const initialState: ILeaderboardState = {
   status: '',
   error: '',
   leaderboard: [],
@@ -27,7 +27,7 @@ export const addUserToLeaderboard = createAsyncThunk<
 >('leaderboard/addUserToLeaderboard', async (query, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/leaderboard`,
+      `${API_ROOT}/leaderboard`,
       {
         data: query,
         ratingFieldName: 'scoresFir',
@@ -51,7 +51,7 @@ export const getLeaderboard = createAsyncThunk<
 >('leaderboard/getLeaderboard', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/leaderboard/all`,
+      `${API_ROOT}/leaderboard/all`,
       {
         ratingFieldName: 'scoresFir',
         cursor: 0,
@@ -75,7 +75,7 @@ export const getTeamLeaderboard = createAsyncThunk<
 >('leaderboard/getTeamLeaderboard', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/leaderboard/${TEAM_NAME}`,
+      `${API_ROOT}/leaderboard/${TEAM_NAME}`,
       {
         ratingFieldName: 'scoresFir',
         cursor: 0,
@@ -92,13 +92,13 @@ export const getTeamLeaderboard = createAsyncThunk<
   }
 })
 
-const setLoading = (state: LeaderboardInitialState) => {
+const setLoading = (state: ILeaderboardState) => {
   state.status = 'loading'
   state.error = ''
 }
 
 const setRejected = (
-  state: LeaderboardInitialState,
+  state: ILeaderboardState,
   action: PayloadAction<string | undefined>
 ) => {
   state.status = 'rejected'

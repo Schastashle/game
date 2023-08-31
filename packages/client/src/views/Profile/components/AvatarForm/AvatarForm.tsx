@@ -5,13 +5,14 @@ import { FieldValues, useForm } from 'react-hook-form'
 import axios from 'axios'
 import { useAppDispatch } from '../../../../hooks/reduxHooks'
 import { getUser } from '../../../../store/slices/userSlice'
-import { BASE_URL } from '../../constants'
+import { API_ROOT } from '../../../../shared/constants'
 import { useDialog } from '../../../../components/UI/Dialog/bll'
 
 interface IAvatarForm {
   disabled: boolean
   avatar?: string
 }
+
 const AvatarForm: FC<IAvatarForm> = ({ disabled, avatar }) => {
   const { isActive, onOpen, onClose } = useDialog()
 
@@ -19,7 +20,7 @@ const AvatarForm: FC<IAvatarForm> = ({ disabled, avatar }) => {
     <>
       <Button type="button" onClick={onOpen} transparent disabled={disabled}>
         <Avatar
-          src={`${avatar ? `${BASE_URL}/resources/${avatar}` : ''}`}
+          src={`${avatar ? `${API_ROOT}/resources${avatar}` : ''}`}
           size="xl"
         />
       </Button>
@@ -33,7 +34,6 @@ type DialogProps = {
   isActive: boolean
   onClose: () => void
 }
-
 const AvatarDialog: FC<DialogProps> = memo(({ isActive, onClose }) => {
   const dispatch = useAppDispatch()
 
@@ -78,7 +78,7 @@ async function sendAvatar(data: FieldValues) {
   formData.append('avatar', data.avatar[0])
   let isOk = false
   try {
-    await axios.put(`${BASE_URL}/user/profile/avatar`, formData, {
+    await axios.put(`${API_ROOT}/user/profile/avatar`, formData, {
       withCredentials: true,
     })
 

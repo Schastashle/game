@@ -1,19 +1,25 @@
 import axios from 'axios'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { IUser, IUserLogin, IUserSignup } from '../../types/IUser'
+import { API_ROOT } from '../../shared/constants'
+import { loginWithCode } from '../../api/OAuth'
 
-interface UserInitialState {
+export interface IUserState {
   user: IUser | null
   status: string
   error: string | undefined
   isAuth: boolean
 }
 
-const initialState: UserInitialState = {
+const initialState: IUserState = {
   user: null,
   status: '',
   error: '',
   isAuth: false,
+}
+
+interface IUserService {
+  getCurrentUser(): Promise<IUser>
 }
 
 export const signupUser = createAsyncThunk<
@@ -22,11 +28,9 @@ export const signupUser = createAsyncThunk<
   { rejectValue: string }
 >('user/signupUser', async (query, { rejectWithValue }) => {
   try {
-    const response = await axios.post(
-      'https://ya-praktikum.tech/api/v2/auth/signup',
-      query,
-      { withCredentials: true }
-    )
+    const response = await axios.post(`${API_ROOT}/auth/signup`, query, {
+      withCredentials: true,
+    })
     if (!response.request.status) {
       return rejectWithValue('Произошла ошибка регистрации')
     }
@@ -43,18 +47,31 @@ export const signinUser = createAsyncThunk<
   { rejectValue: string }
 >('user/signinUser', async (query, { rejectWithValue }) => {
   try {
-    const response = await axios.post(
-      'https://ya-praktikum.tech/api/v2/auth/signin',
-      query,
-      { withCredentials: true }
-    )
+    const response = await axios.post(`${API_ROOT}/auth/signin`, query, {
+      withCredentials: true,
+    })
     if (!response.request.status) {
       return rejectWithValue('Произошла ошибка авторизации')
     }
 
     return true
   } catch (e) {
-    return rejectWithValue('Произошла ошибка авторизации')
+    return rejectWithValue(`Произошла ошибка авторизации ${e}`)
+  }
+})
+
+export const loginWithOAuth = createAsyncThunk<
+  void,
+  string,
+  { rejectValue: string }
+>('user/loginWithOAuth', async (code, { rejectWithValue }) => {
+  try {
+    const response = await loginWithCode(code)
+    if (!response?.request.status) {
+      return rejectWithValue('Произошла ошибка авторизации OAuth')
+    }
+  } catch (e) {
+    return rejectWithValue(`Произошла ошибка авторизации OAuth ${e}`)
   }
 })
 
@@ -62,19 +79,14 @@ export const getUser = createAsyncThunk<
   IUser,
   undefined,
   { rejectValue: string }
->('user/getUser', async (_, { rejectWithValue }) => {
+>('user/getUser', async (_, thunkApi) => {
+  const service: IUserService = thunkApi.extra as IUserService
   try {
-    const response = await axios.get(
-      'https://ya-praktikum.tech/api/v2/auth/user',
-      { withCredentials: true }
-    )
-    if (!response.request.status) {
-      return rejectWithValue('Произошла ошибка получения данных пользователя')
-    }
-
-    return response.data
+    return service.getCurrentUser()
   } catch (e) {
-    return rejectWithValue('Произошла ошибка получения данных пользователя')
+    return thunkApi.rejectWithValue(
+      `Произошла ошибка получения данных пользователя ${e}`
+    )
   }
 })
 
@@ -85,7 +97,7 @@ export const logoutUser = createAsyncThunk<
 >('user/logoutUser', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      'https://ya-praktikum.tech/api/v2/auth/logout',
+      `${API_ROOT}/auth/logout`,
       {},
       { withCredentials: true }
     )
@@ -95,17 +107,17 @@ export const logoutUser = createAsyncThunk<
 
     return false
   } catch (e) {
-    return rejectWithValue('Произошла ошибка выхода из системы')
+    return rejectWithValue(`Произошла ошибка выхода из системы ${e}`)
   }
 })
 
-const setLoading = (state: UserInitialState) => {
+const setLoading = (state: IUserState) => {
   state.status = 'loading'
   state.error = ''
 }
 
 const setRejected = (
-  state: UserInitialState,
+  state: IUserState,
   action: PayloadAction<string | undefined>
 ) => {
   state.status = 'rejected'
@@ -113,9 +125,13 @@ const setRejected = (
 }
 
 export const userSlice = createSlice({
-  name: 'userSlice',
+  name: 'user',
   initialState,
-  reducers: {},
+  reducers: {
+    preloadState: (state: IUserState, action: PayloadAction<IUserState>) => {
+      state = action.payload
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(signinUser.pending, setLoading)

@@ -12,8 +12,11 @@ export default defineConfig({
   define: {
     __SERVER_PORT__: process.env.SERVER_PORT,
   },
+  build: {
+    target: 'esnext',
+  },
   esbuild: {
-    minify: false,
+    // minify: false,
     minifyIdentifiers: false,
     minifySyntax: false,
     minifyWhitespace: false,
@@ -25,9 +28,14 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       devOptions: {
-        enabled: false,
+        enabled: process.env.SW_DEV === 'true',
+        type: 'module',
       },
-      selfDestroying: true,
+      // selfDestroying: true,
+      registerType: 'autoUpdate',
+      workbox: {
+        sourcemap: true,
+      },
     }),
   ],
 })

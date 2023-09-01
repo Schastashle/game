@@ -13,7 +13,7 @@ import { USER_NAME_LENGTH_MAX, USER_NAME_LENGTH_MIN } from './constants'
   tableName: 'users',
   paranoid: false,
 })
-class User extends Model {
+class UserModel extends Model {
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.INTEGER)
@@ -27,4 +27,4 @@ class User extends Model {
   name: string
 }
 
-export default User
+export default UserModel

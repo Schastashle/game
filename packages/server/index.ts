@@ -16,6 +16,7 @@ import CommentRoute from './routes/v1/comment'
 import ReplyRoute from './routes/v1/reply'
 import TopicRoute from './routes/v1/topic'
 import UserRoute from './routes/v1/user'
+import ReactionRoute from './routes/v1/reaction'
 
 import CheckAuth from './middleware/checkAuth'
 import { BASE_URL } from './constants'
@@ -40,6 +41,7 @@ async function startServer() {
   app.use(ReplyRoute)
   app.use(TopicRoute)
   app.use(UserRoute)
+  app.use(ReactionRoute)
 
   const port = Number(process.env.SERVER_PORT)
 

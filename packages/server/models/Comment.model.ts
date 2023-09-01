@@ -10,9 +10,10 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript'
-import Topic from './Topic.model'
-import Reply from './Reply.model'
 import { COMMENT_LENGTH_MIN, COMMENT_LENGTH_MAX } from './constants'
+import TopicModel from './Topic.model'
+import ReplyModel from './Reply.model'
+import ReactionModel from './Reaction.model'
 
 @Table({
   tableName: 'comments',
@@ -27,23 +28,30 @@ class CommentModel extends Model {
   @Column(DataType.INTEGER)
   author_id: number
 
-  @ForeignKey(() => Topic)
+  @ForeignKey(() => TopicModel)
   @Column(DataType.INTEGER)
   topic_id: number
 
-  @BelongsTo(() => Topic)
-  topic: Topic
+  @BelongsTo(() => TopicModel)
+  topic: TopicModel
 
   @Length({ max: COMMENT_LENGTH_MAX, min: COMMENT_LENGTH_MIN })
   @Column(DataType.STRING)
   text: string
 
-  @HasMany(() => Reply, {
+  @HasMany(() => ReplyModel, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
     hooks: true,
   })
-  reply: Reply[]
+  reply: ReplyModel[]
+
+  @HasMany(() => ReactionModel, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    hooks: true,
+  })
+  reaction: ReactionModel[]
 }
 
 export default CommentModel

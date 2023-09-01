@@ -6,6 +6,9 @@
 }
 
 .title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
   color: #7ec36e;
   padding-bottom: 20px;
 }
@@ -84,4 +87,17 @@
   display: flex;
   background-color: white;
   justify-content: space-between;
+}
+
+.sidebarListItemCount {
+  width: fit-content;
+  background-color: #7ec36e;
+  color: white;
+  padding: 2px 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  font-size: 12px;
+  height: 16px;
 }

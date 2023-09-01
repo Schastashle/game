@@ -4,11 +4,13 @@ import { gameSlice } from './slices/gameSlice'
 import type { UserService } from '../api/userService'
 import { IGameState } from './slices/gameSlice/slice'
 import leaderboardSlice, { ILeaderboardState } from './slices/leaderboardSlice'
+import forumSlice, { IFornmInitialState } from './slices/forumSlice'
 
 export interface IAppState {
   user: IUserState
   game: IGameState
   leaderboard: ILeaderboardState
+  forum: IFornmInitialState
 }
 export const createStore = (
   service: UserService,
@@ -19,6 +21,7 @@ export const createStore = (
       user: userSlice,
       game: gameSlice.reducer,
       leaderboard: leaderboardSlice,
+      forum: forumSlice,
     },
     preloadedState,
     middleware: getDefaultMiddleware => {

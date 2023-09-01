@@ -63,9 +63,9 @@
   padding: 17px 18px 17px 20px;
   border: none;
   border-radius: 57px;
-  background: #7dace4;
+  background: var(--accent-4);
   left: 40px;
-  box-shadow: 4px 6px 0px 0px #5483bb;
+  box-shadow: 4px 6px 0px 0px var(--accent-5);
   position: absolute;
   bottom: -39px;
 }

@@ -93,13 +93,13 @@
   font-weight: 900;
   color: #fff;
 
-  background: #7dace4;
+  background: var(--accent-4);
   border-radius: 9px;
 
   transition: all 0.3s;
 
   &:hover {
-    background: #458ee6;
+    background: var(--accent-5);
     box-shadow: 5px 5px 0 0 #700961;
   }
 }
@@ -129,4 +129,48 @@
   &:hover {
     border: 3px solid var(--text-color);
   }
+}
+
+.theme {
+  max-width: 1260px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dark,
+.light {
+  margin-top: -100px;
+}
+
+.darkModeBtn {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  width: 26px;
+  height: 26px;
+  padding: 4px;
+  border-radius: 50px;
+  background-color: transparent;
+}
+
+.darkModeBtn::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+.darkModeBtnActive::before {
+  left: 26px;
+}
+
+.darkModeBtnIcon {
+  position: relative;
+  z-index: 9;
 }

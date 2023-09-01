@@ -1,5 +1,5 @@
 .button {
   font-size: 16px;
   font-weight: 700;
-  color: #bfb2b5;
+  color: var(--text-color);
 }

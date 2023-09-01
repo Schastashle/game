@@ -2,10 +2,12 @@ import { FC } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import { logoutUser } from '../../store/slices/userSlice'
-
+import sun from '../../assets/icons/sun.svg'
+import moon from '../../assets/icons/moon.svg'
 import styles from './home.module.css'
 import SVGSpinner from '../../components/SVGSpinner/SVGSpinner'
 import { IUser } from '../../types/IUser'
+import { useTheme } from '../../hooks/useTheme'
 
 function getUserName(user: IUser | null) {
   return user ? user.login : 'Player'
@@ -13,6 +15,16 @@ function getUserName(user: IUser | null) {
 
 const Home: FC = () => {
   const user = useAppSelector(state => state.user.user)
+
+  const { theme, setTheme } = useTheme()
+
+  const handleLightThemeClick = () => {
+    setTheme('light')
+  }
+
+  const handleDarkThemeClick = () => {
+    setTheme('dark')
+  }
   const dispatch = useAppDispatch()
 
   const logoutHandler = () => {
@@ -21,6 +33,14 @@ const Home: FC = () => {
 
   return (
     <section className={styles.home}>
+      <div className={styles.theme}>
+        <button className={styles.darkModeBtn} onClick={handleLightThemeClick}>
+          <img src={sun} className={styles.darkModeBtnIcon} />
+        </button>
+        <button className={styles.darkModeBtn} onClick={handleDarkThemeClick}>
+          <img src={moon} className={styles.darkModeBtnIcon} />
+        </button>
+      </div>
       <div className={styles.container}>
         <div className={styles.logo}>
           <SVGSpinner />

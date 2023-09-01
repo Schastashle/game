@@ -1,5 +1,5 @@
 .block {
-  color: #bfb2b5;
+  color: var(--text-color);
   display: flex;
 }
 

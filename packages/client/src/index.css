@@ -1,17 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700;900&family=Titillium+Web:ital,wght@0,300;0,400;0,600;1,400&display=swap');
 
-* {
-  --bg-color: #e5e6e0;
-  --text-color: #988686; /* #bfb2b5; сделать поиск по bfb2b5 и заменить на --text-color 988686 93B4B4 87ABAB 91a1a1 a19da1 e5e0e6 */
+/* Dark Theme */
+html[data-theme='dark'] {
+  --bg-color: #6a6363;
+  --text-color: #ffffff;
   --focus-color: #a5a5c0;
   --accent-1: #e61c5d;
   --accent-2: #cd7c39;
   --accent-3: #7ec36e;
+  --accent-4: #7ec36e;
+  --accent-5: #5c9050;
+}
+
+html[data-theme='light'] {
+  --bg-color: #e5e6e0;
+  --text-color: #988686;
+  --focus-color: #a5a5c0;
+  --accent-1: #e61c5d;
+  --accent-2: #cd7c39;
+  --accent-3: #7ec36e;
+  --accent-4: #7dace4;
+  --accent-5: #5483bb;
+}
+
+* {
   --radius-panel: 21px;
   --shadow-panel: 3px 3px 0 0 rgb(218 198 198 / 25%);
   --border: var(--text-color) 3px solid;
   --border-focus: var(--focus-color) 3px solid;
-
   box-sizing: border-box;
   margin: 0;
   padding: 0;

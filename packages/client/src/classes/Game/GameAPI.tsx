@@ -403,9 +403,30 @@ export default class GameAPI extends CanvasAPI {
     })
   }
 
+  public notifyMe(): void {
+    const notification = new Notification('ttegbetgb')
+    if (Notification.permission === 'granted') {
+      const notification = new Notification('Hi there!')
+      alert('Привет')
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          const notification = new Notification('goodbey there!')
+          alert('пока') // дополнила алертами, так как данное апи больше не поддерживается
+        }
+      })
+    }
+  }
+
   // завершение игры
   public finished(callback?: () => void): void {
     this.playing = false
+    // выходит запрос на разрешение уведомлений
+    Notification.requestPermission(callback)
+
+    self.addEventListener('notificationclick', event => {
+      console.log(`On notification click`)
+    })
 
     if (callback) {
       callback()

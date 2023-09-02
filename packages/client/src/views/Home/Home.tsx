@@ -25,6 +25,7 @@ const Home: FC = () => {
   const handleDarkThemeClick = () => {
     setTheme('dark')
   }
+
   const dispatch = useAppDispatch()
 
   const logoutHandler = () => {

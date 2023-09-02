@@ -8,14 +8,15 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript'
-import Comment from './Comment.model'
 import { TOPIC_NAME_LENGTH_MIN, TOPIC_NAME_LENGTH_MAX } from './constants'
+import CommentModel from './Comment.model'
+import ReactionModel from './Reaction.model'
 
 @Table({
   tableName: 'topics',
   paranoid: false,
 })
-class Topic extends Model {
+class TopicModel extends Model {
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.INTEGER)
@@ -28,12 +29,19 @@ class Topic extends Model {
   @Column(DataType.INTEGER)
   author_id: number
 
-  @HasMany(() => Comment, {
+  @HasMany(() => CommentModel, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
     hooks: true,
   })
-  comment: Comment[]
+  comment: CommentModel[]
+
+  @HasMany(() => ReactionModel, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    hooks: true,
+  })
+  reaction: ReactionModel[]
 }
 
-export default Topic
+export default TopicModel

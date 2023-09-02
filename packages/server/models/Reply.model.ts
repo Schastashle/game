@@ -7,8 +7,10 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from 'sequelize-typescript'
-import Comment from './Comment.model'
+import CommentModel from './Comment.model'
+import ReactionModel from './Reaction.model'
 
 @Table({
   tableName: 'replies',
@@ -23,15 +25,22 @@ class ReplyModel extends Model {
   @Column(DataType.STRING)
   text: string
 
-  @ForeignKey(() => Comment)
+  @ForeignKey(() => CommentModel)
   @Column(DataType.INTEGER)
   comment_id: number
 
-  @BelongsTo(() => Comment)
-  comment: Comment
+  @BelongsTo(() => CommentModel)
+  comment: CommentModel
 
   @Column(DataType.INTEGER)
   author_id: number
+
+  @HasMany(() => ReactionModel, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    hooks: true,
+  })
+  reaction: ReactionModel[]
 }
 
 export default ReplyModel

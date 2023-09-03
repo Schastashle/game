@@ -4,13 +4,13 @@ import { gameSlice } from './slices/gameSlice'
 import type { UserService } from '../api/userService'
 import { IGameState } from './slices/gameSlice/slice'
 import leaderboardSlice, { ILeaderboardState } from './slices/leaderboardSlice'
-import forumSlice, { IFornmInitialState } from './slices/forumSlice'
+import forumSlice, { IForumInitialState } from './slices/forumSlice'
 
 export interface IAppState {
   user: IUserState
   game: IGameState
   leaderboard: ILeaderboardState
-  forum: IFornmInitialState
+  forum: IForumInitialState
 }
 export const createStore = (
   service: UserService,

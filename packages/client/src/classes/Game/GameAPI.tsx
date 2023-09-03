@@ -421,6 +421,24 @@ export default class GameAPI extends CanvasAPI {
   // завершение игры
   public finished(callback?: () => void): void {
     this.playing = false
+
+    // создание маркера measure измерений для Performance API
+    performance.measure('game')
+
+    //получает все записи производительности
+    const entries = performance.getEntries()
+
+    //можно фильтровать их по мере необходимости measure либо mark
+    entries.forEach(entry => {
+      if (entry.entryType === 'mark') {
+        console.log(`${entry.name} ${entry.startTime}`)
+      }
+
+      if (entry.entryType === 'measure') {
+        console.log(`${entry.name}'s duration: ${entry.duration}`)
+      }
+    })
+
     // выходит запрос на разрешение уведомлений
     Notification.requestPermission(callback)
 

@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react'
-import useLocalStorage from './useLocalStorage'
+import { useLocalStorage } from './useLocalStorage'
 
 export const useTheme = () => {
   const [theme, setTheme] = useLocalStorage('app-theme', 'light')

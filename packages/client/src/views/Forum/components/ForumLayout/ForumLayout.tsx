@@ -1,4 +1,4 @@
-import { FC, ReactNode, useCallback, useState, useEffect, memo } from 'react'
+import { FC, ReactNode, useCallback, useEffect, memo } from 'react'
 import style from './forumLayout.module.css'
 import { NavLink } from 'react-router-dom'
 import { transformDate } from '../../../../utils/dataTools'
@@ -12,13 +12,12 @@ import { getAllTopics, setTopic } from '../../../../store/slices/forumSlice'
 
 export interface ForumLayoutType {
   children: ReactNode | string
-  topics: ITopic[]
   id: number
 }
 
 function ForumLayout(props: ForumLayoutType) {
   const dispatch = useAppDispatch()
-  const topics = useAppSelector(state => state.forum.topics)
+  const topics: ITopic[] = useAppSelector(state => state.forum.topics)
   const user = useAppSelector(state => state.user.user)
   const { children, id } = props
 

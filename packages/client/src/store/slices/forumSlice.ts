@@ -10,14 +10,14 @@ import {
 const BASE_URL = 'http://localhost:3000/forum/v1/'
 const DEFAULT_ERROR = 'Произошла ошибка отправки данных'
 
-export interface IFornmInitialState {
+export interface IForumInitialState {
   status: string
   error: string | undefined
   topics: ITopic[]
   topic: ITopic | null
 }
 
-const initialState: IFornmInitialState = {
+const initialState: IForumInitialState = {
   status: '',
   error: '',
   topics: [],
@@ -108,24 +108,22 @@ export const getAllTopics = createAsyncThunk<
     const response = await axios.get(`${BASE_URL}topics`, {
       withCredentials: true,
     })
-    console.log(response)
     if (!response.request.status) {
       return rejectWithValue(DEFAULT_ERROR)
     }
     return response.data
   } catch (e) {
-    console.log(e)
     return rejectWithValue(DEFAULT_ERROR)
   }
 })
 
-const setLoading = (state: IFornmInitialState) => {
+const setLoading = (state: IForumInitialState) => {
   state.status = 'loading'
   state.error = ''
 }
 
 const setRejected = (
-  state: IFornmInitialState,
+  state: IForumInitialState,
   action: PayloadAction<string | undefined>
 ) => {
   state.status = 'rejected'

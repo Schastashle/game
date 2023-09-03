@@ -6,39 +6,41 @@ import { Button, Input } from '../../../../components'
 import Dialog from '../../../../components/UI/Dialog/Dialog'
 import { useDialog } from '../../../../components/UI/Dialog/bll'
 import { FieldValues, useForm } from 'react-hook-form'
-import { TopicsType } from '../../../../types/ForumTypes'
+import { ITopic } from '../../../../types/ForumTypes'
+import { useAppDispatch, useAppSelector } from '../../../../hooks/reduxHooks'
+import { getAllTopics, setTopic } from '../../../../store/slices/forumSlice'
 
-interface ForumLayoutType {
+export interface ForumLayoutType {
   children: ReactNode | string
-  topics: TopicsType[]
+  topics: ITopic[]
   id: number
 }
 
 function ForumLayout(props: ForumLayoutType) {
-  const { children, topics, id } = props
+  const dispatch = useAppDispatch()
+  const topics = useAppSelector(state => state.forum.topics)
+  const user = useAppSelector(state => state.user.user)
+  const { children, id } = props
+
+  useEffect(() => {
+    dispatch(getAllTopics())
+  }, [])
 
   const { isActive, onOpen, onClose } = useDialog()
 
   const addTopic = useCallback((name: string) => {
-    setList(prev => {
-      return [
-        ...prev,
-        {
-          id: new Date().getTime(),
+    if (user?.id && user?.login) {
+      dispatch(
+        setTopic({
           name,
-          date: String(new Date()),
-          comments: [],
-          author: {
-            id: 1,
-            userName: 'Курбан',
-          },
-        },
-      ]
-    })
+          author_id: user.id,
+          author_name: user.login,
+        })
+      )
+    }
   }, [])
 
   // временное состояние для работы с мок данными добавления топика
-  const [list, setList] = useState(topics)
 
   return (
     <div className={style.block}>
@@ -63,20 +65,17 @@ function ForumLayout(props: ForumLayoutType) {
               </Button>
             </div>
           </div>
-
           <ul className={style.sidebarList}>
-            {list.map(item => {
+            {topics.map(item => {
               return (
-                <li key={item.id} className={style.sidebarListItem}>
+                <li key={item.topic_id} className={style.sidebarListItem}>
                   <div className={style.sidebarListItemTop}>
                     <div
                       className={style.sidebarListItemLink}
-                      data-active={id === item.id ? 1 : undefined}>
-                      <NavLink to={`/forum/${item.id}`}>{item.name}</NavLink>
-                    </div>
-
-                    <div className={style.sidebarListItemCount}>
-                      <div>{item.comments.length}</div>
+                      data-active={id === item.topic_id ? 1 : undefined}>
+                      <NavLink to={`/forum/${item.topic_id}`}>
+                        {item.name}
+                      </NavLink>
                     </div>
                   </div>
 
@@ -84,13 +83,7 @@ function ForumLayout(props: ForumLayoutType) {
                     <p>
                       <span>{'Дата создания: '}</span>
 
-                      <span>{transformDate(item.date)}</span>
-                    </p>
-
-                    <p>
-                      <span>{`Автор: `}</span>
-
-                      <span>{item.author.userName}</span>
+                      <span>{transformDate(item.createdAt)}</span>
                     </p>
                   </div>
                 </li>

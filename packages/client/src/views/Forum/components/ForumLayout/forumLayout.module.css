@@ -74,18 +74,6 @@
   color: #458ee6;
 }
 
-.sidebarListItemCount {
-  background-color: #7ec36e;
-  color: white;
-  padding: 2px 4px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 4px;
-  font-size: 12px;
-  height: 16px;
-}
-
 .sidebarListItemBottom {
   font-size: 12px;
   display: flex;

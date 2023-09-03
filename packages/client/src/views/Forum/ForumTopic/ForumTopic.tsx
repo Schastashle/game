@@ -1,50 +1,45 @@
-import React, { FC, useEffect, useState, useCallback, memo } from 'react'
-import { mockData } from '../index/mockData'
+import React, { useEffect, useCallback, memo } from 'react'
 import { transformDate, transformTime } from '../../../utils/dataTools'
 import style from './forumTopic.module.css'
 import { Button, Input } from '../../../components/UI'
-import { TopicsType } from '../../../types/ForumTypes'
 import { useForm } from 'react-hook-form'
+import { useAppDispatch, useAppSelector } from '../../../hooks/reduxHooks'
+import { createComment, getTopic } from '../../../store/slices/forumSlice'
 
 interface ForumTopicsProps {
   id: number
 }
 
-function findCallnack(id: number | undefined, item: TopicsType): boolean {
-  return Number.isFinite(id) && item.id === id
-}
-
 function ForumTopic({ id }: ForumTopicsProps) {
-  const [data, setData] = useState<TopicsType | undefined>(undefined)
   const { register, handleSubmit, reset } = useForm()
+  const dispatch = useAppDispatch()
+  const topic = useAppSelector(state => state.forum.topic)
+  const user = useAppSelector(state => state.user.user)
 
   useEffect(() => {
-    const data = mockData.find(findCallnack.bind(null, Number(id)))
-    setData(data)
+    dispatch(getTopic(id))
   }, [id])
 
   const handleAddComment = useCallback(
     handleSubmit(data => {
       if (!data.comment) return
-
-      setData(prevState => {
-        if (!prevState) return undefined
-
-        return {
-          ...prevState,
-          comments: [
-            ...(prevState?.comments || []),
-            createComments(data.comment),
-          ],
-        }
-      })
+      console.log(topic?.topic_id && user?.id)
+      if (topic?.topic_id && user?.id) {
+        dispatch(
+          createComment({
+            topic_id: topic.topic_id,
+            author_id: user.id,
+            text: data.comment,
+          })
+        )
+      }
 
       reset()
     }),
     []
   )
 
-  if (!data) {
+  if (!topic?.topic_id) {
     return (
       <div>
         <h3 className={style.title}>Такой темы не найдено</h3>
@@ -56,46 +51,39 @@ function ForumTopic({ id }: ForumTopicsProps) {
     <div className={style.topic}>
       <div>
         <h2 className={style.title}>
+          <div className={style.sidebarListItemCount}>
+            <div>{topic.comment.length}</div>
+          </div>
           <span>{'Тема: '}</span>
 
-          <span>{data.name}</span>
+          <span>{topic.name}</span>
         </h2>
-
-        <div className={style.subTitle}>
-          <span>{'Автор: '}</span>
-
-          <span>{data.author?.userName}</span>
-        </div>
 
         <div className={style.subTitle}>
           <span>{'Дата создания: '}</span>
 
-          <span>{data.date ? transformDate(data.date) : ''}</span>
+          <span>{topic.createdAt ? transformDate(topic.createdAt) : ''}</span>
         </div>
       </div>
 
       <div className={style.comments}>
         <ul>
-          {data.comments?.map(item => (
-            <li key={`${id}-${item.id}`}>
-              <div className={style.commentsLeft}>
-                <div className={style.commentsAvatar}>
-                  <img
-                    src={'https://vibirai.ru/image/964470.jpg'}
-                    alt="avatar"
-                  />
-                </div>
+          {topic &&
+            topic.comment?.map(item => {
+              return (
+                <li key={`${id}-${item.comment_id}`}>
+                  <div className={style.commentsLeft}>
+                    <div className={style.commentsDate}>
+                      {`${transformDate(item.createdAt)} ${transformTime(
+                        item.createdAt
+                      )}`}
+                    </div>
+                  </div>
 
-                <div className={style.commentsName}>{item.user.userName}</div>
-
-                <div className={style.commentsDate}>
-                  {`${transformDate(item.date)} ${transformTime(item.date)}`}
-                </div>
-              </div>
-
-              <div className={style.commentsRight}>{item.text}</div>
-            </li>
-          ))}
+                  <div className={style.commentsRight}>{item.text}</div>
+                </li>
+              )
+            })}
         </ul>
       </div>
 
@@ -117,18 +105,6 @@ function ForumTopic({ id }: ForumTopicsProps) {
       </div>
     </div>
   )
-}
-
-function createComments(comment: string) {
-  return {
-    id: new Date().getTime(),
-    text: comment,
-    date: String(new Date()),
-    user: {
-      id: 1,
-      userName: 'Курбан',
-    },
-  }
 }
 
 export default memo(ForumTopic)

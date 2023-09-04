@@ -5,46 +5,44 @@ const router = Router()
 
 const URL = '/api/v1/user-theme'
 
-router.get(`${URL}/:id`, async (req, res) => {
-  const user = await UserTheme.findOne({
-    where: { user_id: req.params.id },
-  })
+router.get(`${URL}`, async (req, res) => {
+  const userId = res.locals.user_id
 
-  if (user && user.app_theme_name) {
-    res.status(200).json(user.app_theme_name)
+  if (userId) {
+    const user = await UserTheme.findOne({
+      where: { user_id: userId },
+    })
+
+    if (user && user.app_theme_name) {
+      res.status(200).json(user.app_theme_name)
+    } else {
+      res.status(404)
+    }
   } else {
-    res.status(500)
+    res.status(200)
   }
 })
 
-router.post(`${URL}/:id`, async (req, res) => {
-  const user = await UserTheme.findOne({
-    where: { user_id: req.params.id },
-  })
+router.post(`${URL}`, async (req, res) => {
+  const userId = res.locals.user_id
 
-  if (user) {
-    const updatedUser = await UserTheme.update(req.body, {
-      where: { user_id: req.params.id },
-    })
-
-    let status = 500
-    let payload
-
-    if (updatedUser) {
-      payload = (await UserTheme.findOne({
-        where: { user_id: req.params.id },
-      })) as UserTheme | null
-
-      status = 200
-    }
-    res.status(status).json(payload)
+  if (!userId) {
+    res.status(200)
   } else {
-    const newUser = await UserTheme.create({
-      user_id: req.params.id,
-      ...req.body,
-    })
+    try {
+      const [instance, created] = await UserTheme.upsert({
+        user_id: Number(userId),
+        ...req.body,
+      })
 
-    res.status(200).json(newUser)
+      if (created) {
+        res.status(201).json(instance)
+      } else {
+        res.status(202).json(instance)
+      }
+    } catch (e) {
+      res.status(500).json(e)
+    }
   }
 })
 

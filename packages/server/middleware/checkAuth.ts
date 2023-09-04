@@ -15,10 +15,13 @@ export default async (
       Cookie: `uuid=${uuid};authCookie=${authCookie}`,
     },
   })
+
   const user = await response.json()
 
   if (Object.prototype.hasOwnProperty.call(user, 'reason'))
     return res.status(403).send('Not authorized')
+
+  res.locals.user_id = user.id
 
   next()
 }

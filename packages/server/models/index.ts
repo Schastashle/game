@@ -1,8 +1,15 @@
-import Comment from './Comment.model'
-import Reply from './Reply.model'
-import Topic from './Topic.model'
-import User from './User.model'
+import CommentModel from './Comment.model'
+import ReplyModel from './Reply.model'
+import TopicModel from './Topic.model'
+import UserModel from './User.model'
 import UserTheme from './UserTheme.model'
-import SiteTheme from './SiteTheme.model'
+import ReactionModel from './Reaction.model'
 
-export default [Comment, Reply, Topic, User, UserTheme, SiteTheme]
+export default [
+  CommentModel,
+  ReplyModel,
+  TopicModel,
+  UserModel,
+  ReactionModel,
+  UserTheme,
+]

@@ -6,7 +6,7 @@
     "build:static": "lerna run build:static",
     "dev:client": "lerna run dev  --scope=client",
     "build": "lerna run build && yarn build:static",
-    "dev": "lerna run dev:ssr ",
+    "dev": "lerna run dev:ssr",
     "test": "lerna run test",
     "lint": "lerna run lint",
     "format": "lerna run format",

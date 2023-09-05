@@ -22,13 +22,13 @@
     "express": "^4.18.1",
     "http-proxy-middleware": "^2.0.6",
     "jsesc": "^3.0.2",
-    "http-proxy-middleware": "^2.0.6",
     "pg": "^8.11.2",
     "pg-hstore": "^2.3.4",
     "prettier": "^2.7.1",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.32.1",
-    "sequelize-typescript": "^2.1.5"
+    "sequelize-typescript": "^2.1.5",
+    "vite": "^4.4.9"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.3",

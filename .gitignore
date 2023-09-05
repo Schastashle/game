@@ -6,6 +6,7 @@ dist
 tmp
 packages/client/ssr-dist
 packages/client/dev-dist
+pgdata/
+pgadmin-data/
 
-yarn.lock
 .DS_Store

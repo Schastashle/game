@@ -4,11 +4,16 @@ on:
   push:
     branches:
       - main
+      - dev
       - deploy
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -31,4 +36,4 @@ jobs:
           context: .
           file: Dockerfile.server
           push: true
-          tags: ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}/server:${{ github.sha }}
+          tags: ghcr.io/${{ github.actor }}/${{ github.event.repository.name }}/server:${{ github.sha }}

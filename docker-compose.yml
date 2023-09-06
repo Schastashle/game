@@ -6,26 +6,6 @@ networks:
         driver: bridge 
 
 services:
-    # client:
-    #     container_name: prakticum-client
-    #     image: prakticum-client
-    #     build:
-    #         context: .
-    #         dockerfile: Dockerfile.client
-    #         args:
-    #           CLIENT_PORT: ${CLIENT_PORT}
-    #     restart: always
-    #     ports:
-    #         - "${CLIENT_PORT}:${CLIENT_PORT}"
-    #     environment:
-    #       - CLIENT_PORT=${CLIENT_PORT}
-    #       - SERVER_PORT=${SERVER_PORT}
-    #     env_file:
-    #       - .env
-    #     tty: true
-    #     networks:
-    #       - fiar_game
-
     server:
         container_name: prakticum-server
         image: prakticum-server

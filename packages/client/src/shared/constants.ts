@@ -2,7 +2,6 @@
 // export const API_ROOT = `${BASE_URL}/api/v2`
 
 // редирект на локальный сервер с которого идут все запросы на API
-const __SERVER_PORT__ = 3000
-export const SERVER_URL = `http://localhost:${__SERVER_PORT__}`
+export const SERVER_URL = `http://localhost:3000`
 
 export const API_ROOT = `${SERVER_URL}/api/v2`

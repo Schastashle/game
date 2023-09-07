@@ -45,7 +45,7 @@ async function startServer() {
   app.use(ThemeRoute)
   app.use(ReactionRoute)
 
-  const port = Number(process.env.SERVER_PORT)
+  const port = Number(process.env.SERVER_PORT) || 3000
 
   let viteServer: ViteDevServer
   const distPath = path.dirname(require.resolve('client/dist/index.html'))

@@ -36,7 +36,7 @@ services:
         - POSTGRES_USER=postgres
         - POSTGRES_DB=postgres
       volumes:
-        - ./pgdata:/var/lib/postgresql/data
+        - - /var/lib/postgresql/data:/var/lib/postgresql/data
       healthcheck:
         test: ["CMD-SHELL", "pg_isready -U postgres"]
         interval: 1s
@@ -58,7 +58,7 @@ services:
       ports:
         - "8080:80"
       volumes:
-        - ./pgadmin-data:/var/lib/pgadmin 
+         - /var/lib/pgadmin:/var/lib/pgadmin
       depends_on:
         - postgres
       networks:

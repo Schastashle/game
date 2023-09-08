@@ -32,7 +32,12 @@ import initModels from './init/initModels'
 async function startServer() {
   const app = express()
 
-  app.use(cors())
+  app.use(
+    cors({
+      origin: 'http://158.160.68.210',
+      credentials: true,
+    })
+  )
   app.use(BASE_URL, bodyParser.json())
   app.use(cookieParser() as (options: CookieParseOptions) => void)
 

@@ -21,7 +21,7 @@ services:
         POSTGRES_HOST: postgres
       tty: true
       networks:
-      - fiar_game
+        - fiar_game
       depends_on:
         postgres:
           condition: service_healthy

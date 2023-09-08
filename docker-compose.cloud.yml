@@ -7,7 +7,7 @@ networks:
 services:
     server:
       container_name: server
-      image: ghcr.io/schastashle/game/server:7d3c3e20caea2dbc070a43701729c3d7e0d26b28
+      image: <image_name> # образ из гитхаба
       restart: always
       ports:
         - "3000:3000"

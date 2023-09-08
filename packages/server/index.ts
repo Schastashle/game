@@ -34,10 +34,11 @@ async function startServer() {
 
   app.use(
     cors({
-      origin: 'http://158.160.68.210:80',
+      origin: '*',
       credentials: true,
     })
   )
+
   app.use(BASE_URL, bodyParser.json())
   app.use(cookieParser() as (options: CookieParseOptions) => void)
 

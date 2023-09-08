@@ -13,7 +13,7 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
-RUN yarn lerna bootstrap && yarn build
+RUN yarn lerna bootstrap
 
 # два образ
 FROM node:$NODE_VERSION-buster-slim as production 

@@ -34,7 +34,7 @@ async function startServer() {
 
   app.use(
     cors({
-      origin: 'http://158.160.68.210',
+      origin: 'http://158.160.68.210:80',
       credentials: true,
     })
   )

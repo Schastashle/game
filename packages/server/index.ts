@@ -32,12 +32,7 @@ import initModels from './init/initModels'
 async function startServer() {
   const app = express()
 
-  app.use(
-    cors({
-      origin: 'http://fiar.ya-praktikum.tech',
-      credentials: true,
-    })
-  )
+  app.use(cors())
 
   app.use(BASE_URL, bodyParser.json())
   app.use(cookieParser() as (options: CookieParseOptions) => void)
@@ -80,18 +75,7 @@ async function startServer() {
   )
 
   app.get('/api', (_, res) => {
-    // тест окружения
-    const serv_port = process.env.SERVER_PORT
-    const postgres_user = process.env.POSTGRES_USER
-    const postgres_pass = process.env.POSTGRES_PASSWORD
-    const postgres_db = process.env.POSTGRES_DB
-    const postgres_port = process.env.POSTGRES_PORT
-    const postgres_host = process.env.POSTGRES_HOST
-    res.json(
-      `👋 Howdy from the server :), SERVER_PORT: ${serv_port}, 
-      POSTGRES_USER: ${postgres_user}, POSTGRES_PASSWORD: ${postgres_pass}, 
-      POSTGRES_DB: ${postgres_db}, POSTGRES_PORT: ${postgres_port}, POSTGRES_HOST: ${postgres_host}`
-    )
+    res.json(`👋 Howdy from the server :)`)
   })
 
   if (!isDev()) {

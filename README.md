@@ -68,7 +68,7 @@
 1. nginx, раздающий клиентскую статику (client)
 2. node, ваш сервер (server)
 3. postgres, вашу базу данных (postgres)
-`docker compose up --build` создаеть образы перед запуском
+`docker compose up --build` создает образы перед запуском
 `docker compose up --detach` (`-d`) запуск контейнеров в фоновом режиме
 `cntr+c` оставить контейнеры
 

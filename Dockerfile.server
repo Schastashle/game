@@ -23,12 +23,15 @@ WORKDIR /app
 # в собранном сервере только наш код
 COPY --from=builder /app_build/packages/server/dist/ /app_build/packages/server/package.json /app/
 
+
 # серверный пакеты запускаются из node_modules, установим их
 RUN yarn install --production=true 
 
 # client для ssr делали пакетом, скопируем его в node_modules для сервера
 # поробовать разделить prod и dev режимы? для dev нужна вся папка с клиентом, для prod только некоторые файлы
 COPY --from=builder /app_build/packages/client /app/node_modules/client
+
+COPY --from=builder /app_build/check-key.txt /app/node_modules/client/dist
 
 EXPOSE $SERVER_PORT
 CMD [ "node", "/app/index.js" ]

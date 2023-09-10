@@ -53,6 +53,11 @@ async function startServer() {
   const srcPath = path.dirname(require.resolve('client'))
   const ssrClientPath = require.resolve('client/dist-ssr/client.cjs')
 
+  app.use(
+    '/well-known/acme-challenge/4VH9cpJnR7qhiykJ1MmGJoJ7frGhSyT6f5LkSw_vw-g',
+    express.static(path.resolve(distPath, 'check-key.txt'))
+  )
+
   if (isDev()) {
     viteServer = await createViteServer({
       server: { middlewareMode: true },

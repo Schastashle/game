@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev-ssr": "yarn dev:ssr --scope=server",
-    "preview-ssr": "yarn preview:ssr --scope=server",
+    "dev:ssr-server": "yarn dev:ssr --scope=server",
+    "preview:ssr-server": "yarn preview:ssr --scope=server",
 
     "build": "yarn v-build -- --config vite.config.ts && yarn v-build -- --config ssr.config.ts",
     "lint": "eslint .",

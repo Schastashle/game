@@ -11,7 +11,11 @@
     "lint": "lerna run lint",
     "format": "lerna run format",
     
-    "linkup": "cd ./packages/client && yarn unlink -s && yarn link -s && cd ../server && yarn link 'client'"
+    "linkup": "cd ./packages/client && yarn unlink -s && yarn link -s && cd ../server && yarn link 'client'",
+    "docker:up-build": "docker compose up --build",
+    "docker:down": "docker compose down -v",
+    "docker:start": "docker compose start",
+    "docker:stop": "docker compose stop",
   },
   "license": "MIT",
   "workspaces": [

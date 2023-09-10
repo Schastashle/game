@@ -24,7 +24,9 @@ import { FORUM_PATH, YANDEX_URL, YANDEX_API_PATH } from './constants'
 import { dbConnect } from './db'
 import initModels from './init/initModels'
 
-dotenv.config()
+console.info('DOTENV_CONFIG_PATH', process.env.DOTENV_CONFIG_PATH)
+dotenv.config({ path: process.env.DOTENV_CONFIG_PATH })
+globalThis._FIAR_ENV_ = { PUBLISH_URL: process.env.PUBLISH_URL }
 
 const PATHS = {
   API: '/api',
@@ -87,12 +89,9 @@ async function startServer() {
     console.info('url', req.originalUrl, req.url)
 
     try {
-      console.info('ssr')
       const html = await getSSRIndexHTML(req, viteServer)
-      //console.error("ssr html: ", html)
       res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
     } catch (e) {
-      console.error('ssr error ', e)
       if (viteServer) viteServer.ssrFixStacktrace(e as Error)
       next(e)
     }
@@ -101,9 +100,22 @@ async function startServer() {
   if (!isDev()) {
     app.use(
       '/',
-      express.static(CLIENT_DIST_PATH, { fallthrough: false, index: false })
+      express.static(CLIENT_DIST_PATH, { fallthrough: true, index: false })
     )
   }
+
+  app.use('*', (_, res) => {
+    res.sendStatus(404)
+  })
+
+  // обязательно должно быть 4 параметра в errorHandler, иначе не работает
+  const errorHandler: express.ErrorRequestHandler = (err, _req, res, _next) => {
+    console.error(`Ошибка при обработке запроса: ${_req.url}`)
+    console.error(err.stack)
+    res.status(500).send('Что-то сломалось!')
+  }
+
+  app.use(errorHandler)
 
   await dbConnect()
 
@@ -144,9 +156,16 @@ async function getSSRIndexHTML(
     ssrModule = await import(CLIENT_DIST_SSR_PATH)
   }
 
+  //console.info("user", user);
+  console.info('url', user ? url : '/signin')
+
   const [initialState, appHtml] = await ssrModule.render(
-    user.id ? url : '/signin',
-    { getCurrent: () => user } // делаем редирект на /signin если не авторизированы
+    user ? url : '/signin', // делаем редирект на /signin если не авторизированы
+    // Promise.reject обязательно, для store нужна ошибка
+    {
+      getCurrent: () =>
+        user ? Promise.resolve(user) : Promise.reject('не авторизован'),
+    }
   )
   const initStateSerialized = jsesc(JSON.stringify(initialState), {
     json: true,
@@ -156,6 +175,7 @@ async function getSSRIndexHTML(
   const html = template
     .replace(`<!--ssr-outlet-->`, appHtml)
     .replace('`<!--store-data-->`', initStateSerialized)
+    .replace('`<!--fiar-env-->`', JSON.stringify(globalThis._FIAR_ENV_))
 
   return html
 }

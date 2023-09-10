@@ -4,8 +4,9 @@
   "description": "",
   "scripts": {
     "build": "rm -rf ./dist && tsc --p ./tsconfig.prod.json",
-    "preview": "node ./dist/index.js",
-    "dev:ssr": "cross-env NODE_ENV=development nodemon index.ts",
+    "preview:ssr": "cross-env DOTENV_CONFIG_PATH=../../.env.sample node ./dist/index.js",
+    "dev:ssr": "cross-env DOTENV_CONFIG_PATH=../../.env.sample NODE_ENV=development node index.ts",
+    "dev:ssr1": "cross-env DOTENV_CONFIG_PATH=../../.env.sample NODE_ENV=development nodemon --files index.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "jest ."

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { IUser, IUserLogin, IUserSignup } from '../../types/IUser'
-import { API_ROOT } from '../../shared/constants'
+import { YA_API_URL } from '../../shared/constants'
 import { loginWithCode } from '../../api/OAuth'
 
 export interface IUserState {
@@ -28,7 +28,7 @@ export const signupUser = createAsyncThunk<
   { rejectValue: string }
 >('user/signupUser', async (query, { rejectWithValue }) => {
   try {
-    const response = await axios.post(`${API_ROOT}/auth/signup`, query, {
+    const response = await axios.post(`${YA_API_URL}/auth/signup`, query, {
       withCredentials: true,
     })
     if (!response.request.status) {
@@ -47,7 +47,7 @@ export const signinUser = createAsyncThunk<
   { rejectValue: string }
 >('user/signinUser', async (query, { rejectWithValue }) => {
   try {
-    const response = await axios.post(`${API_ROOT}/auth/signin`, query, {
+    const response = await axios.post(`${YA_API_URL}/auth/signin`, query, {
       withCredentials: true,
     })
     if (!response.request.status) {
@@ -97,7 +97,7 @@ export const logoutUser = createAsyncThunk<
 >('user/logoutUser', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      `${API_ROOT}/auth/logout`,
+      `${YA_API_URL}/auth/logout`,
       {},
       { withCredentials: true }
     )

@@ -4,7 +4,7 @@ import {
   ILeaderboardData,
   ILeaderboardResponse,
 } from '../../types/ILeaderboard'
-import { API_ROOT } from '../../shared/constants'
+import { YA_API_URL } from '../../shared/constants'
 
 const TEAM_NAME = 'FIAR'
 
@@ -27,7 +27,7 @@ export const addUserToLeaderboard = createAsyncThunk<
 >('leaderboard/addUserToLeaderboard', async (query, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      `${API_ROOT}/leaderboard`,
+      `${YA_API_URL}/leaderboard`,
       {
         data: query,
         ratingFieldName: 'scoresFir',
@@ -51,7 +51,7 @@ export const getLeaderboard = createAsyncThunk<
 >('leaderboard/getLeaderboard', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      `${API_ROOT}/leaderboard/all`,
+      `${YA_API_URL}/leaderboard/all`,
       {
         ratingFieldName: 'scoresFir',
         cursor: 0,
@@ -75,7 +75,7 @@ export const getTeamLeaderboard = createAsyncThunk<
 >('leaderboard/getTeamLeaderboard', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.post(
-      `${API_ROOT}/leaderboard/${TEAM_NAME}`,
+      `${YA_API_URL}/leaderboard/${TEAM_NAME}`,
       {
         ratingFieldName: 'scoresFir',
         cursor: 0,

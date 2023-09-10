@@ -12,9 +12,16 @@
         window.__PRELOADED_STATE__ = JSON.parse(`<!--store-data-->`);
       }
       catch(exp) { 
-        console.error("without ssr");
+        console.error("without __PRELOADED_STATE__");
       }
     
+      try {
+        window._FIAR_ENV_ = `<!--fiar-env-->`;
+      }
+      catch(exp) { 
+        console.error("without _FIAR_ENV_");
+      }
+
     </script>
   </head>
   <body>

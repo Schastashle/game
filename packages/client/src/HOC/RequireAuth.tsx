@@ -9,7 +9,7 @@ interface IRequireAuth {
 
 const RequireAuth = ({ children }: IRequireAuth) => {
   const dispatch = useAppDispatch()
-  const isAuth = useAppSelector(state => state.user.isAuth)
+  const isAuth = useAppSelector(state => state.user?.isAuth)
   const [clientSide, setClientSide] = useState(false)
   const location = useLocation()
 

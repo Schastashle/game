@@ -3,14 +3,14 @@
   "private": true,
   "scripts": {
     "bootstrap": "yarn && node init.js && lerna clean && yarn && lerna bootstrap && yarn linkup && yarn build",
-    "build:static": "lerna run build:static",
-    "dev:client": "lerna run dev  --scope=client",
-    "build": "lerna run build && yarn build:static",
-    "dev": "lerna run dev:ssr",
+    "build": "lerna run build",
+    "dev:ssr": "lerna run dev:ssr",
+    "preview:ssr": "lerna run preview:ssr",
+
     "test": "lerna run test",
     "lint": "lerna run lint",
     "format": "lerna run format",
-    "preview": "lerna run preview",
+    
     "linkup": "cd ./packages/client && yarn unlink -s && yarn link -s && cd ../server && yarn link 'client'"
   },
   "license": "MIT",

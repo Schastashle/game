@@ -1,11 +1,11 @@
 import { FC, useCallback } from 'react'
 import style from './oauth.module.css'
-import { getServiceId, getOAuthProviderPageUrl } from '../../api/OAuth'
+import { getOAuthProviderPageUrl } from '../../api/OAuth'
 
 const OAuth: FC = () => {
   const handleLogin = useCallback(async () => {
-    const serviceId = await getServiceId()
-    window.location.replace(getOAuthProviderPageUrl(serviceId))
+    const url = await getOAuthProviderPageUrl()
+    window.location.replace(url)
   }, [])
 
   return (

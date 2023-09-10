@@ -2,10 +2,10 @@ import { Router } from 'express'
 import Comment from '../../controllers/Comment'
 import removeSpecialCharacters from '../../utils/removeSpecialCharacters'
 
-import { BASE_URL } from '../../constants'
+import { FORUM_PATH } from '../../constants'
 
 const router = Router()
-const LOCAL_URL = `${BASE_URL}/comment`
+const LOCAL_URL = `${FORUM_PATH}/comment`
 
 router.get(LOCAL_URL, async (req, res) => {
   try {

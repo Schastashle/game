@@ -1,4 +1,4 @@
-import { YANDEX_API } from '../constants'
+import { YANDEX_API_URL } from '../constants'
 
 export default async (
   req: { cookies: { uuid: any; authCookie: any } },
@@ -9,7 +9,7 @@ export default async (
 
   if (!(uuid && authCookie)) return res.status(403).send('Not authorized')
 
-  const response = await fetch(`${YANDEX_API}/auth/user`, {
+  const response = await fetch(`${YANDEX_API_URL}/auth/user`, {
     method: 'GET',
     headers: {
       Cookie: `uuid=${uuid};authCookie=${authCookie}`,

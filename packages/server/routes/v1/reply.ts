@@ -1,9 +1,9 @@
 import { Router } from 'express'
-import { BASE_URL } from '../../constants'
+import { FORUM_PATH } from '../../constants'
 import Reply from '../../controllers/Reply'
 
 const router = Router()
-const LOCAL_URL = `${BASE_URL}/reply`
+const LOCAL_URL = `${FORUM_PATH}/reply`
 
 router.post(LOCAL_URL, async (req, res) => {
   const { author_id = null, comment_id = null, text } = req.body

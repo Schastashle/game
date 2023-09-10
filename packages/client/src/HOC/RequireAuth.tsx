@@ -33,9 +33,11 @@ const RequireAuth = ({ children }: IRequireAuth) => {
     isAuth && dispatch(getUser())
   }, [isAuth])
 
+  // && clientSide
+
   return (
     <>
-      {!isAuth && clientSide ? (
+      {!isAuth ? (
         <Navigate to="/signin" state={{ from: location }} />
       ) : (
         children

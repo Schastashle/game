@@ -1,11 +1,11 @@
 import { Router } from 'express'
-import { BASE_URL } from '../../constants'
+import { FORUM_PATH } from '../../constants'
 import Topic from '../../controllers/Topic'
 import User from '../../controllers/User'
 import removeSpecialCharacters from '../../utils/removeSpecialCharacters'
 
 const router = Router()
-const LOCAL_URL = `${BASE_URL}/topic`
+const LOCAL_URL = `${FORUM_PATH}/topic`
 
 router.get(LOCAL_URL, async (req, res) => {
   const id: number | unknown = req.query?.id
@@ -21,7 +21,7 @@ router.get(LOCAL_URL, async (req, res) => {
   return
 })
 
-router.get(`${BASE_URL}/topics`, async (_req, res) => {
+router.get(`${FORUM_PATH}/topics`, async (_req, res) => {
   const topics = await new Topic(null).getTopics()
 
   res.json(topics)

@@ -98,3 +98,12 @@ lsof -i :3001 -t
 Память течет, но понять это настоящие утечки или псевдо утечки из-за теневого дом или useCallback, useMemo не удалось
 Память чаще течет, но редко бывают ситуации - что память возвращается, чтобы искать настоящие утечки надо убирать
 useCallback, useMemo и проверять без них
+
+#nginx
+sudo apt update
+sudo apt install nginx
+
+старт `nginx` 
+стоп `nginx -s stop`
+
+sudo ufw app list

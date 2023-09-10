@@ -1,15 +1,18 @@
 import axios from 'axios'
+import {
+  OAUTH_GET_SERVICE_ID_URL,
+  OAUTH_URL,
+  THIS_URL,
+  getOAuthProviderPageUrl,
+} from '../shared/constants'
 
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
-const API_ROOT = `${REDIRECT_URI}/api/v2`
+//const API_ROOT = `${REDIRECT_URI}/api/v2`
 
 // Получаем service_id и записываем его в переменную,
 // которую подставляем в ссылку кнопки
-export const getServiceId = async () => {
+const getServiceId = async () => {
   try {
-    const response = await fetch(
-      `${API_ROOT}/oauth/yandex/service-id?redirect_uri=${REDIRECT_URI}`
-    )
+    const response = await fetch(OAUTH_GET_SERVICE_ID_URL)
     const data = await response.json()
 
     return data.service_id
@@ -18,12 +21,12 @@ export const getServiceId = async () => {
   }
 }
 
-export const loginWithCode = async (code: string) => {
+const loginWithCode = async (code: string) => {
   try {
     // Отправляем запрос на авторизацию с кодом и url для редиректа
-    const response = await axios.post(`${API_ROOT}/oauth/yandex`, {
+    const response = await axios.post(OAUTH_URL, {
       code,
-      redirect_uri: `${REDIRECT_URI}`,
+      redirect_uri: `${THIS_URL}`,
     })
 
     return response
@@ -31,3 +34,5 @@ export const loginWithCode = async (code: string) => {
     console.error(error)
   }
 }
+
+export { getOAuthProviderPageUrl, getServiceId, loginWithCode }

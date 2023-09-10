@@ -1,15 +1,11 @@
 import { FC, useCallback } from 'react'
 import style from './oauth.module.css'
-import { getServiceId } from '../../api/OAuth'
-
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
+import { getServiceId, getOAuthProviderPageUrl } from '../../api/OAuth'
 
 const OAuth: FC = () => {
   const handleLogin = useCallback(async () => {
     const serviceId = await getServiceId()
-    window.location.replace(
-      `https://oauth.yandex.ru/authorize?response_type=code&client_id=${serviceId}&redirect_uri=${REDIRECT_URI}`
-    )
+    window.location.replace(getOAuthProviderPageUrl(serviceId))
   }, [])
 
   return (

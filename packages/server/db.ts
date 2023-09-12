@@ -9,7 +9,7 @@ const {
   POSTGRES_HOST,
 } = process.env
 const sequelizeOptions: SequelizeOptions = {
-  host: POSTGRES_HOST,
+  host: POSTGRES_HOST || 'localhost',
   port: POSTGRES_PORT as unknown as number,
   username: POSTGRES_USER,
   password: POSTGRES_PASSWORD,

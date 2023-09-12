@@ -6,8 +6,9 @@ import {
   QueryTopic,
   QueryUpdateComment,
 } from '../../types/ForumTypes'
+import { SERVER_URL } from '../../shared/constants'
 
-const BASE_URL = 'http://localhost:3000/forum/v1/'
+const BASE_URL = `${SERVER_URL}/forum/v1/`
 const DEFAULT_ERROR = 'Произошла ошибка отправки данных'
 
 export interface IForumInitialState {

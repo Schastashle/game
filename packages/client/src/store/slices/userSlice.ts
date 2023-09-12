@@ -64,15 +64,16 @@ export const loginWithOAuth = createAsyncThunk<
   void,
   string,
   { rejectValue: string }
->('user/loginWithOAuth', async (code, { rejectWithValue }) => {
+>('user/loginWithOAuth', async (code, { rejectWithValue, dispatch }) => {
+  let isOk = false
   try {
-    const response = await loginWithCode(code)
-    if (!response?.request.status) {
-      return rejectWithValue('Произошла ошибка авторизации OAuth')
-    }
+    await loginWithCode(code)
+    isOk = true
   } catch (e) {
     return rejectWithValue(`Произошла ошибка авторизации OAuth ${e}`)
   }
+
+  if (isOk) dispatch(getUser())
 })
 
 export const getUser = createAsyncThunk<

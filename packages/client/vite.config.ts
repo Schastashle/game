@@ -7,11 +7,7 @@ dotenv.config()
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: Number(process.env.CLIENT_PORT) || 3000,
-    proxy: {
-      '/api': 'http://localhost:3000',
-      '/forum': 'http://localhost:3000',
-    },
+    port: Number(process.env.CLIENT_PORT) || 4000,
   },
   define: {
     __SERVER_PORT__: process.env.SERVER_PORT,

@@ -23,7 +23,9 @@ function ForumTopic({ id }: ForumTopicsProps) {
   const handleAddComment = useCallback(
     handleSubmit(data => {
       if (!data.comment) return
+
       console.log(topic?.topic_id && user?.id)
+
       if (topic?.topic_id && user?.id) {
         dispatch(
           createComment({
@@ -36,7 +38,7 @@ function ForumTopic({ id }: ForumTopicsProps) {
 
       reset()
     }),
-    []
+    [topic, user]
   )
 
   if (!topic?.topic_id) {

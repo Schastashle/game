@@ -1,27 +1,27 @@
-import { YANDEX_API_URL } from '../constants'
+import type express from 'express'
+import { YandexAPIRepository } from '../repositories/YandexAPIRepository'
+
+type YA_COOKIES = {
+  uuid: string
+  authCookie: string
+}
 
 export default async (
-  req: { cookies: { uuid: any; authCookie: any } },
-  res: any,
+  req: express.Request,
+  res: express.Response,
   next: any
 ) => {
-  const { uuid, authCookie } = req.cookies
+  const { uuid, authCookie } = req.cookies as YA_COOKIES
+  let user
 
-  if (!(uuid && authCookie)) return res.status(403).send('Not authorized')
+  if (uuid && authCookie) {
+    const ya = new YandexAPIRepository(req.headers['cookie'])
+    user = await ya.getCurrent()
+  }
 
-  const response = await fetch(`${YANDEX_API_URL}/auth/user`, {
-    method: 'GET',
-    headers: {
-      Cookie: `uuid=${uuid};authCookie=${authCookie}`,
-    },
-  })
-
-  const user = await response.json()
-
-  if (Object.prototype.hasOwnProperty.call(user, 'reason'))
-    return res.status(403).send('Not authorized')
-
-  res.locals.user_id = user.id
+  res.locals.user_id = user?.id
+  res.locals.user = user
 
   next()
+  return
 }

@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { IUser, IUserLogin, IUserSignup } from '../../types/IUser'
 import { YA_API_URL } from '../../shared/constants'
@@ -31,9 +31,6 @@ export const signupUser = createAsyncThunk<
     const response = await axios.post(`${YA_API_URL}/auth/signup`, query, {
       withCredentials: true,
     })
-    if (!response.request.status) {
-      return rejectWithValue('Произошла ошибка регистрации')
-    }
 
     return true
   } catch (e) {
@@ -50,9 +47,6 @@ export const signinUser = createAsyncThunk<
     const response = await axios.post(`${YA_API_URL}/auth/signin`, query, {
       withCredentials: true,
     })
-    if (!response.request.status) {
-      return rejectWithValue('Произошла ошибка авторизации')
-    }
 
     return true
   } catch (e) {
@@ -67,8 +61,9 @@ export const loginWithOAuth = createAsyncThunk<
 >('user/loginWithOAuth', async (code, { rejectWithValue, dispatch }) => {
   let isOk = false
   try {
-    await loginWithCode(code)
-    isOk = true
+    const response = await loginWithCode(code)
+    isOk = response?.data === 'OK'
+    if (!isOk) throw new Error('Неизвестный ответ от oauth ' + response?.data)
   } catch (e) {
     return rejectWithValue(`Произошла ошибка авторизации OAuth ${e}`)
   }
@@ -82,6 +77,7 @@ export const getUser = createAsyncThunk<
   { rejectValue: string }
 >('user/getUser', async (_, thunkApi) => {
   const service: IUserService = thunkApi.extra as IUserService
+
   try {
     return service.getCurrentUser()
   } catch (e) {
@@ -96,20 +92,17 @@ export const logoutUser = createAsyncThunk<
   undefined,
   { rejectValue: string }
 >('user/logoutUser', async (_, { rejectWithValue }) => {
+  let error
   try {
-    const response = await axios.post(
-      `${YA_API_URL}/auth/logout`,
-      {},
-      { withCredentials: true }
-    )
-    if (!response.request.status) {
-      return rejectWithValue('Произошла ошибка выхода из системы')
-    }
-
-    return false
+    await axios.post(`${YA_API_URL}/auth/logout`, {}, { withCredentials: true })
   } catch (e) {
-    return rejectWithValue(`Произошла ошибка выхода из системы ${e}`)
+    if (!axios.isAxiosError(e) || 401 !== e.response?.status) {
+      error = e
+    }
   }
+
+  if (error) rejectWithValue(`Произошла ошибка выхода из системы ${error}`)
+  return false
 })
 
 const setLoading = (state: IUserState) => {

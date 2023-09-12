@@ -1,8 +1,9 @@
 import { FC, useCallback } from 'react'
 import style from './oauth.module.css'
 import { getServiceId } from '../../api/OAuth'
+import { SERVER_URL } from '../../shared/constants'
 
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
+const REDIRECT_URI = SERVER_URL
 
 const OAuth: FC = () => {
   const handleLogin = useCallback(async () => {

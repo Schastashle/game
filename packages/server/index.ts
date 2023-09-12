@@ -74,7 +74,7 @@ async function startServer() {
   )
 
   app.get('/api', (_, res) => {
-    res.json('👋 Howdy from the server :)')
+    res.json(`👋 Howdy from the server :)`)
   })
 
   if (!isDev()) {

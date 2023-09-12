@@ -15,7 +15,7 @@
     "docker:up-build": "docker compose up --build",
     "docker:down": "docker compose down -v",
     "docker:start": "docker compose start",
-    "docker:stop": "docker compose stop",
+    "docker:stop": "docker compose stop"
   },
   "license": "MIT",
   "workspaces": [

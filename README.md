@@ -83,6 +83,7 @@
 `docker compose down [sevice_name]` удалить
 
 `docker exec -it prakticum-server bash` - например, чтобы посмотреть файловую систему в запущенном контейнере prakticum-server
+`docker logs --follow prakticum-server` вывод логов по сервису
 
 
 ## ssr

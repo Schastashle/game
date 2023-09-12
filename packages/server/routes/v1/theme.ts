@@ -5,7 +5,7 @@ const router = Router()
 
 const URL = '/api/v1/user-theme'
 
-router.get(`${URL}`, async (req, res) => {
+router.get(`${URL}`, async (_, res) => {
   const userId = res.locals.user_id
 
   if (userId) {

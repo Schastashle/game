@@ -6,7 +6,7 @@
     "dev:ssr-server": "yarn dev:ssr --scope=server",
     "preview:ssr-server": "yarn preview:ssr --scope=server",
 
-    "build": "yarn v-build -- --config vite.config.ts && yarn v-build -- --config ssr.config.ts",
+    "build": "yarn v-build -- --config ssr.config.ts && yarn v-build -- --config vite.config.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "jest ./ --passWithNoTests",

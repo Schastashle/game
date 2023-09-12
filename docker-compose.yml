@@ -88,6 +88,34 @@ services:
     #   networks:
     #     - fiar_game
 
+#
+    proxy:
+        container_name: prakticum-proxy
+        image: prakticum-proxy
+        
+        build:
+            context: .
+            dockerfile: Dockerfile.proxy
+        restart: always
+        ports:
+            - "80:8086"
+            - "443:443"
+        env_file:
+          - .env
+        tty: true
+        networks:
+          - fiar_game
+        depends_on: #возможно нужны более жесткие проверки на то, стартанул сервер или нет
+          - server
+       # echo \"`</etc/nginx/nginx.conf`\" &&
+        command: bash -c "
+                 echo '${SERVER_PORT}' &&
+                 envsubst '$${SERVER_PORT} $${CERTIFICATE_PATH} $${CERTIFICATE_PRIVATE_PATH}' < /etc/nginx/templates/default.conf.template > /etc/nginx/nginx.conf &&
+                 nginx -g \"daemon off;\""   
+        volumes:
+          - ./tmp/ssl:/etc/ssl
+
 # Для pgadmin пришлось поставить sudo chmod -R 777 ./pgadmin-data
-# Для postgres postgres sudo chmod -R 777 ./pgdata
+# Для postgres postgres sudo chmod -R 777 ./tmp/pgdata
 # Если делать .gitkeep + папка, то ошибки от postgres
+# sudo chmod -R 777 /home/marmar/ssl

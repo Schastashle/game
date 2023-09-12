@@ -1,6 +1,5 @@
-import axios from 'axios'
-
-const API_ROOT = 'https://ya-praktikum.tech/api/v2/'
+import axios, { AxiosError } from 'axios'
+import { YANDEX_API_URL } from '../constants'
 
 export interface IUser {
   avatar: string
@@ -15,14 +14,21 @@ export interface IUser {
 
 export class YandexAPIRepository {
   constructor(private readonly _cookieHeader: string | undefined) {}
-  async getCurrent(): Promise<IUser> {
-    const { data } = await axios.get(`${API_ROOT}/auth/user`, {
-      headers: {
-        cookie: this._cookieHeader,
-      },
-    })
-    return {
-      ...data,
+
+  async getCurrent(): Promise<IUser | undefined> {
+    let user: IUser | undefined
+    try {
+      const response = await axios.get(`${YANDEX_API_URL}/auth/user`, {
+        headers: {
+          cookie: this._cookieHeader,
+        },
+      })
+      user = response.data
+    } catch (exp) {
+      const noAuth = exp instanceof AxiosError && exp.response?.status === 401
+      if (!noAuth) throw exp
     }
+
+    return user
   }
 }

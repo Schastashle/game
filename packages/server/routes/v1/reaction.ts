@@ -1,9 +1,9 @@
 import { Router } from 'express'
 import Reaction from '../../controllers/Reaction'
-import { BASE_URL } from '../../constants'
+import { FORUM_PATH } from '../../constants'
 
 const router = Router()
-const LOCAL_URL = `${BASE_URL}/reactions`
+const LOCAL_URL = `${FORUM_PATH}/reactions`
 
 router.post(LOCAL_URL, Reaction.create)
 router.get(`${LOCAL_URL}/:id`, Reaction.getById)

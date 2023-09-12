@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '../hooks/reduxHooks'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { getUser, loginWithOAuth } from '../store/slices/userSlice'
+import { loginWithOAuth } from '../store/slices/userSlice'
 
 interface IRequireAuth {
   children: ReactNode
@@ -9,14 +9,9 @@ interface IRequireAuth {
 
 const RequireAuth = ({ children }: IRequireAuth) => {
   const dispatch = useAppDispatch()
-  const isAuth = useAppSelector(state => state.user.isAuth)
-  const [clientSide, setClientSide] = useState(false)
+  const isAuth = useAppSelector(state => state.user?.isAuth)
+  const sent = useRef(false)
   const location = useLocation()
-
-  // исправляет "<Navigate> must not be used on the initial render in a <StaticRouter>"
-  useEffect(() => {
-    setClientSide(true)
-  }, [])
 
   const { search } = useLocation()
 
@@ -25,17 +20,19 @@ const RequireAuth = ({ children }: IRequireAuth) => {
       const urlParams = new URLSearchParams(search)
       const code = urlParams.get('code')
 
-      code && dispatch(loginWithOAuth(code))
+      // замечены проблемы, если рядом с запросом токена идут запросы за получением
+      // информации о пользователе
+      // убираю лишние запрос
+      if (!sent.current && code) {
+        sent.current = true
+        dispatch(loginWithOAuth(code))
+      }
     }
   }, [search])
 
-  useEffect(() => {
-    isAuth && dispatch(getUser())
-  }, [isAuth])
-
   return (
     <>
-      {!isAuth && clientSide ? (
+      {!isAuth ? (
         <Navigate to="/signin" state={{ from: location }} />
       ) : (
         children

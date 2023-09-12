@@ -17,6 +17,7 @@ const sequelizeOptions: SequelizeOptions = {
   dialect: 'postgres',
   logging: logger,
 }
+
 const sequelize = new Sequelize(sequelizeOptions)
 
 export async function dbConnect() {

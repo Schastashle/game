@@ -7,7 +7,7 @@ dotenv.config()
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: Number(process.env.CLIENT_PORT) || 3000,
+    port: Number(process.env.CLIENT_PORT) || 4000,
   },
   define: {
     __SERVER_PORT__: process.env.SERVER_PORT,
@@ -24,18 +24,26 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      strategies: 'injectManifest',
+      // использовать для отладки
+      selfDestroying: true,
+
       srcDir: 'src',
       filename: 'sw.js',
+      strategies: 'injectManifest',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // по умолчанию 2 МБ, можно увеличить этой настройкой
+      },
+      injectRegister: false,
+      manifest: false,
       devOptions: {
-        enabled: process.env.SW_DEV === 'true',
+        enabled: true, //process.env.SW_DEV === 'true',
         type: 'module',
       },
-      // selfDestroying: true,
-      registerType: 'autoUpdate',
       workbox: {
         sourcemap: true,
       },
+      registerType: 'autoUpdate',
     }),
   ],
 })

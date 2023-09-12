@@ -1,16 +1,21 @@
 import axios from 'axios'
-import { SERVER_URL } from '../shared/constants'
+import { YA_API_URL, PUBLISH_URL } from '../shared/constants'
 
-const REDIRECT_URI = SERVER_URL
-const API_ROOT = `${REDIRECT_URI}/api/v2`
+const oauthUrl = `${YA_API_URL}/oauth/yandex`
+
+const getServiceIdUrl = `${oauthUrl}/service-id?redirect_uri=${PUBLISH_URL}`
+
+async function getOAuthProviderPageUrl() {
+  const serviceId = await getServiceId()
+
+  return `https://oauth.yandex.ru/authorize?response_type=code&client_id=${serviceId}&redirect_uri=${PUBLISH_URL}`
+}
 
 // Получаем service_id и записываем его в переменную,
 // которую подставляем в ссылку кнопки
-export const getServiceId = async () => {
+const getServiceId = async () => {
   try {
-    const response = await fetch(
-      `${API_ROOT}/oauth/yandex/service-id?redirect_uri=${REDIRECT_URI}`
-    )
+    const response = await fetch(getServiceIdUrl)
     const data = await response.json()
 
     return data.service_id
@@ -19,12 +24,12 @@ export const getServiceId = async () => {
   }
 }
 
-export const loginWithCode = async (code: string) => {
+const loginWithCode = async (code: string) => {
   try {
     // Отправляем запрос на авторизацию с кодом и url для редиректа
-    const response = await axios.post(`${API_ROOT}/oauth/yandex`, {
+    const response = await axios.post(oauthUrl, {
       code,
-      redirect_uri: `${REDIRECT_URI}`,
+      redirect_uri: `${PUBLISH_URL}`,
     })
 
     return response
@@ -32,3 +37,5 @@ export const loginWithCode = async (code: string) => {
     console.error(error)
   }
 }
+
+export { getOAuthProviderPageUrl, getServiceId, loginWithCode }

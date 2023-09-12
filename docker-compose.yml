@@ -19,7 +19,7 @@ services:
             - "${SERVER_PORT}:${SERVER_PORT}"
         environment:
           SERVER_PORT: ${SERVER_PORT}
-          POSTGRES_HOST: postgres # имя сервиса с БД
+          POSTGRES_HOST: postgres # services.postgres, имя=host для доступа
         env_file:
           - .env
         tty: true
@@ -29,7 +29,7 @@ services:
           postgres:
             condition: service_healthy
 
-    postgres:
+    postgres: # = значение для POSTGRES_HOST
       image: postgres:14     
       ports:
         - "${POSTGRES_PORT}:${POSTGRES_PORT}"
@@ -37,8 +37,8 @@ services:
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         POSTGRES_USER: ${POSTGRES_USER}
         POSTGRES_DB: ${POSTGRES_DB}
-      volumes:
-        - ./pgdata:/var/lib/postgresql/data
+      #volumes:
+      #  - ./tmp/pgdata:/var/lib/postgresql/data
       healthcheck:
         test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
         interval: 1s
@@ -61,13 +61,40 @@ services:
         PGADMIN_LISTEN_PORT: 80
       ports:
         - "8080:80"
-      volumes:
-        - ./pgadmin-data:/var/lib/pgadmin 
+      #volumes:
+      #  - ./pgadmin-data:/var/lib/pgadmin 
       depends_on:
         - postgres
       networks:
         - fiar_game
 
+    proxy:
+        container_name: prakticum-proxy
+        image: prakticum-proxy
+        
+        build:
+            context: .
+            dockerfile: Dockerfile.proxy
+        restart: always
+        ports:
+            - "80:8086"
+            - "443:443"
+        env_file:
+          - .env
+        tty: true
+        networks:
+          - fiar_game
+        depends_on: #возможно нужны более жесткие проверки на то, стартанул сервер или нет
+          - server
+       # echo \"`</etc/nginx/nginx.conf`\" &&
+        command: bash -c "
+                 echo '${SERVER_PORT}' &&
+                 envsubst '$${SERVER_PORT} $${CERTIFICATE_PATH} $${CERTIFICATE_PRIVATE_PATH}' < /etc/nginx/templates/default.conf.template > /etc/nginx/nginx.conf &&
+                 nginx -g \"daemon off;\""   
+        volumes:
+          - ./tmp/ssl:/etc/ssl
+
 # Для pgadmin пришлось поставить sudo chmod -R 777 ./pgadmin-data
-# Для postgres postgres sudo chmod -R 777 ./pgdata
+# Для postgres postgres sudo chmod -R 777 ./tmp/pgdata
 # Если делать .gitkeep + папка, то ошибки от postgres
+# sudo chmod -R 777 /home/marmar/ssl

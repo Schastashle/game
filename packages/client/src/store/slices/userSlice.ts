@@ -1,7 +1,7 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { IUser, IUserLogin, IUserSignup } from '../../types/IUser'
-import { API_ROOT } from '../../shared/constants'
+import { YA_API_URL } from '../../shared/constants'
 import { loginWithCode } from '../../api/OAuth'
 
 export interface IUserState {
@@ -28,12 +28,9 @@ export const signupUser = createAsyncThunk<
   { rejectValue: string }
 >('user/signupUser', async (query, { rejectWithValue }) => {
   try {
-    const response = await axios.post(`${API_ROOT}/auth/signup`, query, {
+    const response = await axios.post(`${YA_API_URL}/auth/signup`, query, {
       withCredentials: true,
     })
-    if (!response.request.status) {
-      return rejectWithValue('Произошла ошибка регистрации')
-    }
 
     return true
   } catch (e) {
@@ -47,12 +44,9 @@ export const signinUser = createAsyncThunk<
   { rejectValue: string }
 >('user/signinUser', async (query, { rejectWithValue }) => {
   try {
-    const response = await axios.post(`${API_ROOT}/auth/signin`, query, {
+    const response = await axios.post(`${YA_API_URL}/auth/signin`, query, {
       withCredentials: true,
     })
-    if (!response.request.status) {
-      return rejectWithValue('Произошла ошибка авторизации')
-    }
 
     return true
   } catch (e) {
@@ -64,15 +58,17 @@ export const loginWithOAuth = createAsyncThunk<
   void,
   string,
   { rejectValue: string }
->('user/loginWithOAuth', async (code, { rejectWithValue }) => {
+>('user/loginWithOAuth', async (code, { rejectWithValue, dispatch }) => {
+  let isOk = false
   try {
     const response = await loginWithCode(code)
-    if (!response?.request.status) {
-      return rejectWithValue('Произошла ошибка авторизации OAuth')
-    }
+    isOk = response?.data === 'OK'
+    if (!isOk) throw new Error('Неизвестный ответ от oauth ' + response?.data)
   } catch (e) {
     return rejectWithValue(`Произошла ошибка авторизации OAuth ${e}`)
   }
+
+  if (isOk) dispatch(getUser())
 })
 
 export const getUser = createAsyncThunk<
@@ -81,6 +77,7 @@ export const getUser = createAsyncThunk<
   { rejectValue: string }
 >('user/getUser', async (_, thunkApi) => {
   const service: IUserService = thunkApi.extra as IUserService
+
   try {
     return service.getCurrentUser()
   } catch (e) {
@@ -95,20 +92,17 @@ export const logoutUser = createAsyncThunk<
   undefined,
   { rejectValue: string }
 >('user/logoutUser', async (_, { rejectWithValue }) => {
+  let error
   try {
-    const response = await axios.post(
-      `${API_ROOT}/auth/logout`,
-      {},
-      { withCredentials: true }
-    )
-    if (!response.request.status) {
-      return rejectWithValue('Произошла ошибка выхода из системы')
-    }
-
-    return false
+    await axios.post(`${YA_API_URL}/auth/logout`, {}, { withCredentials: true })
   } catch (e) {
-    return rejectWithValue(`Произошла ошибка выхода из системы ${e}`)
+    if (!axios.isAxiosError(e) || 401 !== e.response?.status) {
+      error = e
+    }
   }
+
+  if (error) rejectWithValue(`Произошла ошибка выхода из системы ${error}`)
+  return false
 })
 
 const setLoading = (state: IUserState) => {

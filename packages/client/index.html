@@ -4,8 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/src/utils/sw/registerSW.ts"></script>
+
     <title>Three-in-row</title>
-    <script>window.__PRELOADED_STATE__ = JSON.parse(<!--store-data-->);</script>
+    <script>
+      try {
+        window.__PRELOADED_STATE__ = JSON.parse(`<!--store-data-->`);
+      }
+      catch(exp) { 
+        console.error("without __PRELOADED_STATE__");
+      }
+    
+      try {
+        window._FIAR_ENV_ = `<!--fiar-env-->`;
+      }
+      catch(exp) { 
+        console.error("without _FIAR_ENV_");
+      }
+
+    </script>
   </head>
   <body>
     <div id="root"><!--ssr-outlet--></div>

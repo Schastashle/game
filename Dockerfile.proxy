@@ -1,0 +1,5 @@
+FROM nginx:latest as production
+
+COPY proxy.nginx.template.conf /etc/nginx/templates/default.conf.template
+
+

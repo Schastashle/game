@@ -12,6 +12,7 @@ html[data-theme='dark'] {
   --accent-5: #5c9050;
 }
 
+html,
 html[data-theme='light'] {
   --bg-color: #e5e6e0;
   --text-color: #988686;

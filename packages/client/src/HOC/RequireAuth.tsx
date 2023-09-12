@@ -10,13 +10,7 @@ interface IRequireAuth {
 const RequireAuth = ({ children }: IRequireAuth) => {
   const dispatch = useAppDispatch()
   const isAuth = useAppSelector(state => state.user?.isAuth)
-  const [clientSide, setClientSide] = useState(false)
   const location = useLocation()
-
-  // исправляет "<Navigate> must not be used on the initial render in a <StaticRouter>"
-  useEffect(() => {
-    setClientSide(true)
-  }, [])
 
   const { search } = useLocation()
 
@@ -32,8 +26,6 @@ const RequireAuth = ({ children }: IRequireAuth) => {
   useEffect(() => {
     isAuth && dispatch(getUser())
   }, [isAuth])
-
-  // && clientSide
 
   return (
     <>

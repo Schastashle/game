@@ -1,8 +1,6 @@
 import axios from 'axios'
 import { YA_API_URL, PUBLISH_URL } from '../shared/constants'
 
-//const API_ROOT = `${REDIRECT_URI}/api/v2`
-
 const oauthUrl = `${YA_API_URL}/oauth/yandex`
 
 const getServiceIdUrl = `${oauthUrl}/service-id?redirect_uri=${PUBLISH_URL}`

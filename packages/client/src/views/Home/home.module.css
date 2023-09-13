@@ -132,6 +132,9 @@
 }
 
 .theme {
+  position: absolute;
+  right: 60px;
+  top: 60px;
   max-width: 1260px;
   display: flex;
   align-items: center;

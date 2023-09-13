@@ -33,44 +33,44 @@ const Home: FC = () => {
   }
 
   return (
-    <section className={styles.home}>
-      <div>
-        <div className={styles.theme}>
-          <button
-            className={styles.darkModeBtn}
-            onClick={handleLightThemeClick}>
-            <img src={sun} className={styles.darkModeBtnIcon} />
-          </button>
-          <button className={styles.darkModeBtn} onClick={handleDarkThemeClick}>
-            <img src={moon} className={styles.darkModeBtnIcon} />
-          </button>
-        </div>
-        <div className={styles.container}>
-          <div className={styles.logo}>
-            <SVGSpinner />
-          </div>
-          <h1 className={styles.title}>Three-in-row</h1>
-          <div className={styles.username}>{getUserName(user)}</div>
-          <NavLink to="/game" className={styles.link}>
-            <div className={styles.start}>Старт</div>
-          </NavLink>
-          <div className={styles.btns}>
-            <NavLink to="/profile">
-              <div className={styles.minbtn}>Профиль</div>
-            </NavLink>
-            <NavLink to="/rating">
-              <div className={styles.maxbtn}>Рекорды</div>
-            </NavLink>
-            <NavLink to="/forum">
-              <div className={styles.minbtn}>Форум</div>
-            </NavLink>
-          </div>
-          <button className={styles.logout} onClick={logoutHandler}>
-            Выйти
-          </button>
-        </div>
+    <>
+      <div className={styles.theme}>
+        <button className={styles.darkModeBtn} onClick={handleLightThemeClick}>
+          <img src={sun} className={styles.darkModeBtnIcon} />
+        </button>
+        <button className={styles.darkModeBtn} onClick={handleDarkThemeClick}>
+          <img src={moon} className={styles.darkModeBtnIcon} />
+        </button>
       </div>
-    </section>
+      <section className={styles.home}>
+        <div>
+          <div className={styles.container}>
+            <div className={styles.logo}>
+              <SVGSpinner />
+            </div>
+            <h1 className={styles.title}>Three-in-row</h1>
+            <div className={styles.username}>{getUserName(user)}</div>
+            <NavLink to="/game" className={styles.link}>
+              <div className={styles.start}>Старт</div>
+            </NavLink>
+            <div className={styles.btns}>
+              <NavLink to="/profile">
+                <div className={styles.minbtn}>Профиль</div>
+              </NavLink>
+              <NavLink to="/rating">
+                <div className={styles.maxbtn}>Рекорды</div>
+              </NavLink>
+              <NavLink to="/forum">
+                <div className={styles.minbtn}>Форум</div>
+              </NavLink>
+            </div>
+            <button className={styles.logout} onClick={logoutHandler}>
+              Выйти
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
 

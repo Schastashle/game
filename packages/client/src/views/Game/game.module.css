@@ -10,6 +10,9 @@
 }
 
 .game-controls {
+  position: absolute;
+  bottom: 60px;
+  left: 60px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -32,21 +35,17 @@
 }
 
 .header {
-  position: fixed;
-  top: 0;
+  position: absolute;
+  top: 40px;
   left: 0;
-  bottom: 0;
-  /* transform: translateX(-50%); */
-  width: 310px;
+  right: 0;
 
   display: flex;
   justify-content: space-between;
-  padding: 20px;
-  flex-direction: column;
-}
+  gap: 80px;
+  flex-wrap: wrap;
 
-.timer {
-  min-width: 290px;
+  padding: 0 60px;
 }
 
 .dialogTitle {
@@ -79,4 +78,10 @@
   border: none;
   border-radius: 16px;
   cursor: pointer;
+}
+
+.link {
+  position: absolute;
+  top: 12px;
+  left: 12px;
 }

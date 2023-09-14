@@ -77,7 +77,7 @@ async function startServer() {
     )
   } else {
     viteServer = await createViteDevServer(CLIENT_PATH)
-    app.use(viteServer.middlewares)
+    if (viteServer) app.use(viteServer.middlewares)
   }
 
   app.get(PATHS.API, (_, res) => {
@@ -87,10 +87,10 @@ async function startServer() {
   app.use(
     [PATHS.FORUM, PATHS.FIAR_API_PATH, PATHS.API],
     async (req, res, next) => {
-      await CheckAuth(req, res, next)
+      await CheckAuth(req, res)
       if (!res.locals.user) {
         res.status(401).send('Not authorized')
-      }
+      } else next()
     }
   )
 
@@ -102,13 +102,16 @@ async function startServer() {
   app.use(ThemeRoute)
   app.use(ReactionRoute)
 
-  // аккуратно делать синхронные use, после асинхронных
   app.use('*', async (req, res, next) => {
-    if (req.originalUrl.indexOf('.') !== -1) {
+    if (
+      req.originalUrl.indexOf('.') >= 0 ||
+      req.originalUrl.indexOf('@') >= 0
+    ) {
+      next()
       return
     }
 
-    await CheckAuth(req, res, next)
+    await CheckAuth(req, res)
 
     try {
       const html = await getSSRIndexHTML(req, res, viteServer)
@@ -125,6 +128,10 @@ async function startServer() {
       express.static(CLIENT_DIST_PATH, { fallthrough: true, index: false })
     )
   }
+
+  app.use((_, res /*, next*/) => {
+    res.sendStatus(404)
+  })
 
   // обязательно должно быть 4 параметра в errorHandler, иначе не работает
   const errorHandler: express.ErrorRequestHandler = (err, _req, res, _next) => {
@@ -152,9 +159,9 @@ interface SSRModule {
 async function getSSRIndexHTML(
   req: express.Request,
   res: express.Response,
-  viteServer: ViteDevServer
+  viteServer?: ViteDevServer
 ) {
-  const url = req.originalUrl
+  let url = req.originalUrl
   const rootPath = isDev() ? CLIENT_PATH : CLIENT_DIST_PATH
 
   // CheckAuth запишет пользователя в res.locals.user
@@ -165,16 +172,22 @@ async function getSSRIndexHTML(
   let ssrModule: SSRModule
 
   if (isDev()) {
-    template = await viteServer.transformIndexHtml(url, template)
-    ssrModule = (await viteServer.ssrLoadModule(
+    template = await viteServer!.transformIndexHtml(url, template)
+    ssrModule = (await viteServer!.ssrLoadModule(
       path.resolve(rootPath, 'ssr.tsx')
     )) as SSRModule
   } else {
     ssrModule = await import(CLIENT_DIST_SSR_PATH)
   }
 
+  if (user?.id) {
+    if (url.startsWith('/signin')) url = '/' // делаем редирект на /, если авторизированы
+  } else {
+    if (!url.startsWith('/signin')) url = '/signin' // делаем редирект на /signin, если не авторизированы
+  }
+
   const [initialState, appHtml] = await ssrModule.render(
-    user ? url : '/signin', // делаем редирект на /signin если не авторизированы
+    url,
     // Promise.reject обязательно, для store нужна ошибка
     {
       getCurrent: () =>

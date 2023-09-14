@@ -5,7 +5,6 @@
   "scripts": {
     "dev:ssr-server": "yarn dev:ssr --scope=server",
     "preview:ssr-server": "yarn preview:ssr --scope=server",
-
     "build": "yarn v-build -- --config ssr.config.ts && yarn v-build -- --config vite.config.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -25,7 +24,7 @@
     "react-hook-form": "^7.45.4",
     "react-redux": "^8.1.1",
     "react-router-dom": "^6.15.0",
-    "vite-plugin-pwa": "^0.12.8",
+    "vite-plugin-pwa": "^0.16.5",
     "zod": "^3.21.4"
   },
   "devDependencies": {

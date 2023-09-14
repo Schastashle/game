@@ -4,35 +4,28 @@ import react from '@vitejs/plugin-react'
 import dotenv from 'dotenv'
 dotenv.config()
 
+console.log(process.env.NODE_ENV, process.env.SW_DEV)
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  server: {
-    port: Number(process.env.CLIENT_PORT) || 4000,
-  },
   define: {
-    __SERVER_PORT__: process.env.SERVER_PORT,
+    __VITE_BUILD_DATE__: String(new Date().getTime()),
   },
   build: {
     target: 'esnext',
-  },
-  esbuild: {
-    // minify: false,
-    minifyIdentifiers: false,
-    minifySyntax: false,
-    minifyWhitespace: false,
   },
   plugins: [
     react(),
     VitePWA({
       // использовать для отладки
-      selfDestroying: true,
+      //selfDestroying: true,
 
       srcDir: 'src',
       filename: 'sw.js',
       strategies: 'injectManifest',
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff,woff2}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // по умолчанию 2 МБ, можно увеличить этой настройкой
+        injectionPoint: undefined,
+        rollupFormat: 'iife',
       },
       injectRegister: false,
       manifest: false,
@@ -41,6 +34,8 @@ export default defineConfig({
         type: 'module',
       },
       workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
         sourcemap: true,
       },
       registerType: 'autoUpdate',

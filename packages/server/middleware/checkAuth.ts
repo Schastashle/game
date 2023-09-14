@@ -6,11 +6,7 @@ type YA_COOKIES = {
   authCookie: string
 }
 
-export default async (
-  req: express.Request,
-  res: express.Response,
-  next: any
-) => {
+export default async (req: express.Request, res: express.Response) => {
   const { uuid, authCookie } = req.cookies as YA_COOKIES
   let user
 
@@ -22,6 +18,5 @@ export default async (
   res.locals.user_id = user?.id
   res.locals.user = user
 
-  next()
   return
 }

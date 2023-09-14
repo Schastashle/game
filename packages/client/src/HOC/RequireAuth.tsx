@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '../hooks/reduxHooks'
-import { ReactNode, useEffect, useRef } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { loginWithOAuth } from '../store/slices/userSlice'
 
@@ -10,25 +10,20 @@ interface IRequireAuth {
 const RequireAuth = ({ children }: IRequireAuth) => {
   const dispatch = useAppDispatch()
   const isAuth = useAppSelector(state => state.user?.isAuth)
-  const sent = useRef(false)
   const location = useLocation()
-
-  const { search } = useLocation()
+  const wait = useRef<boolean>(false)
 
   useEffect(() => {
     if (!isAuth) {
-      const urlParams = new URLSearchParams(search)
+      const urlParams = new URLSearchParams(location.search)
       const code = urlParams.get('code')
 
-      // замечены проблемы, если рядом с запросом токена идут запросы за получением
-      // информации о пользователе
-      // убираю лишние запрос
-      if (!sent.current && code) {
-        sent.current = true
+      if (code && !wait.current) {
+        wait.current = true // внутри loginWithOAuth надо проверить, что запрос уже отправлен
         dispatch(loginWithOAuth(code))
       }
     }
-  }, [search])
+  }, [location, isAuth])
 
   return (
     <>

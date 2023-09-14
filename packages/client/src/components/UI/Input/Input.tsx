@@ -17,6 +17,7 @@ const Input = forwardRef<HTMLInputElement, IInputProps>(
           {label}
         </label>
         <input
+          id={name}
           name={name}
           ref={ref}
           className={`${style.input} ${underline ? style.underline : ''}`}

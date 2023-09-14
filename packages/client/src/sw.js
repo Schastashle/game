@@ -1,34 +1,62 @@
-const CACHE_NAME_BASE = 'cache-v'
-const pathItems = self.__WB_MANIFEST
+const BASE_CACHE_NAME = "fiar--";
+const IGNORE_METHODS = new Set(['put', 'post'])
 
-const version = calcVersion(pathItems)
-const CACHE_NAME = `${CACHE_NAME_BASE}-${version}`
+let key = `__VITE_BUILD_DATE__`
+if (key.indexOf("__") >= 0) console.error("В dev режиме необходимо чистить кеш вручную")
 
-self.addEventListener('install', function (event) {
-  let files = pathItems.map(item => item.url)
+let indexCache = 0
+let CACHE_NAME = incCacheName()
+console.info(CACHE_NAME);
 
-  files = files.filter(path => 'index.html' !== path)
+function incCacheName() {
+  indexCache += 1;
+  CACHE_NAME = `${BASE_CACHE_NAME}[${key}]-${indexCache}`
+}
 
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(files)
-      })
-      .then(() => {
-        return self.skipWaiting()
-      })
-  )
+self.addEventListener('install', function () {
+  self.skipWaiting()
 })
 
-const IGNORE_METHODS = new Set(['put', 'post'])
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+  event.waitUntil(deteleOld())
+})
+
+self.addEventListener('fetch', function (event) {
+  
+  deteleOldWithCheck(event) // разобраться с куками, они как будто сохряняются в кеш
+
+  // фикс конфликтов с экстеншенами хрома
+  if (useDefaultFetch(event)) {
+    return
+  }
+
+  event.respondWith(fetchWithCheck(event))
+})
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING')
+    self.skipWaiting()
+})
+
+
+function deteleOldWithCheck(event) {
+  const { url } = event.request
+  const urlObj = new URL(url)
+
+  if (urlObj.pathname.indexOf('oauth/yandex') || urlObj.pathname.indexOf('auth/logout')) {
+    incCacheName()
+    deteleOld()
+  }
+}
 
 function useDefaultFetch(event) {
   const { url } = event.request
+  const urlObj = new URL(url)
 
   if (
     IGNORE_METHODS.has(event.request.method.toLocaleLowerCase()) ||
-    !url.startsWith('http')
+    urlObj.pathname.startsWith('/api') || urlObj.pathname.startsWith('/forum/v1')
   ) {
     return true
   }
@@ -47,59 +75,82 @@ function isOkResponse(response) {
   )
 }
 
-self.addEventListener('fetch', function (event) {
-  // фикс конфликтов с экстеншенами хрома
-  if (useDefaultFetch(event)) {
-    return
+async function fetchWithCheck (event) {
+  // в оффлайн режиме можно попробовать искать 
+  // любую ранее загруженную страницу, если нужной нет
+  if (navigator?.onLine) {
+    // спросим на бэке
+    const serverResponse = await fromNetwork(event.request, true)
+    if (serverResponse) return serverResponse
+  }
+  
+  // если не получили от бэка, поищем в кеше
+  const cachedResponse = fromCache(event.request) 
+  if (cachedResponse) return cachedResponse
+
+  // а вот тут надо еще что-то вернуть, пример  new Response(FALLBACK, { headers: {'Content-Type': 'image/svg+xml'}}));
+}
+
+async function fromCache(request) {
+  const response = await getCacheItem(request.clone())
+  if (response) return response.clone()
+}
+
+// тут скорее всего еще таймаут нужен
+async function fromNetwork(request, withSave) {
+  const oldCacheName = CACHE_NAME;
+  const clonedRequest = request.clone();
+  let response;
+  try {
+    response = await fetch(clonedRequest)
+  }
+  catch (exp) {
+    console.info(request.url, exp)
+    throw exp
+  } 
+
+  if (!isOkResponse(response)) {
+    return response
+  } 
+  
+  if (withSave) {
+    if (oldCacheName === CACHE_NAME) {
+      await setCacheItem(clonedRequest, response.clone())
+    }
   }
 
-  event.respondWith(
-    caches
-      .match(event.request) // Ищем в кэше соответствующий запросу ресурс
-      .then(function (response) {
-        if (response) {
-          return response // Возвращаем кэшированный ресурс, если он найден
-        }
+  return response
+}
 
-        // Если ресурса нет в кэше, делаем фактический запрос
-        return fetch(event.request).then(function (response) {
-          // Если что-то пошло не так, выдаём в основной поток результат, но не кладём его в кеш
-          if (!isOkResponse(response)) {
-            return response
-          }
+// получает объект из кеша
+async function getCacheItem(key) { // key : RequestInfo | URL
+  const cache = await getCache()
+  return await cache.match(key) // с первым совпадающим запросом в объекте Cache https://developer.mozilla.org/en-US/docs/Web/API/Cache/match
+}
 
-          // Клонируем ответ, так как response может быть использован только один раз
-          const responseClone = response.clone()
+// добавляет объект в кеш
+async function setCacheItem(key, value) { // key: RequestInfo | URL, value: Response
+  const cache = await getCache()
+  return await cache.put(key, value)
+}
 
-          caches
-            .open(CACHE_NAME) // Открываем кэш
-            .then(function (cache) {
-              // Кэшируем новый ресурс для будущих запросов
-              cache.put(event.request, responseClone)
-            })
+// вернуть кеш по имени указанном в CACHE_NAME
+async function getCache() {
+  return await caches.open(CACHE_NAME)
+}
 
-          return response // Возвращаем ответ
-        })
+async function deteleOld() {
+  const cacheNames = await caches.keys()
+
+  return Promise.all(
+    cacheNames
+      .filter(
+        name => name !== CACHE_NAME && name.startsWith(BASE_CACHE_NAME)
+      )
+      .map(name => {
+        return caches.delete(name)
       })
   )
-})
-
-function calcVersion(pathItems) {
-  const str = pathItems
-    .map(item => `${item.url}::${item.revision || ''}`)
-    .join('::')
-  return pathItems.length > 0
-    ? String(hashCode(str))
-    : String(new Date().getTime())
 }
 
-function hashCode(str) {
-  let hash = 0
-  for (let i = 0, len = str.length; i < len; i += 1) {
-    const chr = str.charCodeAt(i)
-    hash = (hash << 5) - hash + chr // eslint-disable-line no-bitwise
-    hash |= 0 // eslint-disable-line no-bitwise
-    // Convert to 32bit integer
-  }
-  return hash
-}
+

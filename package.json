@@ -5,7 +5,7 @@
     "bootstrap": "yarn && node init.js && lerna clean && yarn && lerna bootstrap && yarn linkup && yarn build",
     "build": "lerna run build",
     "dev:ssr": "lerna run dev:ssr",
-    "preview:ssr": "lerna run preview:ssr",
+    "preview:ssr": "lerna run build && lerna run preview:ssr",
 
     "test": "lerna run test",
     "lint": "lerna run lint",
